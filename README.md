@@ -18,16 +18,20 @@ You can also use the source control extension in VS Code for easy commits/pushes
 
 ## General Flow
 
-We will have a branch off main called **dev**. We will ONLY directly branch of of dev to develop feature. I will call these branches off dev **feature branches**. Once a feature is complete, you will test it and then create a pull request to merge your branch with **dev**. Once we hit specific milestones, we can test the dev branch thoroughly and then merge it with main. Main should always contain a working version of our app with no KNOWN bugs (bugs will always exist but you shouldn't knowing push buggy code).
+We will have a branch off main called **dev**. We will ONLY directly branch off of dev to develop features. I will call these branches off dev **feature branches**. Once a feature is complete, you will test it and then create a pull request to merge your branch into **dev**. Once we hit specific milestones, we can test the dev branch thoroughly and then merge it with main. Main should always contain a working version of our app with no KNOWN bugs (bugs will always exist but you shouldn't knowingly push buggy code).
 
 See below for detailed instructions on the workflow
 
 ## Setp-by-Step Instructions
 
 ### 1. Make sure you are on the **dev** branch
-If you are using terminal, runt this command: `git checkout dev`
+If you are using terminal, run this command: `git checkout dev`
 Then run `git status` and make sure it says you are on the branch dev.
-If you are on github desktop, simply select the dev branch as your current branch
+**MAKE SURE YOU PULL THE MOST RECENT CHANGES FROM THE REMOTE.** This is extremely important, as you must be working off the current dev branch or we are going to have some serious problems. Run the following commands in order:
+`git fetch`
+`git pull`
+
+If you are on github desktop, simply select the dev branch as your current branch. Then click "fetch origin" and then if there are any changes click "pull origin". The option to pull will only show up if there are changes to pull.
 <img width="1251" height="722" alt="Screenshot 2025-10-22 at 9 31 27 PM" src="https://github.com/user-attachments/assets/cdbec7ec-2473-47b4-b3ce-dc1d3a6db823" />
 
 ### 2. Create your feature branch off dev
@@ -49,16 +53,18 @@ You only really need to push if 1. someone wants to hop on your branch and look 
 ### 4. Creating pull requests
 Once you have working, tested code that you want to push to dev, you will make a pull request. You can do this in github desktop or online. On github desktop, there will be a "Create pull request" button in the same place as the "Publish branch" button above. If you dont use desktop, just go to github online and there should be an option to "compare and pull request."
 
-Add a description to your pull request that breifly describes the features, classes, etc that are on your branch. Make sure you are merging into the correct branch, Most of the time this iwll be dev. See below:
+Add a description to your pull request that briefly describes the features, classes, etc that are on your branch. Make sure you are merging into the correct branch. Most of the time this will be dev. Your "base" branch should be dev. If there are no conflicts, it should say "Able to merge." **ONLY CREATE THE PULL REQUEST IF THERE ARE NO CONFLICTS WITH THE BRANCH YOU ARE MERGING INTO.** See below:
 <img width="930" height="669" alt="Screenshot 2025-10-22 at 10 02 18 PM" src="https://github.com/user-attachments/assets/31af3b30-9609-49b1-b738-3bacd09bf7a7" />
 
-If there are no conflicts, it should say "Able to merge." **ONLY CREATE THE PULL REQUEST IF THERE ARE NO CONFLICTS WITH THE BRANCH YOU ARE MERGING INTO.**
+Once your pull request is merged by a teammate, you should delete your branch. Make sure you delete it on your local machine and on the remote. Simply create a new branch off dev for your next feature.
+
+If you know what you're doing, you can simply pull the changes from dev onto your branch and continue to use it by running `git merge dev` while on your branch. This can get kind of messy if you don't know what you are doing so be careful using this.
 
 ### 5. Merging pull requests
-NEVER MERGE YOUR OWN PULL REQUESTS (unless you are working last minute and it is the night the project is due).
+**NEVER MERGE YOUR OWN PULL REQUESTS** (unless you are working last minute and it is the night the project is due).
 
 If you are going to merge someone elses pull request, I would recommend the following:
-   i) Go on their branch and do a breif test of the app and their features to make sure nothing is broken.
+   i) Go on their branch and do a brief test of the app and their features to make sure nothing is broken.
    ii) If you are too lazy to do step i), at least review the changed files in the pull request and make sure they don't look wack (use your judgment)
    iii) Merge the pull request if the app/features are working AND there are no conflicts. If there are conflicts, refer to step 6.
 
