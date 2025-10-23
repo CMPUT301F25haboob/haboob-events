@@ -25,10 +25,10 @@ See below for detailed instructions on the workflow
 ## Setp-by-Step Instructions
 
 ### 1. Make sure you are on the **dev** branch
-If you are using terminal, run this command: `git checkout dev`
-Then run `git status` and make sure it says you are on the branch dev.
-**MAKE SURE YOU PULL THE MOST RECENT CHANGES FROM THE REMOTE.** This is extremely important, as you must be working off the current dev branch or we are going to have some serious problems. Run the following commands in order:
-`git fetch`
+If you are using terminal, run this command: `git checkout dev`  
+Then run `git status` and make sure it says you are on the branch dev.  
+**MAKE SURE YOU PULL THE MOST RECENT CHANGES FROM THE REMOTE.** This is extremely important, as you must be working off the current dev branch or we are going to have some serious problems. Run the following commands in order:  
+`git fetch`  
 `git pull`
 
 If you are on github desktop, simply select the dev branch as your current branch. Then click "fetch origin" and then if there are any changes click "pull origin". The option to pull will only show up if there are changes to pull.
