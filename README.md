@@ -24,4 +24,8 @@ See below for detailed instructions on the workflow
 
 ## Setp-by-Step Instructions
 
-1. 
+1. Make sure you are on the **dev** branch. If you are using terminal, runt his command: `git checkout dev`
+   Then run `git status` and make sure it says you are on the branch dev.
+   If you are on github desktop, simply select the dev branch as your current branch
+   <img width="1251" height="722" alt="Screenshot 2025-10-22 at 9 31 27 PM" src="https://github.com/user-attachments/assets/cdbec7ec-2473-47b4-b3ce-dc1d3a6db823" />
+
