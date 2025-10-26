@@ -1,11 +1,128 @@
 package com.example.haboob;
 
+import java.sql.Time;
+import java.util.Date;
+
 public class Event {
 
+    /* Event has an organizer, as well as lists for all:
+     * tags, entrants, invitedUsers, enrolledUsers, and cancelledUsers.
+     * We might need to store a QRCode object
+     * We need to store the Poster and Map including geolocation data
+     */
+
+    // The organizer of the event
+    private Organizer organizer;
+
+    // The ID of the event in firebase
+    private String eventID;
+
+    // Details of event
+    private Date registrationStartDate;
+    private Date registrationEndDate;
+    private String eventTitle;
+    private String eventDescription;
+    private boolean geoLocationRequired;
+    private int lotterySampleSize;
+    private GeoLocationMap geoLocationMap;
+    private QRCode qrCode;
+    private Poster poster;
+
     // All of the lists that events have
-    private tags = new EventTagsList();
-    private entrants = new EntrantList();
-    private invitedUsers = new InviteList();
-    private enrolledUsers = new EnrolledList();
-    private cancelledUsers = new CancelledList();
+    private EventTagList tags;
+//    private EntrantList entrants;
+//    private InviteList invitedUsers;
+//    private WaitingList waitingUsers;
+//    private EnrolledList enrolledUsers;
+//    private CancelledList cancelledUsers;
+
+
+    // Constructor for an event
+    public Event(Organizer organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, QRCode qrCode, Poster poster, EventTagList tags) {
+        this.organizer = organizer;
+        this.registrationStartDate = registrationStartDate;
+        this.registrationEndDate = registrationEndDate;
+        this.eventTitle = eventTitle;
+        this.eventDescription = eventDescription;
+        this.geoLocationRequired = geoLocationRequired;
+        this.lotterySampleSize = lotterySampleSize;
+        this.qrCode = qrCode;
+        this.poster = poster;
+        this.tags = tags;
+
+    }
+
+    // GETTER METHODS BELOW
+    public Organizer getOrganizer() {
+    	return this.organizer;
+    }
+
+    public String getEventID() {
+    	return this.eventID;
+    }
+
+    public Date getRegistrationStartDate() {
+    	return this.registrationStartDate;
+    }
+
+    public Date getRegistrationEndDate() {
+    	return this.registrationEndDate;
+    }
+
+    public String getEventTitle() {
+    	return this.eventTitle;
+    }
+
+    public String getEventDescription() {
+        return this.eventDescription;
+    }
+
+    public boolean getGeoLocationRequired() {
+        return this.geoLocationRequired;
+    }
+
+    public int getLotterySampleSize() {
+        return this.lotterySampleSize;
+    }
+
+    public GeoLocationMap getGeoLocationMap() {
+        return this.geoLocationMap;
+    }
+
+    public QRCode getQRCode() {
+        return this.qrCode;
+    }
+
+    public Poster getPoster() {
+        return this.poster;
+    }
+
+    public EventTagList getTags() {
+        return this.tags;
+    }
+
+//    public EntrantList getEntrants() {
+//        return this.entrants;
+//    }
+
+//    public InviteList getInvitedUsers() {
+//        return this.invitedUsers;
+//    }
+
+//    public WaitingList getWaitingUsers() {
+//        return this.waitingUsers;
+//    }
+
+//    public EnrolledList getEnrolledUsers() {
+//        return this.enrolledUsers;
+//    }
+
+//    public CancelledList getCancelledUsers() {
+//        return this.cancelledUsers;
+//    }
+
+    // SETTER METHODS BELOW: TODO: IMPLEMENT THESE
+    public void setEventID(String eventID) {
+    	this.eventID = eventID;
+    }
 }
