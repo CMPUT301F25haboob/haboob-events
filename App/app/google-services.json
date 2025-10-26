@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "258638241965",
+    "project_id": "haboob-eb1f8",
+    "storage_bucket": "haboob-eb1f8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:258638241965:android:40e9365d112f6a2ef86624",
+        "android_client_info": {
+          "package_name": "com.example.haboob"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8hfcZY6PiCfFgK1Dp31ym89ezgvZx5cQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
