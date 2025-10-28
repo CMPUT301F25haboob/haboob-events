@@ -52,7 +52,7 @@
     <CalendarView
         android:id="@+id/start_date"
         android:layout_width="175dp"
-        android:layout_height="240dp"
+        android:layout_height="300dp"
         app:layout_constraintEnd_toStartOf="@+id/end_date"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -61,7 +61,7 @@
     <CalendarView
         android:id="@+id/end_date"
         android:layout_width="175dp"
-        android:layout_height="240dp"
+        android:layout_height="300dp"
         app:layout_constraintBottom_toTopOf="@+id/textView2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/start_date"
