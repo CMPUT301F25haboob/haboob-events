@@ -7,14 +7,16 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /*
- * This class holds and manage a list of all events on the app.
+ * This class holds a list of all events and manages the events database on Firestore
  * getEventsList() Return a list of all events objects
- * loadEventsList() Loads events_list collection of events from Firebase into eventsList
- * addEvent(Event) add an event object to firebase
- * deleteEvent(Event) delete and event from firebase
- * filterEvents(List<String> labels) return a list of filtered events based of a list of tags
+ * loadEventsList() Loads events collection of events from Firestore into eventsList
+ * addEvent(Event e) add an event object to Firestore and assign unique Firestore ID to the event
+ * deleteEvent(Event e) delete and event from Firestore
+ * getEventByID(String eventID)
+ * filterEvents(ArrayList<String> tags) return a list of filtered events based of a list of tags
  */
 public class EventsList {
     private ArrayList<Event> eventsList;
@@ -25,7 +27,7 @@ public class EventsList {
     public EventsList() {
         eventsList = new ArrayList<>();
         db = FirebaseFirestore.getInstance();
-        eventsListRef = db.collection("events_list");
+        eventsListRef = db.collection("events");
     }
 
     public ArrayList<Event> getEventsList() {
@@ -41,7 +43,7 @@ public class EventsList {
         });
     }
 
-    // Add event to db and set events unique Firebase ID
+    // Add event to db and set events unique Firestore ID
     public void addEvent(Event e) {
         eventsListRef.add(e)
                 .addOnSuccessListener(docRef -> {
@@ -53,9 +55,10 @@ public class EventsList {
                 .addOnFailureListener(ex -> {
                     Log.e("TAG", "Failed to add event", ex);
                 });
+
     }
 
-    // Delete event from db using its unique Firebase ID
+    // Delete event from db using its unique Firestore ID
     public void deleteEvent(Event e) {
         if (e.getEventID() == null || e.getEventID().isEmpty()) {
             Log.w("TAG", "Cannot delete event: missing ID");
@@ -70,6 +73,34 @@ public class EventsList {
                 .addOnFailureListener(ex -> {
                     Log.e("TAG", "Failed to delete event", ex);
                 });
+    }
+
+    // Find event by ID and return it
+    public Event getEventByID(String eventID) {
+        for (Event e: eventsList) {
+            if (e.getEventID() == eventID) {
+                return e;
+            }
+        }
+        return null;
+    }
+
+    // Return list of all events that have the same tag(s) as the input given
+    public ArrayList<Event> filterEvents(List<String> tags) {
+        ArrayList<Event> filteredEventList = new ArrayList<>();
+
+        // If tags is null or empty list return all events
+        if (tags == null || tags.isEmpty()) return new ArrayList<>(eventsList);
+
+        // Iterate through all events in eventsList
+        for (Event e: eventsList) {
+            // If current event's (e) tags are not null and contain all the given tags add to list
+            if (e.getTags() != null && e.getTags().containsAll(tags)) {
+                filteredEventList.add(e);
+            }
+        }
+
+        return filteredEventList;
     }
 
 }
