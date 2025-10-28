@@ -112,7 +112,8 @@ public class RegisterActivity extends AppCompatActivity {
             user.put("account_type", userAccountType);
 
 
-            // Add the user to whichever collection they belong to
+            // Add the user to 'users' and whichever collection they belong to
+            db.collection("users").add(user);
             db.collection(userAccountType.toLowerCase()).add(user).addOnSuccessListener(documentReference -> {
                         Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show();
 
