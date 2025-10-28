@@ -5,25 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/organizer_plain_text"
-        android:layout_width="240dp"
-        android:layout_height="40dp"
-        android:text="Organizer Screen"
-        android:textColor="@color/black"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/create_event"
-        android:layout_width="240dp"
-        android:layout_height="45dp"
-        android:text="New Event"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/organizer_plain_text" />
+    <FrameLayout
+        android:id="@+id/organizer_fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
