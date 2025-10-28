@@ -55,8 +55,7 @@ public class EntrantMainFragment extends Fragment {
         );
         rvWaitlists.setAdapter(new EventImageAdapter(waitlistImages));
 
-
-        // Return the inflated view (important!)
+        // Return the inflated view
         return view;
     }
 

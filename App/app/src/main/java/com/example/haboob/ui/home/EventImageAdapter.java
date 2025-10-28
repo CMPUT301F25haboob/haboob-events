@@ -14,7 +14,7 @@ import java.util.List;
 import com.example.haboob.R;
 
 // Author: David T
-// This code is an ImageAdapter for the RecyclerView in entrant_main.xml
+// This code is an ImageAdapter for the RecyclerViews in entrant_main.xml
 
 public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.ViewHolder> {
 
