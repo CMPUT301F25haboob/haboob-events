@@ -25,7 +25,7 @@ public class EventsList {
     public EventsList() {
         eventsList = new ArrayList<>();
         db = FirebaseFirestore.getInstance();
-        eventsListRef = db.collection("events_list");
+        eventsListRef = db.collection("events");
     }
 
     public ArrayList<Event> getEventsList() {
@@ -45,8 +45,13 @@ public class EventsList {
     public void addEvent(Event e) {
         eventsListRef.add(e)
                 .addOnSuccessListener(docRef -> {
+                    // Query the db to get the ID, reset into db
                     String id = docRef.getId();
                     e.setEventID(id);
+
+                    // Set ID into db
+                    db.collection("events").document(id).set(e);
+
                     eventsList.add(e); // Add to local eventsList
                     Log.d("TAG", "Added event with ID: " + id);
                 })
