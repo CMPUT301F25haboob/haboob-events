@@ -5,11 +5,12 @@
     android:id="@+id/mobile_navigation"
     app:startDestination="@+id/navigation_home">
 
-    <fragment
-        android:id="@+id/navigation_home"
-        android:name="com.example.haboob.ui.home.HomeFragment"
-        android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" />
+    <!-- Entrant Main Fragment -->
+    <fragment android:id="@+id/navigation_home"
+        android:name="com.example.haboob.ui.home.EntrantMainFragment"
+        android:label="Main Entrant"
+        tools:layout="@layout/entrant_main"
+        />
 
     <fragment
         android:id="@+id/navigation_dashboard"
