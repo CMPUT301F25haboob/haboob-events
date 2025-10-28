@@ -19,21 +19,17 @@
         android:paddingBottom="8dp"
         app:elevation="0dp">
 
-        <!--        app:startIconDrawable="@drawable/ic_search_24"&ndash;&gt;-->
-        <!-- Search bar -->
+        <!-- Search bar (M3) -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/search_input_layout"
-            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+            style="@style/Widget.Material3.TextInputLayout.FilledBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:layout_marginBottom="8dp"
             app:boxBackgroundMode="filled"
-            app:boxCornerRadiusBottomEnd="16dp"
-            app:boxCornerRadiusBottomStart="16dp"
-            app:boxCornerRadiusTopEnd="16dp"
-            app:boxCornerRadiusTopStart="16dp"
-            app:startIconDrawable="@android:drawable/ic_menu_search"
+            app:startIconDrawable="@drawable/ic_search_24"
+            app:startIconTint="?attr/colorOnSurfaceVariant"
             app:layout_scrollFlags="scroll|enterAlways">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -41,10 +37,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:hint="Search events"
-                android:inputType="text" />
+                android:inputType="text"
+                android:textColor="?attr/colorOnSurface"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Segmented controls -->
+        <!-- Segmented controls (M3 buttons already) -->
         <com.google.android.material.button.MaterialButtonToggleGroup
             android:id="@+id/entrant_toggle_group"
             android:layout_width="match_parent"
@@ -96,15 +93,16 @@
             android:paddingTop="8dp"
             android:paddingBottom="24dp">
 
-            <!-- Hero banner -->
+            <!-- Hero banner (M3 card) -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/entrant_hero_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="12dp"
-                app:cardCornerRadius="16dp"
-                app:cardUseCompatPadding="true">
+                app:cardElevation="6dp"
+                app:strokeColor="?attr/colorOutline"
+                app:strokeWidth="1dp">
 
                 <ImageView
                     android:id="@+id/entrant_hero_image"
@@ -112,7 +110,7 @@
                     android:layout_height="wrap_content"
                     android:adjustViewBounds="true"
                     android:scaleType="centerCrop"
-                    tools:src="@drawable/hockey_example" />
+                    android:src="@drawable/hockey_ex" />
             </com.google.android.material.card.MaterialCardView>
 
             <!-- Upcoming events section -->
@@ -137,7 +135,7 @@
                     android:layout_height="36dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="See all upcoming"
-                    app:srcCompat="@drawable/ic_search" />
+                    app:srcCompat="@drawable/ic_search_24" />
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
@@ -170,7 +168,7 @@
                     android:layout_height="36dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="See all wait-lists"
-                    app:srcCompat="@drawable/ic_search" />
+                    app:srcCompat="@drawable/ic_search_24" />
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
