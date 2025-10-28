@@ -102,6 +102,19 @@ public class OrganizerNewEventFragment extends Fragment {
                 return;
             }
 
+            // Set the current date in here since the user could press the button before/after midnight
+            Calendar today = Calendar.getInstance();
+            today.set(Calendar.HOUR_OF_DAY, 0);
+            today.set(Calendar.MINUTE, 0);
+            today.set(Calendar.SECOND, 0);
+            today.set(Calendar.MILLISECOND, 0);
+
+            // Ensure can't select a period before today
+            if (startDate[0].before(today.getTime()) || endDate[0].before(today.getTime())) {
+                Toast.makeText(requireContext(), "Dates cannot be before today", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             // If they input any limit then try to parse the int
             if (!signupLimit.isEmpty()) {
                 try {

@@ -121,6 +121,11 @@ public class RegisterActivity extends AppCompatActivity {
                         if (userAccountType.equals("Entrant")) {
                             Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
                             intent.putExtra("device_id", deviceId);
+                            intent.putExtra("first_name", firstName);
+                            intent.putExtra("last_name", lastName);
+                            intent.putExtra("email", email);
+                            intent.putExtra("phone", phoneNumber);
+                            intent.putExtra("account_type", userAccountType);
                             startActivity(intent);
                             finish();
                         }
@@ -128,6 +133,11 @@ public class RegisterActivity extends AppCompatActivity {
                             // TODO: Navigate to OrganizerMainActivity if the user is an Organizer (not implemented yet)
                             Intent intent = new Intent(RegisterActivity.this, OrganizerMainActivity.class);
                             intent.putExtra("device_id", deviceId);
+                            intent.putExtra("first_name", firstName);
+                            intent.putExtra("last_name", lastName);
+                            intent.putExtra("email", email);
+                            intent.putExtra("phone", phoneNumber);
+                            intent.putExtra("account_type", userAccountType);
                             startActivity(intent);
                             finish();
                         }

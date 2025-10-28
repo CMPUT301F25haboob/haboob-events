@@ -32,8 +32,8 @@ public class SplashActivity extends AppCompatActivity {
         );
 
         // Get a reference to the users collection so we can query it
-        organizersRef = db.collection("organizers");
-        entrantsRef = db.collection("entrants");
+        organizersRef = db.collection("organizer");
+        entrantsRef = db.collection("entrant");
 
 
         // Query the db to check if a user with the given deviceId is already registered or not
@@ -43,7 +43,7 @@ public class SplashActivity extends AppCompatActivity {
                     if (!queryDocumentSnapshots.isEmpty()) {
                         // User is already registered - transition them to MainActivity
                         // TODO: Make sure this properly transitions to main activity
-                        Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+                        Intent intent = new Intent(SplashActivity.this, OrganizerMainActivity.class);
                         startActivity(intent);
                         finish();
                     } else {

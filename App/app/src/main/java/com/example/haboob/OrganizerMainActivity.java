@@ -44,7 +44,23 @@ public class OrganizerMainActivity extends AppCompatActivity {
 
         // Set up database and organizer using app
         db = FirebaseFirestore.getInstance();
-        currentOrganizer = new Organizer("CURRENT_ORGANIZER", "Organizer", "test@gmail.com", "Organizer", "780-000-0000");
+        Intent intent = getIntent();
+        // SHOULD TRY TO PULL INFO FOR ORGANIZER FROM DB
+        currentOrganizer = new Organizer("TEST_ID", "TEST_FIRST_NAME", "TEST_LAST_NAME", "TEST_EMAIL", "Organizer", "000-000-0000");
+
+        //        if (intent != null) {
+//            // Get the organizerID from intent
+//            String organizerID = intent.getStringExtra("device_id");
+//            String organizerFirstName = intent.getStringExtra("first_name");
+//            String organizerLastName =  intent.getStringExtra("last_name");
+//            String organizerEmail = intent.getStringExtra("email");
+//            String organizerPhone = intent.getStringExtra("phone");
+//            String accountType = intent.getStringExtra("account_type");
+//
+//
+//            // Create a new Organizer object with the organizerID
+//            currentOrganizer = new Organizer(organizerID, organizerFirstName, organizerLastName, organizerEmail, accountType, organizerPhone);
+//        }
 
         // New fragment to show the buttons for organizer
         if (savedInstanceState == null) {
@@ -59,16 +75,6 @@ public class OrganizerMainActivity extends AppCompatActivity {
     public Organizer getCurrentOrganizer() {
         return currentOrganizer;
     }
-
-        // TODO: EDIT THIS CODE WHEN WE HAVE THE DB WORKING WITH deviceID AND OBJECT!
-//        Intent intent = getIntent();
-//        if (intent != null) {
-//            // Get the organizerID from intent
-//            String organizerID = intent.getStringExtra("organizerID");
-//
-//            // Create a new Organizer object with the organizerID
-//            currentOrganizer = new Organizer();
-//        }
 }
 
 
