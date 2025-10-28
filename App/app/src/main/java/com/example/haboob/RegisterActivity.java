@@ -103,6 +103,7 @@ public class RegisterActivity extends AppCompatActivity {
             Map<String, Object> user = new HashMap<>(); // Using a hashmap for easy inserting into the db
 
             // Add all the user info to the hash map. The hashmap will just be treated as a json document for db purposes
+            // NOTE: Can we instead just do
             user.put("device_id", deviceId);
             user.put("first_name", firstName);
             user.put("last_name", lastName);
@@ -110,18 +111,25 @@ public class RegisterActivity extends AppCompatActivity {
             user.put("phone", phoneNumber);
             user.put("account_type", userAccountType);
 
-            db.collection("users").add(user).addOnSuccessListener(documentReference -> {
+
+            // Add the user to whichever collection they belong to
+            db.collection(userAccountType.toLowerCase()).add(user).addOnSuccessListener(documentReference -> {
                         Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show();
 
                         // After the user is added to the db, we want to navigate to the activity based on the users account type
                         // Navigate to MainActivity if the user is an Entrant
                         if (userAccountType.equals("Entrant")) {
                             Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+                            intent.putExtra("device_id", deviceId);
                             startActivity(intent);
                             finish();
                         }
                         if (userAccountType.equals("Organizer")) {
                             // TODO: Navigate to OrganizerMainActivity if the user is an Organizer (not implemented yet)
+                            Intent intent = new Intent(RegisterActivity.this, OrganizerMainActivity.class);
+                            intent.putExtra("device_id", deviceId);
+                            startActivity(intent);
+                            finish();
                         }
                     })
                     .addOnFailureListener(e -> {

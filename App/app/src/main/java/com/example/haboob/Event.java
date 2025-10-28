@@ -2,6 +2,7 @@ package com.example.haboob;
 
 import java.sql.Time;
 import java.util.Date;
+import java.util.List;
 
 public class Event {
 
@@ -12,7 +13,7 @@ public class Event {
      */
 
     // The organizer of the event
-    private Organizer organizer;
+    private String organizerID;
 
     // The ID of the event in firebase
     private String eventID;
@@ -24,6 +25,7 @@ public class Event {
     private String eventDescription;
     private boolean geoLocationRequired;
     private int lotterySampleSize;
+    private int optionalWaitingListSize;
     private GeoLocationMap geoLocationMap;
     private QRCode qrCode;
     private Poster poster;
@@ -38,28 +40,40 @@ public class Event {
 
 
     // Constructor for an event
-    public Event(Organizer organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, QRCode qrCode, Poster poster, EventTagList tags) {
-        this.organizer = organizer;
+    public Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, QRCode qrCode, Poster poster, EventTagList tags) {
+        this.organizerID = organizer;
         this.registrationStartDate = registrationStartDate;
         this.registrationEndDate = registrationEndDate;
         this.eventTitle = eventTitle;
         this.eventDescription = eventDescription;
         this.geoLocationRequired = geoLocationRequired;
         this.lotterySampleSize = lotterySampleSize;
+        this.optionalWaitingListSize = -1;
         this.qrCode = qrCode;
         this.poster = poster;
         this.tags = tags;
+    }
 
+    public Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, int optionalWaitingListSize, QRCode qrCode, Poster poster, EventTagList tags) {
+        this.organizerID = organizer;
+        this.registrationStartDate = registrationStartDate;
+        this.registrationEndDate = registrationEndDate;
+        this.eventTitle = eventTitle;
+        this.eventDescription = eventDescription;
+        this.geoLocationRequired = geoLocationRequired;
+        this.lotterySampleSize = lotterySampleSize;
+        this.optionalWaitingListSize = optionalWaitingListSize;
+        this.qrCode = qrCode;
+        this.poster = poster;
+        this.tags = tags;
     }
 
     // GETTER METHODS BELOW
-    public Organizer getOrganizer() {
-    	return this.organizer;
+    public String getOrganizer() {
+    	return this.organizerID;
     }
 
-    public String getEventID() {
-    	return this.eventID;
-    }
+    public String getEventID() { return this.eventID; }
 
     public Date getRegistrationStartDate() {
     	return this.registrationStartDate;
@@ -97,8 +111,8 @@ public class Event {
         return this.poster;
     }
 
-    public EventTagList getTags() {
-        return this.tags;
+    public List<String> getTags() {
+        return this.tags.getTagList();
     }
 
 //    public EntrantList getEntrants() {

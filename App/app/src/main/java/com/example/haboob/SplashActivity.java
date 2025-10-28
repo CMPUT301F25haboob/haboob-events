@@ -16,7 +16,8 @@ import java.util.Collection;
 public class SplashActivity extends AppCompatActivity {
     private String deviceId;
     private FirebaseFirestore db;
-    private CollectionReference usersRef;
+    private CollectionReference organizersRef;
+    private CollectionReference entrantsRef;
 
     @SuppressLint("HardwareIds")
     @Override
@@ -31,10 +32,38 @@ public class SplashActivity extends AppCompatActivity {
         );
 
         // Get a reference to the users collection so we can query it
-        usersRef = db.collection("users");
+        organizersRef = db.collection("organizers");
+        entrantsRef = db.collection("entrants");
+
 
         // Query the db to check if a user with the given deviceId is already registered or not
-        usersRef.whereEqualTo("device_id", deviceId)
+        organizersRef.whereEqualTo("device_id", deviceId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        // User is already registered - transition them to MainActivity
+                        // TODO: Make sure this properly transitions to main activity
+                        Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        // User doesn't exist - go to RegisterActivity
+                        // TODO: Make sure this properly transitions to register activity
+                        Intent intent = new Intent(SplashActivity.this, RegisterActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Handle error
+                    Toast.makeText(SplashActivity.this,
+                            "Error checking user: " + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                    // TODO: Retry? Go to registration here???
+                });
+
+        // Check entrants list now
+        entrantsRef.whereEqualTo("device_id", deviceId)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (!queryDocumentSnapshots.isEmpty()) {
