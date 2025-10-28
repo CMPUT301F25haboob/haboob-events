@@ -44,7 +44,7 @@ public class OrganizerMainActivity extends AppCompatActivity {
 
         // Set up database and organizer using app
         db = FirebaseFirestore.getInstance();
-        currentOrganizer = new Organizer("Test", "Organizer", "test@gmail.com", "Organizer", "780-000-0000");
+        currentOrganizer = new Organizer("CURRENT_ORGANIZER", "Organizer", "test@gmail.com", "Organizer", "780-000-0000");
 
         // Create event button
         createEventButton = findViewById(R.id.create_event);
@@ -115,6 +115,9 @@ public class OrganizerMainActivity extends AppCompatActivity {
                 currentOrganizer.getEventList().addEvent(newEvent);
             });
         });
+
+        // Return to the main screen
+        setContentView(R.layout.main_organizer_activity);
 
 
         // TODO: EDIT THIS CODE WHEN WE HAVE THE DB WORKING WITH deviceID AND OBJECT!
