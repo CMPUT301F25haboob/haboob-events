@@ -112,39 +112,45 @@ public class RegisterActivity extends AppCompatActivity {
             user.put("account_type", userAccountType);
 
 
-            // Add the user to 'users' and whichever collection they belong to
-            db.collection("users").add(user);
-            db.collection(userAccountType.toLowerCase()).add(user).addOnSuccessListener(documentReference -> {
-                        Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show();
+            // Add the user to 'users' collection first
+            db.collection("users").add(user)
+                    .addOnSuccessListener(userDocRef -> {
+                        // After successfully adding to 'users', add to the specific collection
+                        db.collection(userAccountType.toLowerCase()).add(user)
+                                .addOnSuccessListener(documentReference -> {
+                                    Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show();
 
-                        // After the user is added to the db, we want to navigate to the activity based on the users account type
-                        // Navigate to MainActivity if the user is an Entrant
-                        if (userAccountType.equals("Entrant")) {
-                            Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
-                            intent.putExtra("device_id", deviceId);
-                            intent.putExtra("first_name", firstName);
-                            intent.putExtra("last_name", lastName);
-                            intent.putExtra("email", email);
-                            intent.putExtra("phone", phoneNumber);
-                            intent.putExtra("account_type", userAccountType);
-                            startActivity(intent);
-                            finish();
-                        }
-                        if (userAccountType.equals("Organizer")) {
-                            // TODO: Navigate to OrganizerMainActivity if the user is an Organizer (not implemented yet)
-                            Intent intent = new Intent(RegisterActivity.this, OrganizerMainActivity.class);
-                            intent.putExtra("device_id", deviceId);
-                            intent.putExtra("first_name", firstName);
-                            intent.putExtra("last_name", lastName);
-                            intent.putExtra("email", email);
-                            intent.putExtra("phone", phoneNumber);
-                            intent.putExtra("account_type", userAccountType);
-                            startActivity(intent);
-                            finish();
-                        }
+                                    // After the user is added to the db, we want to navigate to the activity based on the users account type
+                                    // Navigate to MainActivity if the user is an Entrant
+                                    if (userAccountType.equals("Entrant")) {
+                                        Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+                                        intent.putExtra("device_id", deviceId);
+                                        intent.putExtra("first_name", firstName);
+                                        intent.putExtra("last_name", lastName);
+                                        intent.putExtra("email", email);
+                                        intent.putExtra("phone", phoneNumber);
+                                        intent.putExtra("account_type", userAccountType);
+                                        startActivity(intent);
+                                        finish();
+                                    }
+                                    if (userAccountType.equals("Organizer")) {
+                                        Intent intent = new Intent(RegisterActivity.this, OrganizerMainActivity.class);
+                                        intent.putExtra("device_id", deviceId);
+                                        intent.putExtra("first_name", firstName);
+                                        intent.putExtra("last_name", lastName);
+                                        intent.putExtra("email", email);
+                                        intent.putExtra("phone", phoneNumber);
+                                        intent.putExtra("account_type", userAccountType);
+                                        startActivity(intent);
+                                        finish();
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(this, "Registration failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                });
                     })
                     .addOnFailureListener(e -> {
-                        Toast.makeText(this, "Registration failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Failed to add user: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
         });
     }

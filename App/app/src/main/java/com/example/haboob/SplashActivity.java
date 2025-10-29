@@ -32,6 +32,8 @@ public class SplashActivity extends AppCompatActivity {
         );
 
         // Get a reference to the users collection so we can query it
+        // TODO: We need the users collections back so that we can query the account type instead
+        //       getting both collections and checking for the user
         usersRef = db.collection("users");
 
 
@@ -40,14 +42,21 @@ public class SplashActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (!queryDocumentSnapshots.isEmpty()) {
-                        // User is already registered - transition them to MainActivity
-                        // TODO: Make sure this properly transitions to main activity
-                        Intent intent = new Intent(SplashActivity.this, OrganizerMainActivity.class);
+                        // User is already registered, check their account_type
+                        String accountType = queryDocumentSnapshots.getDocuments().get(0).getString("account_type");
+
+                        Intent intent;
+                        if ("Organizer".equals(accountType)) {
+                            // Route organizers to OrganizerMainActivity
+                            intent = new Intent(SplashActivity.this, OrganizerMainActivity.class);
+                        } else {
+                            // Route entrants (and others) to MainActivity
+                            intent = new Intent(SplashActivity.this, MainActivity.class);
+                        }
                         startActivity(intent);
                         finish();
                     } else {
                         // User doesn't exist - go to RegisterActivity
-                        // TODO: Make sure this properly transitions to register activity
                         Intent intent = new Intent(SplashActivity.this, RegisterActivity.class);
                         startActivity(intent);
                         finish();
@@ -60,5 +69,6 @@ public class SplashActivity extends AppCompatActivity {
                             Toast.LENGTH_SHORT).show();
                     // TODO: Retry? Go to registration here???
                 });
+
     }
 }
