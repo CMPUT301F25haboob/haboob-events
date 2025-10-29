@@ -51,6 +51,9 @@ public class EventsList {
                 .addOnSuccessListener(docRef -> {
                     String id = docRef.getId();
                     e.setEventID(id);
+                    
+                    db.collection("events").document(id).set(e);
+
                     eventsList.add(e); // Add to local eventsList
                     Log.d("TAG", "Added event with ID: " + id);
                 })
