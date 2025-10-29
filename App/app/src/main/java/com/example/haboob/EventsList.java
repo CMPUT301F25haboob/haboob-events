@@ -49,6 +49,7 @@ public class EventsList {
     public void addEvent(Event e) {
         eventsListRef.add(e)
                 .addOnSuccessListener(docRef -> {
+                    // Query the db to get the ID, reset into db
                     String id = docRef.getId();
                     e.setEventID(id);
                     
