@@ -17,6 +17,7 @@ import java.util.List;
  * deleteEvent(Event e) delete and event from Firestore
  * getEventByID(String eventID)
  * filterEvents(ArrayList<String> tags) return a list of filtered events based of a list of tags
+ * getOrganizerEvents(Organizer o) // Returns a list of events had by a specific Organizer ID
  */
 public class EventsList {
     private ArrayList<Event> eventsList;
@@ -30,7 +31,8 @@ public class EventsList {
         eventsListRef = db.collection("events");
     }
 
-    public ArrayList<Event> getEventsList() {
+    // Return a list of all events
+    public ArrayList<Event> getAllEventsList() {
         return eventsList;
     }
 
@@ -103,4 +105,21 @@ public class EventsList {
         return filteredEventList;
     }
 
-}
+    // Returns a list of events had by a specific Organizer ID
+    public ArrayList<Event> getOrganizerEvents(Organizer o) {
+        ArrayList<Event> organizerEventList = new ArrayList<>();
+
+        if (o == null || o.getOrganizerID() == null) return organizerEventList;
+
+        // Iterate through all events in eventsList
+        for (Event e: eventsList) {
+            // If event e has the given organizer ID
+            if (e.getOrganizer().equals(o.getOrganizerID())) {
+                organizerEventList.add(e);
+            }
+        }
+
+        return organizerEventList;
+    }
+
+ }
