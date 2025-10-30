@@ -112,7 +112,7 @@ public class Event {
     }
 
     public List<String> getTags() {
-        return this.tags.getTagList();
+        return (this.tags == null) ? null : this.tags.getTagList();
     }
 
 //    public EntrantList getEntrants() {

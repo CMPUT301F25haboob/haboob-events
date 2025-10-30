@@ -31,8 +31,17 @@ public class EventsList {
         eventsListRef = db.collection("events");
     }
 
+    // Constructor used for testers so tests don't interact with firestore
+    public EventsList(boolean inMemoryOnly) {
+        eventsList = new ArrayList<>();
+        if (!inMemoryOnly) {
+            db = FirebaseFirestore.getInstance();
+            eventsListRef = db.collection("events");
+        }
+    }
+
     // Return a list of all events
-    public ArrayList<Event> getAllEventsList() {
+    public ArrayList<Event> getEventsList() {
         return eventsList;
     }
 
@@ -66,8 +75,13 @@ public class EventsList {
 
     // Delete event from db using its unique Firestore ID
     public void deleteEvent(Event e) {
-        if (e.getEventID() == null || e.getEventID().isEmpty()) {
-            Log.w("TAG", "Cannot delete event: missing ID");
+        // Check for invalid state
+        if (eventsList.isEmpty()) {
+            throw new IllegalStateException("Cannot delete from an empty events list");
+        }
+        // Null or no event ID
+        if (e == null || e.getEventID() == null || e.getEventID().isEmpty()) {
+            Log.w("TAG", "Cannot delete event: missing or invalid ID");
             return;
         }
 
@@ -84,7 +98,7 @@ public class EventsList {
     // Find event by ID and return it
     public Event getEventByID(String eventID) {
         for (Event e: eventsList) {
-            if (e.getEventID() == eventID) {
+            if (eventID != null && eventID.equals(e.getEventID())) {
                 return e;
             }
         }
@@ -98,10 +112,25 @@ public class EventsList {
         // If tags is null or empty list return all events
         if (tags == null || tags.isEmpty()) return new ArrayList<>(eventsList);
 
+        // Make input tags all lowercase
+        List<String> lowerTags = new ArrayList<>();
+        for (String tag : tags) {
+            if (tag != null) lowerTags.add(tag.toLowerCase());
+        }
+
         // Iterate through all events in eventsList
         for (Event e: eventsList) {
-            // If current event's (e) tags are not null and contain all the given tags add to list
-            if (e.getTags() != null && e.getTags().containsAll(tags)) {
+            List<String> eventTags = e.getTags();
+            if (eventTags == null) continue;
+
+            // Make event's tags lowercase
+            List<String> lowerEventTags = new ArrayList<>();
+            for (String tag: eventTags) {
+                if (tag != null) lowerEventTags.add(tag.toLowerCase());
+            }
+
+            // If event contains all the given tags
+            if (lowerEventTags.containsAll(lowerTags)) {
                 filteredEventList.add(e);
             }
         }
