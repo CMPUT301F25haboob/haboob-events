@@ -128,7 +128,7 @@ public class Event {
 //        return this.cancelledUsers;
 //    }
 
-    // SETTER METHODS BELOW: TODO: IMPLEMENT THESE
+    // SETTER METHODS BELOW:
     public void setOrganizer(String organizer) {
         this.organizerID = organizer;
     }

@@ -25,7 +25,8 @@ public class OrganizerOptionsFragment extends Fragment {
     private ArrayAdapter<String> organizerEventsAdapter;
     private int selectedPosition = -1;
     private Organizer currentOrganizer;
-    private ProgressBar loadingIndicator;
+
+    // NOTE: Can check LogCat to help debug processes
 
     @Nullable
     @Override
@@ -46,40 +47,30 @@ public class OrganizerOptionsFragment extends Fragment {
             return view;
         }
 
+        // Can check LogCat to see which organizer is creating/viewing their events (debugging purposes)
         Log.d("OrganizerOptions", "Organizer (" + currentOrganizer.getOrganizerID() + ") loaded successfully");
 
-        // Initialize collections
+        // Initialize lists to use/display
         organizerEvents = new ArrayList<>();
         eventNames = new ArrayList<>();
 
-        // Set up adapter
+        // Set up adapter for list items
         organizerEventsAdapter = new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_list_item_1, eventNames);
 
-        // Set up ListView
+        // Set up ListView -> attach ArrayAdapter to the ListView
         organizerEventsView = view.findViewById(R.id.organizer_events);
-        if (organizerEventsView == null) {
-            Log.e("OrganizerOptions", "ListView not found in layout!");
-            return view;
-        }
         organizerEventsView.setAdapter(organizerEventsAdapter);
 
-        // Optional: Add a ProgressBar to your layout and reference it here
-        // loadingIndicator = view.findViewById(R.id.loading_indicator);
-
-        // Set up create event button
+        // Logic for creating an event on button click
         Button createEventButton = view.findViewById(R.id.create_event);
-        if (createEventButton != null) {
-            createEventButton.setOnClickListener(v -> {
-                getParentFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.organizer_fragment_container, new OrganizerNewEventFragment())
-                        .addToBackStack(null)
-                        .commit();
-            });
-        } else {
-            Log.e("OrganizerOptions", "Create event button not found!");
-        }
+        createEventButton.setOnClickListener(v -> {
+            getParentFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.organizer_fragment_container, new OrganizerNewEventFragment())
+                    .addToBackStack(null)
+                    .commit();
+        });
 
         // Load events from Firestore
         try {
@@ -93,24 +84,22 @@ public class OrganizerOptionsFragment extends Fragment {
     }
 
     private void loadEventsFromFirestore() {
-        Log.d("OrganizerOptions", "loadEventsFromFirestore called");
 
+        // Ensure our organizer is still valid
         if (currentOrganizer == null) {
             Log.e("OrganizerOptions", "currentOrganizer is null in loadEventsFromFirestore");
             return;
         }
 
+        // Ensure we still have an eventslist
         if (currentOrganizer.getEventList() == null) {
             Log.e("OrganizerOptions", "EventList is null! Check your Organizer class initialization");
             Toast.makeText(getContext(), "Error: Event list not initialized", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Log.d("OrganizerOptions", "Checking if events are loaded...");
-
-        // Check if events are already loaded
+        // Check if events are already loaded into our current eventslist
         if (currentOrganizer.getEventList().isLoaded()) {
-            Log.d("OrganizerOptions", "Events already loaded, refreshing UI");
             // Data is already there, just refresh the UI immediately
             refreshEventList();
             return;
@@ -118,7 +107,7 @@ public class OrganizerOptionsFragment extends Fragment {
 
         Log.d("OrganizerOptions", "Events not loaded yet, waiting for Firestore...");
 
-        // Load events with callback
+        // Load events with callback (WITH HELP FROM CLAUDE -> Suggested the event loaded listener to ensure synced data)
         currentOrganizer.getEventList().loadEventsList(new EventsList.OnEventsLoadedListener() {
             @Override
             public void onEventsLoaded() {
@@ -189,7 +178,7 @@ public class OrganizerOptionsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        // When we return from creating an event, force reload to get fresh data
+        // When we return from creating an event, force reload to get fresh data to display
         reloadEventsFromFirestore();
     }
 
