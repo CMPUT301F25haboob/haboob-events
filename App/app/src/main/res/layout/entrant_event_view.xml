@@ -154,7 +154,7 @@
                 app:layout_constraintTop_toBottomOf="@id/labelAmount"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:backgroundTint="@color/teal_200"
+                app:backgroundTint="@color/white"
                 tools:backgroundTint="#35C759" />
 
             <com.google.android.material.button.MaterialButton

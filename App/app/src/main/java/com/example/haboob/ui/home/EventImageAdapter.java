@@ -55,7 +55,8 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
         // set an onClicklistener toast for the item at the position
         holder.itemView.setOnClickListener(v -> {
             Toast.makeText(v.getContext(), "Clicked " + position, Toast.LENGTH_SHORT).show();
-//            Navigation.findNavController(v).navigate(R.id.entrant_event_view);
+
+            // navigate using an action
             Navigation.findNavController(v).navigate(R.id.action_mainEntrantView___to___EventView);
         });
 
