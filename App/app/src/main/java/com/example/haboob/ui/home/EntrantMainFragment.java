@@ -70,6 +70,11 @@ public class EntrantMainFragment extends Fragment {
         tagStrings.add("family");
         EventTagList tags = new EventTagList(tagStrings);
 
+        // create a list of dummy entrant Ids for this event:
+        ArrayList<String> event_entrant_ids = new ArrayList<>();
+
+        event_entrant_ids.add("david's_id");
+
         // Finally, create your dummy Event using your constructor
         Event dummyEvent = new Event(
                 "org12345",                                  // organizer
@@ -81,11 +86,14 @@ public class EntrantMainFragment extends Fragment {
                 100,                                         // lotterySampleSize
                 qrCode,                                      // QRCode object
                 poster,                                      // Poster object
-                tags                                         // EventTagList
+                tags,                                         // EventTagList
+                event_entrant_ids
         );
 
+        // the actual creation of the event: commented out for now so we're not
+        // overpopulating the database
         if (eventsList != null){
-            eventsList.addEvent(dummyEvent);
+//            eventsList.addEvent(dummyEvent);
             Log.d("TAG", "eventsList is not null");
         }
         else{

@@ -1,5 +1,6 @@
 package com.example.haboob.ui.home;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,6 +8,8 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
@@ -50,9 +53,12 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
         holder.imageView.setImageResource(images.get(position));
 
         // set an onClicklistener toast for the item at the position
-        holder.itemView.setOnClickListener(v ->
-                Toast.makeText(v.getContext(), "Clicked " + position, Toast.LENGTH_SHORT).show()
-        );
+        holder.itemView.setOnClickListener(v -> {
+            Toast.makeText(v.getContext(), "Clicked " + position, Toast.LENGTH_SHORT).show();
+//            Navigation.findNavController(v).navigate(R.id.entrant_event_view);
+            Navigation.findNavController(v).navigate(R.id.action_mainEntrantView___to___EventView);
+        });
+
     }
 
     @Override

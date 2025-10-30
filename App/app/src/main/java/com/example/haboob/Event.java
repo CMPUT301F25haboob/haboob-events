@@ -1,6 +1,8 @@
 package com.example.haboob;
 
+import java.sql.Array;
 import java.sql.Time;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -38,9 +40,12 @@ public class Event {
 //    private EnrolledList enrolledUsers;
 //    private CancelledList cancelledUsers;
 
+    // to store the entrants that are in the lottery
+    private ArrayList<String> entrant_ids_for_lottery;
+
 
     // Constructor for an event
-    public Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, QRCode qrCode, Poster poster, EventTagList tags) {
+    public Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, QRCode qrCode, Poster poster, EventTagList tags, ArrayList<String> entrant_ids_for_lottery) {
         this.organizerID = organizer;
         this.registrationStartDate = registrationStartDate;
         this.registrationEndDate = registrationEndDate;
@@ -52,6 +57,7 @@ public class Event {
         this.qrCode = qrCode;
         this.poster = poster;
         this.tags = tags;
+        this.entrant_ids_for_lottery = entrant_ids_for_lottery;
     }
 
     public Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, int optionalWaitingListSize, QRCode qrCode, Poster poster, EventTagList tags) {
@@ -71,6 +77,10 @@ public class Event {
     // GETTER METHODS BELOW
     public String getOrganizer() {
     	return this.organizerID;
+    }
+
+    public ArrayList<String> getEntrant_ids_for_lottery() {
+        return this.entrant_ids_for_lottery;
     }
 
     public String getEventID() { return this.eventID; }

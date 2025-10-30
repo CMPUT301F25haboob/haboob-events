@@ -53,7 +53,7 @@ public class EventsList {
                     db.collection("events").document(id).set(e);
 
                     eventsList.add(e); // Add to local eventsList
-                    Log.d("TAG", "Added event with ID: " + id);
+                    Log.d("TAG", "Added event with ID: " + id + " with entrants: " + e.getEntrant_ids_for_lottery());
                 })
                 .addOnFailureListener(ex -> {
                     Log.e("TAG", "Failed to add event", ex);

@@ -12,18 +12,5 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
-
-        <!-- Toolbar title font -->
-        <item name="toolbarStyle">@style/CustomToolbar</item>
-
-        <style name="CustomToolbar" parent="Widget.Material3.Toolbar">
-            <item name="titleTextAppearance">@style/ToolbarTitleText</item>
-        </style>
-
-        <style name="ToolbarTitleText" parent="TextAppearance.Material3.TitleLarge">
-            <item name="fontFamily">@font/montserrat_semibold</item>
-            <item name="android:textStyle">bold</item>
-        </style>
-
     </style>
 </resources>
