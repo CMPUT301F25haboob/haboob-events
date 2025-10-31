@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,6 +24,16 @@ import com.example.haboob.MainActivity;
 import com.example.haboob.Poster;
 import com.example.haboob.QRCode;
 import com.example.haboob.R;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,9 +48,54 @@ import java.util.List;
 // this fragment represents the main fragment that the entrant will see when entering the app
 
 public class EntrantMainFragment extends Fragment {
+
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+    // will hold the local Events list, query will add to this eventsList
+    private final List<Event> eventsList2 = new ArrayList<>();
+
+    List<Integer> images = Arrays.asList(R.drawable.hockey_ex, R.drawable.bob_ross, R.drawable.clash_royale, R.drawable.swimming_lessons);
+
+
     public EntrantMainFragment() {
         // Required empty public constructor
     }
+    // TODO: this fragment needs to query the database and show all events that the user is registered for,
+    // and then once a user clicks one, use an intent to start a new fragment that shows the event details
+
+
+    // queries the dataBase, adds events to local EventList Array
+    private void loadEventsForUser(String userId) {
+        // Example paths — pick ONE that matches your schema:
+        // CollectionReference col = db.collection("events");                                      // top-level
+        // CollectionReference col = db.collection("cities").document("BJ").collection("events"); // subcollection
+        CollectionReference col = db.collection("events");
+
+        // If you want only the events the user is registered for (array of ids):
+        // Remove this where clause if you want ALL events.
+        Query q = col;
+
+        // Clear current list to avoid duplicates on refresh
+        eventsList2.clear();
+
+        q.get()
+                .addOnSuccessListener(snap -> {
+                    for (DocumentSnapshot doc : snap.getDocuments()) {
+                        Event e = doc.toObject(Event.class);
+                        if (e != null) {
+                            // Keep Firestore id if useful
+                            try { e.setEventID(doc.getId()); } catch (Exception ignored) {}
+                            eventsList2.add(e);
+                        } else {
+                            Log.w("TAG", "Skipping unmappable doc: " + doc.getId() + " -> " + doc.getData());
+                        }
+                    }
+//                    if (adapter != null) adapter.notifyDataSetChanged();
+                    Log.d("TAG", "Loaded " + eventsList2.size() + " events");
+                })
+                .addOnFailureListener(err -> Log.e("TAG", "Failed loading events", err));
+    }
+
 
     // “When this Fragment becomes visible, create its UI from entrant_main.xml and attach it to the container.”
     @Override
@@ -48,20 +104,45 @@ public class EntrantMainFragment extends Fragment {
 
         // access mainActivity to access the EventsList
         MainActivity mainActivity = (MainActivity) getActivity();
-        assert mainActivity != null;
         EventsList eventsList = mainActivity.getEventsList();
 
-        Log.d("TAG", "ThE FRAGMENT LAUNCHED");
+        String userID = "davids_id";
+//        loadEventsForUser(userID);
 
-        // *********** create a new dummy event: ********************************************************************
+//        for (Event event : eventsList) {
+//                Log.w("TAG", "Event ID: " + event.getEventID() + ", Event Title: " + event.getEventTitle());
+//        }
 
+//        Log.d("TAG", "ThE FRAGMENT LAUNCHED");
+
+        // DEBUG: Logging each ID in the database:
+        db.collection("events")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d("TAG", document.getId() + " => " + document.getData());
+                            }
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+
+
+
+
+//        // *********** create a new dummy event: ********************************************************************
+//
         // Build registration dates
         Date regStart = new GregorianCalendar(2025, Calendar.NOVEMBER, 1).getTime();
         Date regEnd   = new GregorianCalendar(2025, Calendar.NOVEMBER, 15).getTime();
 
         // Create supporting objects
         QRCode qrCode = new QRCode("https://haboob.app/events/event001");
-        Poster poster = new Poster("pumpkin_festival_poster.webp");
+        Poster poster = new Poster("bob_ross.webp");
 
         // Create a list of tags for this event
         List<String> tagStrings = new ArrayList<>();
@@ -69,6 +150,11 @@ public class EntrantMainFragment extends Fragment {
         tagStrings.add("outdoor");
         tagStrings.add("family");
         EventTagList tags = new EventTagList(tagStrings);
+
+//        List<String> tagslist2 = new ArrayList<>();
+//        tagslist2.add("Bob");
+//        tagslist2.add("Ross");
+//        tagslist2.add("Art");
 
         // create a list of dummy entrant Ids for this event:
         ArrayList<String> event_entrant_ids = new ArrayList<>();
@@ -80,20 +166,20 @@ public class EntrantMainFragment extends Fragment {
                 "org12345",                                  // organizer
                 regStart,                                    // registrationStartDate
                 regEnd,                                      // registrationEndDate
-                "Pumpkin Festival 2025",                     // eventTitle
-                "A fun outdoor festival with local food, music, and pumpkin carving contests.", // eventDescription
+                "Bob Ross Art Class",                          // eventTitle
+                "Art class hosted by Bob Ross!",             // eventDescription
                 true,                                        // geoLocationRequired
                 100,                                         // lotterySampleSize
                 qrCode,                                      // QRCode object
                 poster,                                      // Poster object
                 tags,                                         // EventTagList
-                event_entrant_ids
+                event_entrant_ids                             // entrant event ids
         );
 
         // the actual creation of the event: commented out for now so we're not
         // overpopulating the database
         if (eventsList != null){
-//            eventsList.addEvent(dummyEvent);
+            eventsList.addEvent(dummyEvent);
             Log.d("TAG", "eventsList is not null");
         }
         else{
