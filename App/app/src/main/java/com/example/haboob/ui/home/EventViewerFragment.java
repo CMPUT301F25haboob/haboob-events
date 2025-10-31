@@ -42,11 +42,11 @@ import java.util.List;
 // this fragment hold the functionality for viewing the events
 public class EventViewerFragment extends Fragment {
 
+    private String eventID;
+
     public EventViewerFragment() {
         // Required empty public constructor
     }
-
-
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,

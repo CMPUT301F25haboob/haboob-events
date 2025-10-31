@@ -34,6 +34,10 @@ public class Event {
 
     // All of the lists that events have
     private EventTagList tags;
+
+    // made another tagsList for easy mapping to fireStore - ask david about change
+    private List<String> tags2;
+
 //    private EntrantList entrants;
 //    private InviteList invitedUsers;
 //    private WaitingList waitingUsers;
@@ -42,6 +46,7 @@ public class Event {
 
     // to store the entrants that are in the lottery
     private ArrayList<String> entrant_ids_for_lottery;
+    private String event_image;
 
 
     // Constructor for an event
@@ -57,6 +62,25 @@ public class Event {
         this.qrCode = qrCode;
         this.poster = poster;
         this.tags = tags;
+        this.entrant_ids_for_lottery = entrant_ids_for_lottery;
+    }
+
+//    // empty constructor for firestore - made by David T, pls dont delete this
+    public Event(){}
+
+    // different constructor for tags2, which just is a list of strings instead of an EventTagList, works better in fireBase
+    public Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, QRCode qrCode, Poster poster, List<String> tags2, ArrayList<String> entrant_ids_for_lottery) {
+        this.organizerID = organizer;
+        this.registrationStartDate = registrationStartDate;
+        this.registrationEndDate = registrationEndDate;
+        this.eventTitle = eventTitle;
+        this.eventDescription = eventDescription;
+        this.geoLocationRequired = geoLocationRequired;
+        this.lotterySampleSize = lotterySampleSize;
+        this.optionalWaitingListSize = -1;
+        this.qrCode = qrCode;
+        this.poster = poster;
+        this.tags2 = tags2;
         this.entrant_ids_for_lottery = entrant_ids_for_lottery;
     }
 
@@ -121,8 +145,18 @@ public class Event {
         return this.poster;
     }
 
+//    public List<String> getTags() {
+//        return this.tags.getTagList();
+//    }
+
+
+    // made another getTags and setTags to make mapping easier in fireStore - ask david for details
     public List<String> getTags() {
-        return this.tags.getTagList();
+        return tags2;
+    }
+    // made another getTags and setTags to make mapping easier in fireStore - ask david for details
+    public void setTags(List<String> tags) {
+        this.tags2 = tags;
     }
 
 //    public EntrantList getEntrants() {
