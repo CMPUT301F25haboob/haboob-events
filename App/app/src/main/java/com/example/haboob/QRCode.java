@@ -4,6 +4,9 @@ public class QRCode {
     // TODO: Need to figure out what the fuck this does
     private String data;
 
+    public QRCode() {
+        // Empty Constructor
+    }
     public QRCode(String data) {
         this.data = data;
     }

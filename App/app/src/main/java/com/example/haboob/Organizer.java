@@ -6,12 +6,10 @@ public class Organizer extends User {
     private String organizerID;
 
     // Constructors for subclass
-    // Without phone number
+    // Empty for serialization
     public Organizer(String orgID, String firstName, String lastName, String email, String accountType) {
-        super(firstName, lastName, email, accountType);
+        super();
         this.events = new EventsList();
-        this.organizerID = orgID;
-        // SHOULD PULL FROM DATABASE TO SET EVENTSLIST
     }
 
     // With phone number
@@ -28,5 +26,14 @@ public class Organizer extends User {
 
     public String getOrganizerID() {
         return this.organizerID;
+    }
+
+    // Setter for serialization from Firestore
+    public void setOrganizerID(String orgID) {
+        this.organizerID = orgID;
+    }
+
+    public void setEventList(EventsList events) {
+        this.events = events;
     }
 }

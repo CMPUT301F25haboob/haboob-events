@@ -1,6 +1,7 @@
 package com.example.haboob;
 
 import java.sql.Time;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -31,7 +32,7 @@ public class Event {
     private Poster poster;
 
     // All of the lists that events have
-    private EventTagList tags;
+    private ArrayList<String> tags;
 //    private EntrantList entrants;
 //    private InviteList invitedUsers;
 //    private WaitingList waitingUsers;
@@ -40,21 +41,11 @@ public class Event {
 
 
     // Constructor for an event
-    public Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, QRCode qrCode, Poster poster, EventTagList tags) {
-        this.organizerID = organizer;
-        this.registrationStartDate = registrationStartDate;
-        this.registrationEndDate = registrationEndDate;
-        this.eventTitle = eventTitle;
-        this.eventDescription = eventDescription;
-        this.geoLocationRequired = geoLocationRequired;
-        this.lotterySampleSize = lotterySampleSize;
-        this.optionalWaitingListSize = -1;
-        this.qrCode = qrCode;
-        this.poster = poster;
-        this.tags = tags;
+    public Event() {
+        // Empty constructor for firestore
     }
 
-    public Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, int optionalWaitingListSize, QRCode qrCode, Poster poster, EventTagList tags) {
+    public Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, int optionalWaitingListSize, QRCode qrCode, Poster poster, ArrayList<String> tags) {
         this.organizerID = organizer;
         this.registrationStartDate = registrationStartDate;
         this.registrationEndDate = registrationEndDate;
@@ -99,6 +90,8 @@ public class Event {
         return this.lotterySampleSize;
     }
 
+    public int getOptionalWaitingListSize() { return this.optionalWaitingListSize; }
+
     public GeoLocationMap getGeoLocationMap() {
         return this.geoLocationMap;
     }
@@ -111,8 +104,8 @@ public class Event {
         return this.poster;
     }
 
-    public List<String> getTags() {
-        return this.tags.getTagList();
+    public ArrayList<String> getTags() {
+        return this.tags;
     }
 
 //    public EntrantList getEntrants() {
@@ -135,8 +128,56 @@ public class Event {
 //        return this.cancelledUsers;
 //    }
 
-    // SETTER METHODS BELOW: TODO: IMPLEMENT THESE
+    // SETTER METHODS BELOW:
+    public void setOrganizer(String organizer) {
+        this.organizerID = organizer;
+    }
+
     public void setEventID(String eventID) {
-    	this.eventID = eventID;
+        this.eventID = eventID;
+    }
+
+    public void setRegistrationStartDate(Date registrationStartDate) {
+        this.registrationStartDate = registrationStartDate;
+    }
+
+    public void setRegistrationEndDate(Date registrationEndDate) {
+        this.registrationEndDate = registrationEndDate;
+    }
+
+    public void setEventTitle(String eventTitle) {
+        this.eventTitle = eventTitle;
+    }
+
+    public void setEventDescription(String eventDescription) {
+        this.eventDescription = eventDescription;
+    }
+
+    public void setGeoLocationRequired(boolean geoLocationRequired) {
+        this.geoLocationRequired = geoLocationRequired;
+    }
+
+    public void setLotterySampleSize(int lotterySampleSize) {
+        this.lotterySampleSize = lotterySampleSize;
+    }
+
+    public void setOptionalWaitingListSize(int optionalWaitingListSize) {
+        this.optionalWaitingListSize = optionalWaitingListSize;
+    }
+
+    public void setGeoLocationMap(GeoLocationMap geoLocationMap) {
+        this.geoLocationMap = geoLocationMap;
+    }
+
+    public void setQRCode(QRCode qrCode) {
+        this.qrCode = qrCode;
+    }
+
+    public void setPoster(Poster poster) {
+        this.poster = poster;
+    }
+
+    public void setTags(ArrayList<String> tags) {
+        this.tags = tags;
     }
 }

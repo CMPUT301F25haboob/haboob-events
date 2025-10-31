@@ -10,6 +10,11 @@ public class Poster {
 //    public Poster(Picture imgSource) {
 //        this.imgSource = imgSource;
 //    }
+
+    public Poster() {
+        // Empty Constructor
+    }
+
     public Poster(String data) {
         this.data = data;
     }
