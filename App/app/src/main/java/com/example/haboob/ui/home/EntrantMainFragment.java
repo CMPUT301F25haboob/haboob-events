@@ -55,6 +55,10 @@ public class EntrantMainFragment extends Fragment {
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     String userID = "davids_id";
+    // prepare a list of sample imageURLs:
+    List<String> imageURLs = Arrays.asList("https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/396e9/MainBefore.jpg", "https://blog.en.uptodown.com/files/2017/08/clash-royale-consejos-novato-featured.jpg", "https://media.cnn.com/api/v1/images/stellar/prod/130214161738-01-michael-jordan.jpg?q=w_3072,h_1728,x_0,y_0,c_fill");
+    EventImageAdapter imageAdapter = new EventImageAdapter(imageURLs);
+    boolean createDummyEvent = false;
 
     // will hold the local Events list, query will add to this eventsList
     private final List<Event> eventsList2 = new ArrayList<>();
@@ -66,7 +70,6 @@ public class EntrantMainFragment extends Fragment {
     }
     // TODO: this fragment needs to query the database and show all events that the user is registered for,
     // and then once a user clicks one, use an intent to start a new fragment that shows the event details
-
 
     // queries the dataBase, adds events to local EventList Array, note that this takes a while to run!!
     private void loadEventsForUser(String userId) {
@@ -96,12 +99,12 @@ public class EntrantMainFragment extends Fragment {
                     List<String> imageURLs = new ArrayList<>();
                     addEventImagesLocally(eventsList2, imageURLs); // imageURLS <- list of imageURLs from query
 
-
-
                     for (String image : imageURLs) {
                         Log.d("TAG", "Event image string: " + image);
                     }
-
+                    // replace the images after query is done:
+                    imageAdapter.replaceItems(imageURLs);
+                    Log.d("TAG:", "ImageAdapter images Replaced");
                 })
                 .addOnFailureListener(err -> Log.e("TAG", "Failed loading events", err));
     }
@@ -112,6 +115,9 @@ public class EntrantMainFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         loadEventsForUser(userID);
+
+        if (createDummyEvent)
+            createDummyEvent();
 
         // DEBUG: Logging each ID in the database:
         db.collection("events")
@@ -138,14 +144,12 @@ public class EntrantMainFragment extends Fragment {
         // Prepare a list of example images from drawable
 //        List<Integer> images = Arrays.asList(R.drawable.hockey_ex, R.drawable.bob_ross, R.drawable.clash_royale, R.drawable.swimming_lessons);
 
-        // prepare a list of imageURLs:
-        List<String> imageURLs = Arrays.asList("https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/396e9/MainBefore.jpg", "https://blog.en.uptodown.com/files/2017/08/clash-royale-consejos-novato-featured.jpg", "https://media.cnn.com/api/v1/images/stellar/prod/130214161738-01-michael-jordan.jpg?q=w_3072,h_1728,x_0,y_0,c_fill");
 
         // Set up LayoutManager for horizontal scrolling, tells the RecyclerView how to position items, essential for actual rendering
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         recyclerView.setLayoutManager(layoutManager);
         // Attach the adapter, its the bridge between the data of the images to the actual UI
-        recyclerView.setAdapter(new EventImageAdapter(imageURLs));
+        recyclerView.setAdapter(imageAdapter);
 
 //        // ***** Second carousel - My Open Waitlists *****
 //        RecyclerView rvWaitlists = view.findViewById(R.id.entrant_rv_waitlists);
@@ -161,16 +165,17 @@ public class EntrantMainFragment extends Fragment {
     }
 
     public void createDummyEvent() {
-
         // *********** create a new dummy event: ********************************************************************
-//
+        MainActivity mainAct = (MainActivity) getActivity(); // find the instance of mainActivity thats currently running
+        EventsList eventsList = mainAct.getEventsList();
+
         // Build registration dates
         Date regStart = new GregorianCalendar(2025, Calendar.NOVEMBER, 1).getTime();
         Date regEnd   = new GregorianCalendar(2025, Calendar.NOVEMBER, 15).getTime();
 
         // Create supporting objects
-        QRCode qrCode = new QRCode("https://haboob.app/events/event001");
-        Poster poster = new Poster("bob_ross.webp");
+        QRCode qrCode = new QRCode("idk lol");
+        Poster poster = new Poster("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTdCydTqu_psrtdn9fA9bXqIDNT0LVrFR0ZJQ&s");
 
         // Create a list of tags for this event
         List<String> tagStrings = new ArrayList<>();
@@ -194,8 +199,8 @@ public class EntrantMainFragment extends Fragment {
                 "org12345",                                  // organizer
                 regStart,                                    // registrationStartDate
                 regEnd,                                      // registrationEndDate
-                "Bob Ross Art Class",                          // eventTitle
-                "Art class hosted by Bob Ross!",             // eventDescription
+                "hobby horsing",                          // eventTitle
+                "insane this is a sport",             // eventDescription
                 true,                                        // geoLocationRequired
                 100,                                         // lotterySampleSize
                 qrCode,                                      // QRCode object
@@ -206,8 +211,8 @@ public class EntrantMainFragment extends Fragment {
 
         // the actual creation of the event: commented out for now so we're not
         // overpopulating the database
-        if (eventsList2 != null){
-//            eventsList2.add(dummyEvent);
+        if (eventsList != null){
+            eventsList.addEvent(dummyEvent);
             Log.d("TAG", "eventsList is not null");
         }
         else{

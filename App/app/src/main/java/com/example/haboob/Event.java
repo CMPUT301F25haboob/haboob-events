@@ -36,7 +36,7 @@ public class Event {
     private EventTagList tags;
 
     // made another tagsList for easy mapping to fireStore - ask david about change
-    private List<String> tags2;
+    private ArrayList<String> tags2;
 
 //    private EntrantList entrants;
 //    private InviteList invitedUsers;
@@ -69,7 +69,7 @@ public class Event {
     public Event(){}
 
     // different constructor for tags2, which just is a list of strings instead of an EventTagList, works better in fireBase
-    public Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, QRCode qrCode, Poster poster, List<String> tags2, ArrayList<String> entrant_ids_for_lottery) {
+    public Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, QRCode qrCode, Poster poster, ArrayList<String> tags2, ArrayList<String> entrant_ids_for_lottery) {
         this.organizerID = organizer;
         this.registrationStartDate = registrationStartDate;
         this.registrationEndDate = registrationEndDate;
@@ -155,7 +155,7 @@ public class Event {
         return tags2;
     }
     // made another getTags and setTags to make mapping easier in fireStore - ask david for details
-    public void setTags(List<String> tags) {
+    public void setTags(ArrayList<String> tags) {
         this.tags2 = tags;
     }
 

@@ -13,6 +13,7 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import com.bumptech.glide.Glide;
@@ -24,11 +25,19 @@ import com.example.haboob.R;
 public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.ViewHolder> {
 
 //    private final List<Integer> images;
-    private List<String> imageUrls;
+//    private List<String> imageUrls;
+    private final List<String> imageUrls = new ArrayList<>(); // always mutable
 
-    // Constructor: pass a list of drawable resource IDs, and then stores those ids in a list
-    public EventImageAdapter(List<String> images) {
-        this.imageUrls = images;
+    public EventImageAdapter() { }
+
+    // copy the input when constructed:
+    public EventImageAdapter(List<String> initial) {
+        if (initial != null) imageUrls.addAll(initial);     // copy into mutable list
+    }
+    public void replaceItems(Collection<String> newItems) {
+        imageUrls.clear(); // we can only use clear() on a MUTABLE list, so imageURLs has to be muable
+        if (newItems != null) imageUrls.addAll(newItems);
+        notifyDataSetChanged();
     }
 
     // ViewHolder class holds each ImageView
