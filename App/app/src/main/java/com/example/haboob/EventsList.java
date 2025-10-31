@@ -49,8 +49,17 @@ public class EventsList {
         this.loadEventsList(listener);
     }
 
+    // Constructor used for testers so tests don't interact with firestore
+    public EventsList(boolean inMemoryOnly) {
+        eventsList = new ArrayList<>();
+        if (!inMemoryOnly) {
+            db = FirebaseFirestore.getInstance();
+            eventsListRef = db.collection("events");
+        }
+    }
+
     // Return a list of all events
-    public ArrayList<Event> getAllEventsList() {
+    public ArrayList<Event> getEventsList() {
         return eventsList;
     }
 
@@ -169,8 +178,25 @@ public class EventsList {
             return new ArrayList<>(eventsList);
         }
 
+        // Make input tags all lowercase
+        List<String> lowerTags = new ArrayList<>();
+        for (String tag : tags) {
+            if (tag != null) lowerTags.add(tag.toLowerCase());
+        }
+
+        // Iterate through all events in eventsList
         for (Event e: eventsList) {
-            if (e.getTags() != null && e.getTags().containsAll(tags)) {
+            List<String> eventTags = e.getTags();
+            if (eventTags == null) continue;
+
+            // Make event's tags lowercase
+            List<String> lowerEventTags = new ArrayList<>();
+            for (String tag: eventTags) {
+                if (tag != null) lowerEventTags.add(tag.toLowerCase());
+            }
+
+            // If event contains all the given tags
+            if (lowerEventTags.containsAll(lowerTags)) {
                 filteredEventList.add(e);
             }
         }
