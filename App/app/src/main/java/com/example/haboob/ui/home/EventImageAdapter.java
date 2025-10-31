@@ -35,7 +35,7 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
         if (initial != null) imageUrls.addAll(initial);     // copy into mutable list
     }
     public void replaceItems(Collection<String> newItems) {
-        imageUrls.clear(); // we can only use clear() on a MUTABLE list, so imageURLs has to be muable
+        imageUrls.clear(); // we can only use clear() on a MUTABLE list, so imageURLs has to be mutable
         if (newItems != null) imageUrls.addAll(newItems);
         notifyDataSetChanged();
     }
@@ -82,6 +82,7 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
                 .into(holder.imageView);
 
         // set an onClicklistener toast for the item at the position
+        // TODO: make an intent that opens the event viewer with event info
         holder.itemView.setOnClickListener(v -> {
             Toast.makeText(v.getContext(), "Clicked " + position, Toast.LENGTH_SHORT).show();
 

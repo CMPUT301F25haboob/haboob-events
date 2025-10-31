@@ -68,8 +68,6 @@ public class EntrantMainFragment extends Fragment {
     public EntrantMainFragment() {
         // Required empty public constructor
     }
-    // TODO: this fragment needs to query the database and show all events that the user is registered for,
-    // and then once a user clicks one, use an intent to start a new fragment that shows the event details
 
     // queries the dataBase, adds events to local EventList Array, note that this takes a while to run!!
     private void loadEventsForUser(String userId) {
@@ -115,7 +113,6 @@ public class EntrantMainFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         loadEventsForUser(userID);
-
         if (createDummyEvent)
             createDummyEvent();
 
@@ -143,7 +140,6 @@ public class EntrantMainFragment extends Fragment {
         RecyclerView recyclerView = view.findViewById(R.id.entrant_rv_upcoming);
         // Prepare a list of example images from drawable
 //        List<Integer> images = Arrays.asList(R.drawable.hockey_ex, R.drawable.bob_ross, R.drawable.clash_royale, R.drawable.swimming_lessons);
-
 
         // Set up LayoutManager for horizontal scrolling, tells the RecyclerView how to position items, essential for actual rendering
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
