@@ -37,6 +37,9 @@ public abstract class User {
         this.accountType = accountType;
     }
 
+    public User(String firstName, String lastName, String email, String accountType) {
+    }
+
     // Setter methods
     public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;

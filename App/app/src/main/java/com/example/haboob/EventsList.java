@@ -131,6 +131,21 @@ public class EventsList {
 
     // Delete event from db using its unique Firestore ID
     public void deleteEvent(Event e, OnEventsLoadedListener listener) {
+        // Check for empty list
+        if (eventsList == null || eventsList.isEmpty()) {
+            throw new IllegalStateException("Cannot delete from an empty events list");
+        }
+
+        // Check for null Firestore reference FOR TESTING
+        if (eventsListRef == null) {
+            eventsList.remove(e);
+            Log.d("EventsList", "Deleted event locally (no Firestore)");
+            if (listener != null) {
+                listener.onEventsLoaded();
+            }
+            return;
+        }
+
         if (e.getEventID() == null || e.getEventID().isEmpty()) {
             Log.w("EventsList", "Cannot delete event: missing ID");
             if (listener != null) {
@@ -172,52 +187,66 @@ public class EventsList {
 
     // Return list of all events that have the same tag(s) as the input given
     public ArrayList<Event> filterEvents(List<String> tags) {
+        if (tags == null || tags.isEmpty()) return new ArrayList<>(eventsList);
+
+        // Lowercase
+        ArrayList<String> lowerTags = new ArrayList<>(tags.size());
+        for (String t : tags) lowerTags.add(t.toLowerCase());
+
         ArrayList<Event> filteredEventList = new ArrayList<>();
+        for (Event e : eventsList) {
+            ArrayList<String> eventTagsLower = new ArrayList<>(e.getTags().size());
+            for (String t : e.getTags()) eventTagsLower.add(t.toLowerCase());
 
-        if (tags == null || tags.isEmpty()) {
-            return new ArrayList<>(eventsList);
+            if (eventTagsLower.containsAll(lowerTags)) filteredEventList.add(e);
         }
-
-        // Make input tags all lowercase
-        List<String> lowerTags = new ArrayList<>();
-        for (String tag : tags) {
-            if (tag != null) lowerTags.add(tag.toLowerCase());
-        }
-
-        // Iterate through all events in eventsList
-        for (Event e: eventsList) {
-            List<String> eventTags = e.getTags();
-            if (eventTags == null) continue;
-
-            // Make event's tags lowercase
-            List<String> lowerEventTags = new ArrayList<>();
-            for (String tag: eventTags) {
-                if (tag != null) lowerEventTags.add(tag.toLowerCase());
-            }
-
-            // If event contains all the given tags
-            if (lowerEventTags.containsAll(lowerTags)) {
-                filteredEventList.add(e);
-            }
-        }
-
         return filteredEventList;
     }
 
     // Returns a list of events had by a specific Organizer ID
-    public ArrayList<Event> getOrganizerEvents(Organizer o) {
+    public ArrayList<Event> getOrganizerEvents(String organizerID) {
         ArrayList<Event> organizerEventList = new ArrayList<>();
 
-        if (o == null || o.getOrganizerID() == null) {
+        if (organizerID == null || organizerID.isEmpty()) {
             return organizerEventList;
         }
 
-        for (Event e: eventsList) {
-            if (e.getOrganizer().equals(o.getOrganizerID())) {
+        for (Event e : eventsList) {
+            if (e != null && organizerID.equals(e.getOrganizer())) {
                 organizerEventList.add(e);
             }
         }
 
         return organizerEventList;
     }
+
+    // Return all events the given entrant is a part of
+    public ArrayList<Event> getEntrantEvents(String entrantID) {
+        ArrayList<Event> entrantEventList = new ArrayList<>();
+
+        for (Event e: eventsList) {
+            // If given entrants
+            if (e.getEntrants().contains(entrantID)) {
+                entrantEventList.add(e);
+            }
+        }
+
+        return entrantEventList;
+    }
+
+    // Return all events the given entrant is waitlisted for
+    public ArrayList<Event> getEntrantWaitlistedEvents(String entrantID) {
+        ArrayList<Event> waitlistedEventList = new ArrayList<>();
+
+        for (Event e: eventsList) {
+            // If given entrants
+            if (e.getWaitingEntrants().contains(entrantID)) {
+                waitlistedEventList.add(e);
+            }
+        }
+
+        return waitlistedEventList;
+    }
+
+
 }

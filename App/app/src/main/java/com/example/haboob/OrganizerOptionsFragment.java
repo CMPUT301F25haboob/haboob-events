@@ -197,7 +197,7 @@ public class OrganizerOptionsFragment extends Fragment {
 
         try {
             // Get the updated events list
-            organizerEvents = currentOrganizer.getEventList().getOrganizerEvents(currentOrganizer);
+            organizerEvents = currentOrganizer.getEventList().getOrganizerEvents(currentOrganizer.getOrganizerID());
             Log.d("OrganizerOptions", "Found " + organizerEvents.size() + " events for organizer");
 
             // Update event names

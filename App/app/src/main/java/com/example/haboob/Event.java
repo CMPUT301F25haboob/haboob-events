@@ -56,7 +56,11 @@ public class Event {
         this.optionalWaitingListSize = optionalWaitingListSize;
         this.qrCode = qrCode;
         this.poster = poster;
-        this.tags = tags;
+        this.tags = (tags == null) ? new ArrayList<>() : new ArrayList<>(tags);
+    }
+
+    // For EventsListTest
+    public Event(String organizerId, Date date, Date date1, String s, String s1, boolean b, int i, Object o, Object o1, List<String> tags) {
     }
 
     // GETTER METHODS BELOW
@@ -104,8 +108,8 @@ public class Event {
         return this.poster;
     }
 
-    public ArrayList<String> getTags() {
-        return this.tags;
+    public List<String> getTags() {
+        return new ArrayList<>(tags);
     }
 
 //    public EntrantList getEntrants() {
