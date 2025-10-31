@@ -129,10 +129,9 @@ public class OrganizerNewEventFragment extends Fragment {
             // Create new Event object (pass in dummy data for now)
             QRCode qrCode = new QRCode("test");
             Poster poster = new Poster("test");
-            List<String> tags = new ArrayList<>();
+            ArrayList<String> tags = new ArrayList<>();
             tags.add("test");
-            EventTagList eventTags = new EventTagList(tags);
-            Event newEvent = new Event(currentOrganizer.getOrganizerID(), signupStart, signupEnd, eventTitle, eventDetails, geoData, capacity, limit, qrCode, poster, eventTags);
+            Event newEvent = new Event(currentOrganizer.getOrganizerID(), signupStart, signupEnd, eventTitle, eventDetails, geoData, capacity, limit, qrCode, poster, tags);
 
             // Add Event to organizer's eventList
             currentOrganizer.getEventList().addEvent(newEvent);

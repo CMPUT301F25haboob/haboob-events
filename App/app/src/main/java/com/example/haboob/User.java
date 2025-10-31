@@ -21,14 +21,10 @@ public abstract class User {
     private String phone; // Optional - constructor should reflect this
     private String accountType; // TODO: may not need this later??
 
-    public User(String firstName, String lastName, String email, String accountType)
+
+    public User()
     {
-        // This constructor is for if the user does NOT provide a phone number
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.phone = ""; // Phone number is an empty string
-        this.accountType = accountType;
+        // Empty constructor for firebase
     }
 
     public User(String firstName, String lastName, String email, String phoneNumber, String accountType)
@@ -41,6 +37,29 @@ public abstract class User {
         this.accountType = accountType;
     }
 
+    // Setter methods
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
+    }
 
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public void setAccountType(String accountType) {
+        this.accountType = accountType;
+    }
 
 }

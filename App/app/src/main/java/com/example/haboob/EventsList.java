@@ -23,12 +23,30 @@ public class EventsList {
     private ArrayList<Event> eventsList;
     private FirebaseFirestore db;
     private CollectionReference eventsListRef;
+    private boolean isLoaded = false;
 
-    // Constructor
+    // Callback interface for async operations
+    public interface OnEventsLoadedListener {
+        void onEventsLoaded();
+        void onError(Exception e);
+    }
+
+    // Constructor - automatically loads events on creation
     public EventsList() {
         eventsList = new ArrayList<>();
         db = FirebaseFirestore.getInstance();
         eventsListRef = db.collection("events");
+
+        // Automatically load events when EventsList is created
+        this.loadEventsList();
+    }
+
+    // Optional: Constructor with callback for when you need to know when loading completes
+    public EventsList(OnEventsLoadedListener listener) {
+        eventsList = new ArrayList<>();
+        db = FirebaseFirestore.getInstance();
+        eventsListRef = db.collection("events");
+        this.loadEventsList(listener);
     }
 
     // Constructor used for testers so tests don't interact with firestore
@@ -45,60 +63,107 @@ public class EventsList {
         return eventsList;
     }
 
+    public boolean isLoaded() {
+        return isLoaded;
+    }
+
+    // Updated loadEventsList with callback
+    public void loadEventsList(OnEventsLoadedListener listener) {
+        eventsListRef.get()
+                .addOnSuccessListener(snapshots -> {
+                    eventsList.clear();
+                    for (QueryDocumentSnapshot doc : snapshots) {
+                        eventsList.add(doc.toObject(Event.class));
+                    }
+                    isLoaded = true;
+                    if (listener != null) {
+                        listener.onEventsLoaded();
+                    }
+                    Log.d("EventsList", "Successfully loaded " + eventsList.size() + " events");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("EventsList", "Failed to load events", e);
+                    if (listener != null) {
+                        listener.onError(e);
+                    }
+                });
+    }
+
+    // Overloaded version without callback for backward compatibility
     public void loadEventsList() {
-        eventsListRef.get().addOnSuccessListener(snapshots -> {
-            eventsList.clear();
-            for (QueryDocumentSnapshot doc : snapshots) {
-                eventsList.add(doc.toObject(Event.class));
-            }
-        });
+        loadEventsList(null);
     }
 
     // Add event to db and set events unique Firestore ID
-    public void addEvent(Event e) {
+    public void addEvent(Event e, OnEventsLoadedListener listener) {
         eventsListRef.add(e)
                 .addOnSuccessListener(docRef -> {
-                    // Query the db to get the ID, reset into db
                     String id = docRef.getId();
                     e.setEventID(id);
-                    
-                    db.collection("events").document(id).set(e);
 
-                    eventsList.add(e); // Add to local eventsList
-                    Log.d("TAG", "Added event with ID: " + id);
+                    db.collection("events").document(id).set(e)
+                            .addOnSuccessListener(aVoid -> {
+                                eventsList.add(e);
+                                Log.d("EventsList", "Added event with ID: " + id);
+                                if (listener != null) {
+                                    listener.onEventsLoaded();
+                                }
+                            })
+                            .addOnFailureListener(ex -> {
+                                Log.e("EventsList", "Failed to update event with ID", ex);
+                                if (listener != null) {
+                                    listener.onError(ex);
+                                }
+                            });
                 })
                 .addOnFailureListener(ex -> {
-                    Log.e("TAG", "Failed to add event", ex);
+                    Log.e("EventsList", "Failed to add event", ex);
+                    if (listener != null) {
+                        listener.onError(ex);
+                    }
                 });
+    }
 
+    // Backward compatible version
+    public void addEvent(Event e) {
+        addEvent(e, null);
     }
 
     // Delete event from db using its unique Firestore ID
-    public void deleteEvent(Event e) {
-        // Check for invalid state
-        if (eventsList.isEmpty()) {
-            throw new IllegalStateException("Cannot delete from an empty events list");
-        }
-        // Null or no event ID
-        if (e == null || e.getEventID() == null || e.getEventID().isEmpty()) {
-            Log.w("TAG", "Cannot delete event: missing or invalid ID");
+    public void deleteEvent(Event e, OnEventsLoadedListener listener) {
+        if (e.getEventID() == null || e.getEventID().isEmpty()) {
+            Log.w("EventsList", "Cannot delete event: missing ID");
+            if (listener != null) {
+                listener.onError(new IllegalArgumentException("Event ID is missing"));
+            }
             return;
         }
 
         eventsListRef.document(e.getEventID()).delete()
                 .addOnSuccessListener(aVoid -> {
-                    eventsList.remove(e); // Remove from to local eventsList
-                    Log.d("TAG", "Deleted event with ID: " + e.getEventID());
+                    eventsList.remove(e);
+                    Log.d("EventsList", "Deleted event with ID: " + e.getEventID());
+                    if (listener != null) {
+                        listener.onEventsLoaded();
+                    }
                 })
                 .addOnFailureListener(ex -> {
-                    Log.e("TAG", "Failed to delete event", ex);
+                    Log.e("EventsList", "Failed to delete event", ex);
+                    if (listener != null) {
+                        listener.onError(ex);
+                    }
                 });
+    }
+
+    // Backward compatible version
+    public void deleteEvent(Event e) {
+        deleteEvent(e, null);
     }
 
     // Find event by ID and return it
     public Event getEventByID(String eventID) {
         for (Event e: eventsList) {
-            if (eventID != null && eventID.equals(e.getEventID())) {
+            if (e.getEventID().equals(eventID)) {
                 return e;
             }
         }
@@ -109,8 +174,9 @@ public class EventsList {
     public ArrayList<Event> filterEvents(List<String> tags) {
         ArrayList<Event> filteredEventList = new ArrayList<>();
 
-        // If tags is null or empty list return all events
-        if (tags == null || tags.isEmpty()) return new ArrayList<>(eventsList);
+        if (tags == null || tags.isEmpty()) {
+            return new ArrayList<>(eventsList);
+        }
 
         // Make input tags all lowercase
         List<String> lowerTags = new ArrayList<>();
@@ -142,11 +208,11 @@ public class EventsList {
     public ArrayList<Event> getOrganizerEvents(Organizer o) {
         ArrayList<Event> organizerEventList = new ArrayList<>();
 
-        if (o == null || o.getOrganizerID() == null) return organizerEventList;
+        if (o == null || o.getOrganizerID() == null) {
+            return organizerEventList;
+        }
 
-        // Iterate through all events in eventsList
         for (Event e: eventsList) {
-            // If event e has the given organizer ID
             if (e.getOrganizer().equals(o.getOrganizerID())) {
                 organizerEventList.add(e);
             }
@@ -154,5 +220,4 @@ public class EventsList {
 
         return organizerEventList;
     }
-
- }
+}
