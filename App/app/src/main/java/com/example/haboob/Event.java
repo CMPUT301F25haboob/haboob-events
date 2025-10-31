@@ -63,8 +63,24 @@ public class Event {
         this.poster = poster;
         this.tags = tags;
     }
+    // different constructor for tags2, which just is a list of strings instead of an EventTagList, works better in fireBase
+    public Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, QRCode qrCode, Poster poster, ArrayList<String> tags, ArrayList<String> entrant_ids_for_lottery) {
+        this.organizerID = organizer;
+        this.registrationStartDate = registrationStartDate;
+        this.registrationEndDate = registrationEndDate;
+        this.eventTitle = eventTitle;
+        this.eventDescription = eventDescription;
+        this.geoLocationRequired = geoLocationRequired;
+        this.lotterySampleSize = lotterySampleSize;
+        this.optionalWaitingListSize = -1;
+        this.qrCode = qrCode;
+        this.poster = poster;
+        this.tags = tags;
+        this.entrant_ids_for_lottery = entrant_ids_for_lottery;
+    }
 
-    // GETTER METHODS BELOW
+
+        // GETTER METHODS BELOW
     public String getOrganizer() {
     	return this.organizerID;
     }

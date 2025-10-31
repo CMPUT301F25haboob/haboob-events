@@ -17,7 +17,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.haboob.Event;
-import com.example.haboob.EventTagList;
 import com.example.haboob.EventsList;
 import com.example.haboob.GeoLocationMap;
 import com.example.haboob.MainActivity;
@@ -178,12 +177,12 @@ public class EntrantMainFragment extends Fragment {
         tagStrings.add("festival");
         tagStrings.add("outdoor");
         tagStrings.add("family");
-        EventTagList tags = new EventTagList(tagStrings);
+//        EventTagList tags = new EventTagList(tagStrings);
 
-//        List<String> tagslist2 = new ArrayList<>();
-//        tagslist2.add("Bob");
-//        tagslist2.add("Ross");
-//        tagslist2.add("Art");
+        ArrayList<String> tagslist2 = new ArrayList<>();
+        tagslist2.add("Bob");
+        tagslist2.add("Ross");
+        tagslist2.add("Art");
 
         // create a list of dummy entrant Ids for this event:
         ArrayList<String> event_entrant_ids = new ArrayList<>();
@@ -201,9 +200,12 @@ public class EntrantMainFragment extends Fragment {
                 100,                                         // lotterySampleSize
                 qrCode,                                      // QRCode object
                 poster,                                      // Poster object
-                tags,                                         // EventTagList
+                tagslist2,                // tagsList<String>
                 event_entrant_ids                             // entrant event ids
         );
+
+//        Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, QRCode qrCode, Poster poster, ArrayList<String> tags, ArrayList<String> entrant_ids_for_lottery) {
+
 
         // the actual creation of the event: commented out for now so we're not
         // overpopulating the database

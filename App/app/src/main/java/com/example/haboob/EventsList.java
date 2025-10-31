@@ -113,6 +113,7 @@ public class EventsList {
                         listener.onError(ex);
                     }
                 });
+    }
 
     // Backward compatible version
     public void addEvent(Event e) {

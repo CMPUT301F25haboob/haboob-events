@@ -23,7 +23,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.haboob.Event;
-import com.example.haboob.EventTagList;
 import com.example.haboob.EventsList;
 import com.example.haboob.MainActivity;
 import com.example.haboob.Poster;

@@ -19,10 +19,6 @@ public class Poster {
         this.data = data;
     }
 
-    // no-arg constructor for FireBase
-    public Poster(){}
-
-
     public Picture draw() {
         return imgSource;
     }
