@@ -50,6 +50,6 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
-    // JUnit 5 for local unit tests
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+    // JUnit 4 for local unit tests
+    testImplementation("junit:junit:4.13.2")
 }
