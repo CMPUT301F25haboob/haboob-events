@@ -1,5 +1,8 @@
 package com.example.haboob;
 
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,6 +15,9 @@ public class Event {
      * We might need to store a QRCode object
      * We need to store the Poster and Map including geolocation data
      */
+    // Database reference
+    private FirebaseFirestore db;
+    private DocumentReference docRef;
 
     // The organizer of the event
     private String organizerID;
@@ -31,21 +37,26 @@ public class Event {
     private QRCode qrCode;
     private Poster poster;
 
-    // All of the lists that events have
+    // All of the lists that events have (all other than tags will have the entries as strings of user IDs)
     private ArrayList<String> tags;
-//    private EntrantList entrants;
-//    private InviteList invitedUsers;
-//    private WaitingList waitingUsers;
-//    private EnrolledList enrolledUsers;
-//    private CancelledList cancelledUsers;
+    private ArrayList<String> entrants;
+    private ArrayList<String> invitedEntrants;
+    private ArrayList<String> waitingEntrants;
+    private ArrayList<String> enrolledEntrants;
+    private ArrayList<String> cancelledEntrants;
 
 
     // Constructor for an event
     public Event() {
-        // Empty constructor for firestore
+        // Constructor for firebase only
+        this.db = FirebaseFirestore.getInstance();
+        this.docRef = db.collection("Events").document();
+        this.loadEventLists();
     }
 
     public Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, int optionalWaitingListSize, QRCode qrCode, Poster poster, ArrayList<String> tags) {
+        this.db = FirebaseFirestore.getInstance();
+        this.docRef = db.collection("Events").document();
         this.organizerID = organizer;
         this.registrationStartDate = registrationStartDate;
         this.registrationEndDate = registrationEndDate;
@@ -57,6 +68,32 @@ public class Event {
         this.qrCode = qrCode;
         this.poster = poster;
         this.tags = tags;
+        this.loadEventLists();
+    }
+
+    public void addUserToEntrants(String userID) {
+        this.entrants.add(userID);
+    }
+
+    public void addUserToInvitedUsers(String userID) {
+        this.invitedEntrants.add(userID);
+    }
+
+    public void addUserToWaitingUsers(String userID) {
+        this.waitingEntrants.add(userID);
+    }
+
+    public void addUserToEnrolledUsers(String userID) {
+        this.enrolledEntrants.add(userID);
+    }
+
+    public void addUserToCancelledUsers(String userID) {
+        this.cancelledEntrants.add(userID);
+    }
+
+    public void loadEventLists() {
+        // Load in all the lists from database upon creation
+
     }
 
     // GETTER METHODS BELOW
@@ -108,25 +145,25 @@ public class Event {
         return this.tags;
     }
 
-//    public EntrantList getEntrants() {
-//        return this.entrants;
-//    }
+    public ArrayList<String> getEntrants() {
+        return this.entrants;
+    }
 
-//    public InviteList getInvitedUsers() {
-//        return this.invitedUsers;
-//    }
+    public ArrayList<String> getInvitedUsers() {
+        return this.invitedEntrants;
+    }
 
-//    public WaitingList getWaitingUsers() {
-//        return this.waitingUsers;
-//    }
+    public ArrayList<String> getWaitingUsers() {
+        return this.waitingEntrants;
+    }
 
-//    public EnrolledList getEnrolledUsers() {
-//        return this.enrolledUsers;
-//    }
+    public ArrayList<String> getEnrolledUsers() {
+        return this.enrolledEntrants;
+    }
 
-//    public CancelledList getCancelledUsers() {
-//        return this.cancelledUsers;
-//    }
+    public ArrayList<String> getCancelledUsers() {
+        return this.cancelledEntrants;
+    }
 
     // SETTER METHODS BELOW:
     public void setOrganizer(String organizer) {
@@ -180,4 +217,26 @@ public class Event {
     public void setTags(ArrayList<String> tags) {
         this.tags = tags;
     }
+
+    public void setEntrantsList(ArrayList<String> entrants) {
+        this.entrants = entrants;
+    }
+
+    public void setInvitedUsersList(ArrayList<String> invitedUsers) {
+        this.invitedEntrants = invitedUsers;
+    }
+
+    public void setWaitingUsersList(ArrayList<String> waitingUsers) {
+        this.waitingEntrants = waitingUsers;
+    }
+
+    public void setEnrolledUsersList(ArrayList<String> enrolledUsers) {
+        this.enrolledEntrants = enrolledUsers;
+    }
+
+    public void setCancelledUsersList(ArrayList<String> cancelledUsers) {
+        this.cancelledEntrants = cancelledUsers;
+    }
+
+
 }

@@ -85,6 +85,12 @@ public class OrganizerNewEventFragment extends Fragment {
             // Then try to parse integer
             try {
                 capacity = Integer.parseInt(eventCapacity);
+                limit = Integer.parseInt(signupLimit);
+                if (limit < capacity || capacity < 0) {
+                    Toast.makeText(requireContext(), "Limit must be no less than capacity and capacity must be greater than 0", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
             } catch (NumberFormatException e) {
                 Toast.makeText(requireContext(), "Please enter in an integer number for capacity and/or limit", Toast.LENGTH_SHORT).show();
                 return;
@@ -113,16 +119,6 @@ public class OrganizerNewEventFragment extends Fragment {
             if (startDate[0].before(today.getTime()) || endDate[0].before(today.getTime())) {
                 Toast.makeText(requireContext(), "Dates cannot be before today", Toast.LENGTH_SHORT).show();
                 return;
-            }
-
-            // If they input any limit then try to parse the int
-            if (!signupLimit.isEmpty()) {
-                try {
-                    limit = Integer.parseInt(signupLimit);
-                } catch (NumberFormatException e) {
-                    Toast.makeText(requireContext(), "Please enter in an integer number for capacity and/or limit", Toast.LENGTH_SHORT).show();
-                    return;
-                }
             }
 
 
