@@ -17,7 +17,6 @@ public class Event {
      */
     // Database reference
     private FirebaseFirestore db;
-    private DocumentReference docRef;
 
     // The organizer of the event
     private String organizerID;
@@ -50,13 +49,11 @@ public class Event {
     public Event() {
         // Constructor for firebase only
         this.db = FirebaseFirestore.getInstance();
-        this.docRef = db.collection("Events").document();
         this.loadEventLists();
     }
 
     public Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, int optionalWaitingListSize, QRCode qrCode, Poster poster, ArrayList<String> tags) {
         this.db = FirebaseFirestore.getInstance();
-        this.docRef = db.collection("Events").document();
         this.organizerID = organizer;
         this.registrationStartDate = registrationStartDate;
         this.registrationEndDate = registrationEndDate;
@@ -71,25 +68,31 @@ public class Event {
         this.loadEventLists();
     }
 
-    public void addUserToEntrants(String userID) {
+    public void addEntrantToEntrants(String userID) {
         this.entrants.add(userID);
+        db.collection("events").document(eventID).update("entrants", userID);
     }
 
-    public void addUserToInvitedUsers(String userID) {
+    public void addEntrantToInvitedEntrants(String userID) {
         this.invitedEntrants.add(userID);
+        db.collection("events").document(eventID).update("invitedEntrants", userID);
     }
 
-    public void addUserToWaitingUsers(String userID) {
+    public void addEntrantToWaitingEntrants(String userID) {
         this.waitingEntrants.add(userID);
+        db.collection("events").document(eventID).update("waitingEntrants", userID);
     }
 
-    public void addUserToEnrolledUsers(String userID) {
+    public void addEntrantToEnrolledEntrants(String userID) {
         this.enrolledEntrants.add(userID);
+        db.collection("events").document(eventID).update("enrolledEntrants", userID);
     }
 
-    public void addUserToCancelledUsers(String userID) {
+    public void addEntrantToCancelledEntrants(String userID) {
         this.cancelledEntrants.add(userID);
+        db.collection("events").document(eventID).update("cancelledEntrants", userID);
     }
+
 
     public void loadEventLists() {
         // Load in all the lists from database upon creation
@@ -149,19 +152,19 @@ public class Event {
         return this.entrants;
     }
 
-    public ArrayList<String> getInvitedUsers() {
+    public ArrayList<String> getInvitedEntrants() {
         return this.invitedEntrants;
     }
 
-    public ArrayList<String> getWaitingUsers() {
+    public ArrayList<String> getWaitingEntrants() {
         return this.waitingEntrants;
     }
 
-    public ArrayList<String> getEnrolledUsers() {
+    public ArrayList<String> getEnrolledEntrants() {
         return this.enrolledEntrants;
     }
 
-    public ArrayList<String> getCancelledUsers() {
+    public ArrayList<String> getCancelledEntrants() {
         return this.cancelledEntrants;
     }
 
@@ -222,20 +225,20 @@ public class Event {
         this.entrants = entrants;
     }
 
-    public void setInvitedUsersList(ArrayList<String> invitedUsers) {
-        this.invitedEntrants = invitedUsers;
+    public void setInvitedEntrantsList(ArrayList<String> invitedEntrants) {
+        this.invitedEntrants = invitedEntrants;
     }
 
-    public void setWaitingUsersList(ArrayList<String> waitingUsers) {
-        this.waitingEntrants = waitingUsers;
+    public void setWaitingEntrants(ArrayList<String> waitingEntrants) {
+        this.waitingEntrants = waitingEntrants;
     }
 
-    public void setEnrolledUsersList(ArrayList<String> enrolledUsers) {
-        this.enrolledEntrants = enrolledUsers;
+    public void setEnrolledEntrantsList(ArrayList<String> enrolledEntrants) {
+        this.enrolledEntrants = enrolledEntrants;
     }
 
-    public void setCancelledUsersList(ArrayList<String> cancelledUsers) {
-        this.cancelledEntrants = cancelledUsers;
+    public void setCancelledEntrantsList(ArrayList<String> cancelledEntrants) {
+        this.cancelledEntrants = cancelledEntrants;;
     }
 
 
