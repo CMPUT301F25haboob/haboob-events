@@ -42,6 +42,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+
+import kotlinx.serialization.descriptors.PrimitiveKind;
 
 
 // Author: David T, created on Sunday, oct 26 2025
@@ -50,12 +54,12 @@ import java.util.List;
 public class EntrantMainFragment extends Fragment {
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
+    String userID = "davids_id";
 
     // will hold the local Events list, query will add to this eventsList
     private final List<Event> eventsList2 = new ArrayList<>();
 
     List<Integer> images = Arrays.asList(R.drawable.hockey_ex, R.drawable.bob_ross, R.drawable.clash_royale, R.drawable.swimming_lessons);
-
 
     public EntrantMainFragment() {
         // Required empty public constructor
@@ -64,20 +68,15 @@ public class EntrantMainFragment extends Fragment {
     // and then once a user clicks one, use an intent to start a new fragment that shows the event details
 
 
-    // queries the dataBase, adds events to local EventList Array
+    // queries the dataBase, adds events to local EventList Array, note that this takes a while to run!!
     private void loadEventsForUser(String userId) {
-        // Example paths — pick ONE that matches your schema:
-        // CollectionReference col = db.collection("events");                                      // top-level
-        // CollectionReference col = db.collection("cities").document("BJ").collection("events"); // subcollection
         CollectionReference col = db.collection("events");
-
-        // If you want only the events the user is registered for (array of ids):
-        // Remove this where clause if you want ALL events.
         Query q = col;
 
         // Clear current list to avoid duplicates on refresh
         eventsList2.clear();
 
+        // DataBase query -> grabs all event items, adds them to local EnventsList, where they are now local Events()
         q.get()
                 .addOnSuccessListener(snap -> {
                     for (DocumentSnapshot doc : snap.getDocuments()) {
@@ -86,34 +85,33 @@ public class EntrantMainFragment extends Fragment {
                             // Keep Firestore id if useful
                             try { e.setEventID(doc.getId()); } catch (Exception ignored) {}
                             eventsList2.add(e);
+                            Log.d("TAG", "event added");
                         } else {
                             Log.w("TAG", "Skipping unmappable doc: " + doc.getId() + " -> " + doc.getData());
                         }
                     }
-//                    if (adapter != null) adapter.notifyDataSetChanged();
-                    Log.d("TAG", "Loaded " + eventsList2.size() + " events");
+
+                    // runs AFTER the database is done querying:
+                    Log.d("TAG", "EventsList size: " + eventsList2.size());
+                    List<String> imageURLs = new ArrayList<>();
+                    addEventImagesLocally(eventsList2, imageURLs); // imageURLS <- list of imageURLs from query
+
+
+
+                    for (String image : imageURLs) {
+                        Log.d("TAG", "Event image string: " + image);
+                    }
+
                 })
                 .addOnFailureListener(err -> Log.e("TAG", "Failed loading events", err));
     }
 
-
-    // “When this Fragment becomes visible, create its UI from entrant_main.xml and attach it to the container.”
+    // When this Fragment becomes visible, create its UI from entrant_main.xml and attach it to the container
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        // access mainActivity to access the EventsList
-        MainActivity mainActivity = (MainActivity) getActivity();
-        EventsList eventsList = mainActivity.getEventsList();
-
-        String userID = "davids_id";
-//        loadEventsForUser(userID);
-
-//        for (Event event : eventsList) {
-//                Log.w("TAG", "Event ID: " + event.getEventID() + ", Event Title: " + event.getEventTitle());
-//        }
-
-//        Log.d("TAG", "ThE FRAGMENT LAUNCHED");
+        loadEventsForUser(userID);
 
         // DEBUG: Logging each ID in the database:
         db.collection("events")
@@ -131,10 +129,40 @@ public class EntrantMainFragment extends Fragment {
                     }
                 });
 
+       // Turns the XML file entrant_main.xml into actual View objects in memory.
+        View view = inflater.inflate(R.layout.entrant_main, container, false);
 
+        // ***** First carousel - My upcoming events *****
+        // Find RecyclerView by ID
+        RecyclerView recyclerView = view.findViewById(R.id.entrant_rv_upcoming);
+        // Prepare a list of example images from drawable
+//        List<Integer> images = Arrays.asList(R.drawable.hockey_ex, R.drawable.bob_ross, R.drawable.clash_royale, R.drawable.swimming_lessons);
 
+        // prepare a list of imageURLs:
+        List<String> imageURLs = Arrays.asList("https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/396e9/MainBefore.jpg", "https://blog.en.uptodown.com/files/2017/08/clash-royale-consejos-novato-featured.jpg", "https://media.cnn.com/api/v1/images/stellar/prod/130214161738-01-michael-jordan.jpg?q=w_3072,h_1728,x_0,y_0,c_fill");
 
-//        // *********** create a new dummy event: ********************************************************************
+        // Set up LayoutManager for horizontal scrolling, tells the RecyclerView how to position items, essential for actual rendering
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        recyclerView.setLayoutManager(layoutManager);
+        // Attach the adapter, its the bridge between the data of the images to the actual UI
+        recyclerView.setAdapter(new EventImageAdapter(imageURLs));
+
+//        // ***** Second carousel - My Open Waitlists *****
+//        RecyclerView rvWaitlists = view.findViewById(R.id.entrant_rv_waitlists);
+//        rvWaitlists.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+//        rvWaitlists.setNestedScrollingEnabled(false);
+//        List<Integer> waitlistImages = Arrays.asList(
+//                R.drawable.clash_royale, R.drawable.clash_royale, R.drawable.clash_royale
+//        );
+//        rvWaitlists.setAdapter(new EventImageAdapter(waitlistImages));
+
+        // Return the inflated view
+        return view;
+    }
+
+    public void createDummyEvent() {
+
+        // *********** create a new dummy event: ********************************************************************
 //
         // Build registration dates
         Date regStart = new GregorianCalendar(2025, Calendar.NOVEMBER, 1).getTime();
@@ -178,39 +206,22 @@ public class EntrantMainFragment extends Fragment {
 
         // the actual creation of the event: commented out for now so we're not
         // overpopulating the database
-        if (eventsList != null){
-            eventsList.addEvent(dummyEvent);
+        if (eventsList2 != null){
+//            eventsList2.add(dummyEvent);
             Log.d("TAG", "eventsList is not null");
         }
         else{
             Log.d("TAG", "eventsList is null");
         }
 
-                // Turns the XML file entrant_main.xml into actual View objects in memory.
-        View view = inflater.inflate(R.layout.entrant_main, container, false);
+    }
 
-        // ***** First carousel - My upcoming events *****
-        // Find RecyclerView by ID
-        RecyclerView recyclerView = view.findViewById(R.id.entrant_rv_upcoming);
-        // Prepare a list of example images from drawable
-        List<Integer> images = Arrays.asList(R.drawable.hockey_ex, R.drawable.bob_ross, R.drawable.clash_royale, R.drawable.swimming_lessons);
-        // Set up LayoutManager for horizontal scrolling, tells the RecyclerView how to position items, essential for actual rendering
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
-        recyclerView.setLayoutManager(layoutManager);
-        // Attach the adapter, its the bridge between the data of the images to the actual UI
-        recyclerView.setAdapter(new EventImageAdapter(images));
-
-        // ***** Second carousel - My Open Waitlists *****
-        RecyclerView rvWaitlists = view.findViewById(R.id.entrant_rv_waitlists);
-        rvWaitlists.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        rvWaitlists.setNestedScrollingEnabled(false);
-        List<Integer> waitlistImages = Arrays.asList(
-                R.drawable.clash_royale, R.drawable.clash_royale, R.drawable.clash_royale
-        );
-        rvWaitlists.setAdapter(new EventImageAdapter(waitlistImages));
-
-        // Return the inflated view
-        return view;
+    // adds the strings of the events to the local list of images (images2)
+    public void addEventImagesLocally(List<Event> eventsList2, List<String> imageURLs) {
+        for (Event event : eventsList2) {
+            imageURLs.add(event.getPoster().getData());
+            Log.d("TAG", "Poster data string: " + event.getPoster().getData());
+        }
     }
 
 }

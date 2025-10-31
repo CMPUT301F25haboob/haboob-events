@@ -12,8 +12,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import com.bumptech.glide.Glide;
 import com.example.haboob.R;
 
 // Author: David T
@@ -21,11 +23,12 @@ import com.example.haboob.R;
 
 public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.ViewHolder> {
 
-    private final List<Integer> images;
+//    private final List<Integer> images;
+    private List<String> imageUrls;
 
     // Constructor: pass a list of drawable resource IDs, and then stores those ids in a list
-    public EventImageAdapter(List<Integer> images) {
-        this.images = images;
+    public EventImageAdapter(List<String> images) {
+        this.imageUrls = images;
     }
 
     // ViewHolder class holds each ImageView
@@ -36,10 +39,19 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
             super(itemView);
             imageView = itemView.findViewById(R.id.image_event);
         }
+
     }
+
+    public void replaceItems(List<String> newItems) {
+        imageUrls.clear();
+        imageUrls.addAll(newItems);
+        notifyDataSetChanged();
+    }
+
 
     @NonNull
     @Override
+    // Create a new ViewHolder for each item in the RecyclerView
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // Inflate the item layout (item_event_image.xml)
         View view = LayoutInflater.from(parent.getContext())
@@ -48,9 +60,17 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
     }
 
     @Override
+    // recyclerView binding data to each viewHolder
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         // Bind image resource to ImageView
-        holder.imageView.setImageResource(images.get(position));
+//        holder.imageView.setImageResource(images.get(position));
+
+        String url = imageUrls.get(position);
+        Glide.with(holder.imageView.getContext())
+                .load(url)
+                .placeholder(R.drawable.shrug)
+                .error(R.drawable.shrug )
+                .into(holder.imageView);
 
         // set an onClicklistener toast for the item at the position
         holder.itemView.setOnClickListener(v -> {
@@ -64,7 +84,7 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
 
     @Override
     public int getItemCount() {
-        return images.size();
+        return imageUrls.size();
     }
 
 }
