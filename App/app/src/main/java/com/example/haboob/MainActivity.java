@@ -3,7 +3,7 @@ package com.example.haboob;
 import android.os.Bundle;
 
 import com.example.haboob.ui.home.EntrantMainFragment;
-import com.example.haboob.ui.home.myCallback;
+//import com.example.haboob.ui.home.myCallback;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,7 +21,6 @@ public class MainActivity extends AppCompatActivity {
 
     // create an EventsList that we can pass to all our fragments:
     private EventsList eventsList;
-
 
     // create a method that returns our EventsList:
     public EventsList getEventsList() {

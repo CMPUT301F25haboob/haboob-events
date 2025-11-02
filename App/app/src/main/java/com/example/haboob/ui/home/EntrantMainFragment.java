@@ -6,6 +6,8 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -51,7 +53,6 @@ import kotlinx.serialization.descriptors.PrimitiveKind;
 // this fragment represents the main fragment that the entrant will see when entering the app
 
 public class EntrantMainFragment extends Fragment {
-
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     String userID = "davids_id";
     // prepare a list of sample imageURLs:
@@ -94,13 +95,17 @@ public class EntrantMainFragment extends Fragment {
                     // runs AFTER the database is done querying:
                     Log.d("TAG", "EventsList size: " + eventsList2.size());
                     List<String> imageURLs = new ArrayList<>();
+                    List<String> eventIDs = new ArrayList<>();
                     addEventImagesLocally(eventsList2, imageURLs); // imageURLS <- list of imageURLs from query
+                    addEventIDsLocally(eventsList2, eventIDs); // eventIDs <- list of eventIDs from query
 
-                    for (String image : imageURLs) {
-                        Log.d("TAG", "Event image string: " + image);
-                    }
-                    // replace the images after query is done:
+//                    for (String image : imageURLs) {
+//                        Log.d("TAG", "Event image string: " + image);
+//                    }
+                    // replace the placeholder images after query is done:
                     imageAdapter.replaceItems(imageURLs);
+                    // input the IDs of the same images into the imageAdapter
+                    imageAdapter.inputIDs(eventIDs);
                     Log.d("TAG:", "ImageAdapter images Replaced");
                 })
                 .addOnFailureListener(err -> Log.e("TAG", "Failed loading events", err));
@@ -116,20 +121,20 @@ public class EntrantMainFragment extends Fragment {
             createDummyEvent();
 
         // DEBUG: Logging each ID in the database:
-        db.collection("events")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d("TAG", document.getId() + " => " + document.getData());
-                            }
-                        } else {
-                            Log.d("TAG", "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
+//        db.collection("events")
+//                .get()
+//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                        if (task.isSuccessful()) {
+//                            for (QueryDocumentSnapshot document : task.getResult()) {
+////                                Log.d("TAG", document.getId() + " => " + document.getData());
+//                            }
+//                        } else {
+//                            Log.d("TAG", "Error getting documents: ", task.getException());
+//                        }
+//                    }
+//                });
 
        // Turns the XML file entrant_main.xml into actual View objects in memory.
         View view = inflater.inflate(R.layout.entrant_main, container, false);
@@ -143,8 +148,26 @@ public class EntrantMainFragment extends Fragment {
         // Set up LayoutManager for horizontal scrolling, tells the RecyclerView how to position items, essential for actual rendering
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         recyclerView.setLayoutManager(layoutManager);
-        // Attach the adapter, its the bridge between the data of the images to the actual UI
         recyclerView.setAdapter(imageAdapter);
+
+        // Clicks on the viewBindHolder calls back to this onItemCLick, and this finds the event
+        // associated with the click and starts a new fragment with the event data
+        imageAdapter.setOnItemClick(eventId -> {
+            EventsList eventsList = new EventsList();
+            // find the event clicked(the new events list should be updated with the database data):
+            for (Event event : eventsList2) {
+                if (event.getEventID().equals(eventId)) {
+                    Log.d("TAG", "Event clicked: " + event.getEventTitle());
+                    // Navigate to the EventViewerFragment");
+                }
+            }
+        });
+
+
+
+        // Attach the adapter, its the bridge between the data of the images to the actual UI
+//        recyclerView.setAdapter(imageAdapter);
+
 
 //        // ***** Second carousel - My Open Waitlists *****
 //        RecyclerView rvWaitlists = view.findViewById(R.id.entrant_rv_waitlists);
@@ -170,7 +193,7 @@ public class EntrantMainFragment extends Fragment {
 
         // Create supporting objects
         QRCode qrCode = new QRCode("idk lol");
-        Poster poster = new Poster("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTdCydTqu_psrtdn9fA9bXqIDNT0LVrFR0ZJQ&s");
+        Poster poster = new Poster("https://cdn-useast1.kapwing.com/static/templates/spider-man-triple-meme-template-full-a9a8b78a.webp");
 
         // Create a list of tags for this event
         List<String> tagStrings = new ArrayList<>();
@@ -180,9 +203,9 @@ public class EntrantMainFragment extends Fragment {
 //        EventTagList tags = new EventTagList(tagStrings);
 
         ArrayList<String> tagslist2 = new ArrayList<>();
-        tagslist2.add("Bob");
-        tagslist2.add("Ross");
-        tagslist2.add("Art");
+        tagslist2.add("Peter");
+        tagslist2.add("Family");
+        tagslist2.add("Guy");
 
         // create a list of dummy entrant Ids for this event:
         ArrayList<String> event_entrant_ids = new ArrayList<>();
@@ -194,8 +217,8 @@ public class EntrantMainFragment extends Fragment {
                 "org12345",                                  // organizer
                 regStart,                                    // registrationStartDate
                 regEnd,                                      // registrationEndDate
-                "hobby horsing",                          // eventTitle
-                "insane this is a sport",             // eventDescription
+                "Spoodermen",                          // eventTitle
+                "Petah griff",             // eventDescription
                 true,                                        // geoLocationRequired
                 100,                                         // lotterySampleSize
                 qrCode,                                      // QRCode object
@@ -227,4 +250,11 @@ public class EntrantMainFragment extends Fragment {
         }
     }
 
+    // adds the strings of the events to the local list of images (images2)
+    public void addEventIDsLocally(List<Event> eventsList2, List<String> eventIDs) {
+        for (Event event : eventsList2) {
+            eventIDs.add(event.getEventID());
+            Log.d("TAG", "Event: " + event.getEventTitle() + " ID string: " + event.getEventID());
+        }
+    }
 }

@@ -19,8 +19,8 @@
     <fragment android:id="@+id/entrant_event_view"
         android:name="com.example.haboob.ui.home.EventViewerFragment"
         android:label="Entrant Event Viewer"
-        tools:layout="@layout/entrant_event_view"
-        />
+        tools:layout="@layout/entrant_event_view">
+    </fragment>
     <fragment
         android:id="@+id/navigation_dashboard"
         android:name="com.example.haboob.ui.dashboard.DashboardFragment"

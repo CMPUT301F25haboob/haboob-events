@@ -1,6 +1,7 @@
 package com.example.haboob.ui.home;
 
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,12 +25,19 @@ import com.example.haboob.R;
 
 public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.ViewHolder> {
 
-//    private final List<Integer> images;
-//    private List<String> imageUrls;
+
+    public interface OnItemClick { void onClick(String eventId); }     // setting up the callback
     private final List<String> imageUrls = new ArrayList<>(); // always mutable
+    private List<String> eventIDs = new ArrayList<>();
+    private OnItemClick onItemClick;
+    public EventImageAdapter(OnItemClick onItemClick) {     // Primary actor: caller supplies the click callback
+        this.onItemClick = onItemClick;
+    }
+    public EventImageAdapter() { }// empty constructor}
 
-    public EventImageAdapter() { }
-
+    public void setOnItemClick(OnItemClick onItemClick) {
+        this.onItemClick = onItemClick;
+    }
     // copy the input when constructed:
     public EventImageAdapter(List<String> initial) {
         if (initial != null) imageUrls.addAll(initial);     // copy into mutable list
@@ -51,12 +59,20 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
 
     }
 
+    // when querying the data is done, replace the items in the recyclerView with the new items from the database
     public void replaceItems(List<String> newItems) {
         imageUrls.clear();
         imageUrls.addAll(newItems);
         notifyDataSetChanged();
     }
 
+    // when querying the data is done, replace the items in the recyclerView with the new items from the database
+    public void inputIDs(List<String> eventIDs) {
+        this.eventIDs.clear();
+        this.eventIDs.addAll(eventIDs);
+        notifyDataSetChanged();
+        Log.d("TAG", "InputIDs ran, size: " + eventIDs.size() + " userIDs: " + eventIDs.toString());
+    }
 
     @NonNull
     @Override
@@ -81,13 +97,22 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
                 .error(R.drawable.shrug )
                 .into(holder.imageView);
 
-        // set an onClicklistener toast for the item at the position
-        // TODO: make an intent that opens the event viewer with event info
+        // set an onClicklistener callback:
         holder.itemView.setOnClickListener(v -> {
             Toast.makeText(v.getContext(), "Clicked " + position, Toast.LENGTH_SHORT).show();
 
             // navigate using an action
             Navigation.findNavController(v).navigate(R.id.action_mainEntrantView___to___EventView);
+
+            // call back to the fragment, with the position data passed:
+            int pos = holder.getBindingAdapterPosition();
+            if (pos != RecyclerView.NO_POSITION && pos < eventIDs.size()) {
+                String eventId = eventIDs.get(pos);
+
+                if (onItemClick != null) {              // 'onItemClick' is the  instance field
+                    onItemClick.onClick(eventIDs.get(pos));   // invoke the actual callback
+                }
+            }
         });
 
     }
