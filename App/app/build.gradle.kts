@@ -54,4 +54,6 @@ dependencies {
     // dependencies for using URLS to display images
     implementation("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+    // JUnit 4 for local unit tests
+    testImplementation("junit:junit:4.13.2")
 }
