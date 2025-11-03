@@ -1,6 +1,10 @@
 package com.example.haboob;
 
+import android.util.Log;
+
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.sql.Time;
@@ -49,6 +53,7 @@ public class Event {
     public Event() {
         // Constructor for firebase only
         this.db = FirebaseFirestore.getInstance();
+        this.initLists();
         this.loadEventLists();
     }
 
@@ -65,38 +70,74 @@ public class Event {
         this.qrCode = qrCode;
         this.poster = poster;
         this.tags = tags;
-        this.loadEventLists();
+        this.initLists();
+    }
+
+    public void initLists() {
+        // Initialize all the lists to use/populate later
+        this.tags = new ArrayList<String>();
+        this.entrants = new ArrayList<String>();
+        this.invitedEntrants = new ArrayList<String>();
+        this.waitingEntrants = new ArrayList<String>();
+        this.enrolledEntrants = new ArrayList<String>();
+        this.cancelledEntrants = new ArrayList<String>();
     }
 
     public void addEntrantToEntrants(String userID) {
         this.entrants.add(userID);
-        db.collection("events").document(eventID).update("entrants", userID);
+        db.collection("events").document(eventID).update("entrants", FieldValue.arrayUnion(userID));
     }
 
     public void addEntrantToInvitedEntrants(String userID) {
         this.invitedEntrants.add(userID);
-        db.collection("events").document(eventID).update("invitedEntrants", userID);
+        db.collection("events").document(eventID).update("invitedEntrants", FieldValue.arrayUnion(userID));
     }
 
     public void addEntrantToWaitingEntrants(String userID) {
         this.waitingEntrants.add(userID);
-        db.collection("events").document(eventID).update("waitingEntrants", userID);
+        db.collection("events").document(eventID).update("waitingEntrants", FieldValue.arrayUnion(userID));
     }
 
     public void addEntrantToEnrolledEntrants(String userID) {
         this.enrolledEntrants.add(userID);
-        db.collection("events").document(eventID).update("enrolledEntrants", userID);
+        db.collection("events").document(eventID).update("enrolledEntrants", FieldValue.arrayUnion(userID));
     }
 
     public void addEntrantToCancelledEntrants(String userID) {
         this.cancelledEntrants.add(userID);
-        db.collection("events").document(eventID).update("cancelledEntrants", userID);
+        db.collection("events").document(eventID).update("cancelledEntrants", FieldValue.arrayUnion(userID));
     }
 
 
     public void loadEventLists() {
-        // Load in all the lists from database upon creation
+        // Load in all the lists from database upon creation;
+        DocumentReference docRef = db.collection("events").document(eventID);
+        docRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                Event event = documentSnapshot.toObject(Event.class);
+                this.tags = event.getTags();
+                this.entrants = event.getEntrants();
+                this.invitedEntrants = event.getInvitedEntrants();
+                this.waitingEntrants = event.getWaitingEntrants();
+                this.enrolledEntrants = event.getEnrolledEntrants();
+                this.cancelledEntrants = event.getCancelledEntrants();
 
+            } else {
+                Log.d("Firestore", "No such document!");
+            }
+        }).addOnFailureListener(e -> {
+            Log.w("Firestore", "Error fetching event", e);
+        });
+
+    }
+
+    public void logEventLists() {
+        // TESTING FUNCTION
+        Log.d("Event", "Entrants: " + this.entrants);
+        Log.d("Event", "Invited Entrants: " + this.invitedEntrants);
+        Log.d("Event", "Waiting Entrants: " + this.waitingEntrants);
+        Log.d("Event", "Enrolled Entrants: " + this.enrolledEntrants);
+        Log.d("Event", "Cancelled Entrants: " + this.cancelledEntrants);
     }
 
     // GETTER METHODS BELOW
@@ -240,6 +281,4 @@ public class Event {
     public void setCancelledEntrantsList(ArrayList<String> cancelledEntrants) {
         this.cancelledEntrants = cancelledEntrants;;
     }
-
-
 }
