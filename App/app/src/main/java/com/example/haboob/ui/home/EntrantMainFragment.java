@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -158,7 +159,15 @@ public class EntrantMainFragment extends Fragment {
             for (Event event : eventsList2) {
                 if (event.getEventID().equals(eventId)) {
                     Log.d("TAG", "Event clicked: " + event.getEventTitle());
-                    // Navigate to the EventViewerFragment");
+
+                    // Create a Bundle to pass data to the EventViewerFragment
+                    Bundle args = new Bundle();
+                    args.putString(EventViewerFragment.ARG_EVENT_ID, eventId);
+
+                    // navigate to the EventViewerFragment using the NavController
+                    NavHostFragment.findNavController(this)
+                            .navigate(R.id.entrant_event_view, args);
+
                 }
             }
         });
@@ -166,17 +175,17 @@ public class EntrantMainFragment extends Fragment {
 
 
         // Attach the adapter, its the bridge between the data of the images to the actual UI
-//        recyclerView.setAdapter(imageAdapter);
+        recyclerView.setAdapter(imageAdapter);
 
 
-//        // ***** Second carousel - My Open Waitlists *****
-//        RecyclerView rvWaitlists = view.findViewById(R.id.entrant_rv_waitlists);
-//        rvWaitlists.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-//        rvWaitlists.setNestedScrollingEnabled(false);
-//        List<Integer> waitlistImages = Arrays.asList(
-//                R.drawable.clash_royale, R.drawable.clash_royale, R.drawable.clash_royale
-//        );
-//        rvWaitlists.setAdapter(new EventImageAdapter(waitlistImages));
+        // ***** Second carousel - My Open Waitlists *****
+        RecyclerView rvWaitlists = view.findViewById(R.id.entrant_rv_waitlists);
+        rvWaitlists.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        rvWaitlists.setNestedScrollingEnabled(false);
+        List<Integer> waitlistImages = Arrays.asList(
+                R.drawable.clash_royale, R.drawable.clash_royale, R.drawable.clash_royale
+        );
+        rvWaitlists.setAdapter(new EventImageAdapter(imageURLs));
 
         // Return the inflated view
         return view;

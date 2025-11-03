@@ -87,6 +87,10 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
     @Override
     // recyclerView binding data to each viewHolder
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+
+        // TODO: OPTIONAL: the fact that it has to load the images each time is a bit inefficient, maybe its a good idea
+        // TODO: to somehow save the photos on first load and then use those?
+
         // Bind image resource to ImageView
 //        holder.imageView.setImageResource(images.get(position));
 
