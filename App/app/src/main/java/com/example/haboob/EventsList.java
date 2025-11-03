@@ -212,7 +212,9 @@ public class EventsList {
             return organizerEventList;
         }
 
+        // Iterate through all events in eventsList
         for (Event e: eventsList) {
+            // If event e has the given organizer ID
             if (e.getOrganizer().equals(o.getOrganizerID())) {
                 organizerEventList.add(e);
             }
