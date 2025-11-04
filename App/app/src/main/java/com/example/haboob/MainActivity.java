@@ -1,6 +1,7 @@
 package com.example.haboob;
 
 import android.os.Bundle;
+import android.provider.Settings;
 
 import com.example.haboob.ui.home.EntrantMainFragment;
 //import com.example.haboob.ui.home.myCallback;
@@ -13,6 +14,7 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.example.haboob.databinding.ActivityMainBinding;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MainActivity extends AppCompatActivity {
 

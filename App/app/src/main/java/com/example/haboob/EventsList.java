@@ -40,7 +40,6 @@ public class EventsList {
         // Automatically load events when EventsList is created
         this.loadEventsList();
     }
-
     // Optional: Constructor with callback for when you need to know when loading completes
     public EventsList(OnEventsLoadedListener listener) {
         eventsList = new ArrayList<>();

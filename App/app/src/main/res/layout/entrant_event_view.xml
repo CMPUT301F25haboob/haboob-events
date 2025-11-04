@@ -18,7 +18,8 @@
         app:menu="@menu/menu_event_detail"
         app:title="Bob Ross Painting Class"
         app:titleCentered="false"
-        app:titleTextColor="@android:color/black" />
+        app:titleTextColor="@android:color/black"
+        android:layout_marginTop="24dp"/>
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scrollArea"
@@ -50,20 +51,43 @@
                 android:contentDescription="@string/title_home"
                 android:src="@drawable/bob_ross" />
 
+            <!-- Registration Start -->
+
+            <!-- Registration End -->
 
             <!-- Date + Time -->
+
             <TextView
-                android:id="@+id/labelDateTime"
+                android:id="@+id/registrationStart"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Date + Time:"
-                android:textStyle="bold"
+                android:layout_marginTop="28dp"
+                android:text="Registration Start:"
                 android:textSize="14sp"
-                app:layout_constraintTop_toBottomOf="@id/heroImage"
-                app:layout_constraintStart_toStartOf="parent"
+                android:textStyle="bold"
                 app:layout_constraintEnd_toStartOf="@id/valueDateTime"
-                app:layout_goneMarginEnd="8dp"/>
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/heroImage"
+                app:layout_goneMarginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/valueregistrationStart"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Oct 29, 3:30—3:30PM"
+                android:textSize="14sp"
+                app:layout_constraintBaseline_toBaselineOf="@id/registrationStart"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <TextView
+                android:id="@+id/valueregistrationEnd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Oct 29, 3:30—3:30PM"
+                android:textSize="14sp"
+                app:layout_constraintBaseline_toBaselineOf="@id/registrationEnd"
+                app:layout_constraintEnd_toEndOf="parent" />
 
             <TextView
                 android:id="@+id/valueDateTime"
@@ -71,43 +95,10 @@
                 android:layout_height="wrap_content"
                 android:text="Oct 29, 3:30—3:30PM"
                 android:textSize="14sp"
-                app:layout_constraintBaseline_toBaselineOf="@id/labelDateTime"
-                app:layout_constraintEnd_toEndOf="parent"/>
-
-            <!-- Fees -->
-            <TextView
-                android:id="@+id/labelFees"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="Fees:"
-                android:textStyle="bold"
-                android:textSize="14sp"
-                app:layout_constraintTop_toBottomOf="@id/labelDateTime"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/valueFees"/>
-
-            <TextView
-                android:id="@+id/valueFees"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="$0.00"
-                android:textSize="14sp"
-                app:layout_constraintBaseline_toBaselineOf="@id/labelFees"
-                app:layout_constraintEnd_toEndOf="parent"/>
+                app:layout_constraintBaseline_toBaselineOf="@id/eventDate"
+                app:layout_constraintEnd_toEndOf="parent" />
 
             <!-- Lottery Draw Date -->
-            <TextView
-                android:id="@+id/labelDrawDate"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="Lottery Draw Date:"
-                android:textStyle="bold"
-                android:textSize="14sp"
-                app:layout_constraintTop_toBottomOf="@id/labelFees"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/valueDrawDate"/>
 
             <TextView
                 android:id="@+id/valueDrawDate"
@@ -119,17 +110,8 @@
                 app:layout_constraintEnd_toEndOf="parent"/>
 
             <!-- Amount in Lottery -->
-            <TextView
-                android:id="@+id/labelAmount"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="Amount in Lottery:"
-                android:textStyle="bold"
-                android:textSize="14sp"
-                app:layout_constraintTop_toBottomOf="@id/labelDrawDate"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/valueAmount"/>
+
+            <!-- Bottom spacer so buttons never hide behind the nav bar -->
 
             <TextView
                 android:id="@+id/valueAmount"
@@ -141,20 +123,35 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 tools:ignore="SmallSp" />
 
+            <TextView
+                android:id="@+id/registrationEnd"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="52dp"
+                android:text="Registration End:"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toStartOf="@id/valueDateTime"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/heroImage"
+                app:layout_goneMarginEnd="8dp" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnAccept"
                 style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="12dp"
                 android:text="Accept Invitation"
                 android:textAllCaps="false"
                 android:textStyle="bold"
-                app:cornerRadius="16dp"
-                app:layout_constraintTop_toBottomOf="@id/labelAmount"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:backgroundTint="@color/white"
+                app:cornerRadius="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/labelAmount"
                 tools:backgroundTint="#35C759" />
 
             <com.google.android.material.button.MaterialButton
@@ -164,23 +161,65 @@
                 android:layout_marginTop="12dp"
                 android:text="Leave Waitlist"
                 android:textAllCaps="false"
+                android:textColor="@android:color/white"
                 android:textStyle="bold"
-                app:cornerRadius="16dp"
-                app:layout_constraintTop_toBottomOf="@id/btnAccept"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:backgroundTint="@android:color/black"
+                app:cornerRadius="16dp"
                 app:iconTint="@android:color/white"
-                android:textColor="@android:color/white"/>
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnAccept" />
 
-            <!-- Bottom spacer so buttons never hide behind the nav bar -->
+            <TextView
+                android:id="@+id/labelAmount"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Amount in Lottery:"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toStartOf="@id/valueAmount"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/labelDrawDate" />
+
+            <TextView
+                android:id="@+id/eventDate"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="80dp"
+                android:text="Event Date:"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toStartOf="@id/valueDateTime"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/heroImage"
+                app:layout_goneMarginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/labelDrawDate"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Lottery Draw Date:"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toStartOf="@id/valueDrawDate"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/eventDate" />
+
             <Space
                 android:layout_width="0dp"
                 android:layout_height="24dp"
-                app:layout_constraintTop_toBottomOf="@id/btnLeaveWaitlist"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"/>
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnLeaveWaitlist"
+                app:layout_constraintVertical_bias="0.899" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 

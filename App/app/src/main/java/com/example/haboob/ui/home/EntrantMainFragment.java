@@ -5,6 +5,8 @@ import android.location.Location;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
@@ -12,6 +14,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -57,59 +60,76 @@ public class EntrantMainFragment extends Fragment {
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     String userID = "davids_id";
     // prepare a list of sample imageURLs:
-    List<String> imageURLs = Arrays.asList("https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/396e9/MainBefore.jpg", "https://blog.en.uptodown.com/files/2017/08/clash-royale-consejos-novato-featured.jpg", "https://media.cnn.com/api/v1/images/stellar/prod/130214161738-01-michael-jordan.jpg?q=w_3072,h_1728,x_0,y_0,c_fill");
+//    List<String> imageURLs = Arrays.asList("https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/396e9/MainBefore.jpg", "https://blog.en.uptodown.com/files/2017/08/clash-royale-consejos-novato-featured.jpg", "https://media.cnn.com/api/v1/images/stellar/prod/130214161738-01-michael-jordan.jpg?q=w_3072,h_1728,x_0,y_0,c_fill");
+    List<String> imageURLs = new ArrayList<>();
     EventImageAdapter imageAdapter = new EventImageAdapter(imageURLs);
     boolean createDummyEvent = false;
 
     // will hold the local Events list, query will add to this eventsList
     private final List<Event> eventsList2 = new ArrayList<>();
-
-    List<Integer> images = Arrays.asList(R.drawable.hockey_ex, R.drawable.bob_ross, R.drawable.clash_royale, R.drawable.swimming_lessons);
+    private EventsList eventsList3;
 
     public EntrantMainFragment() {
         // Required empty public constructor
     }
 
-    // queries the dataBase, adds events to local EventList Array, note that this takes a while to run!!
+    // queries the dataBase, relies on a callback to adds events to local EventList Array, updates the imageAdapter with the new images from the database
     private void loadEventsForUser(String userId) {
+
         CollectionReference col = db.collection("events");
-        Query q = col;
+
+        Log.d("TAG", "this shit ran");
 
         // Clear current list to avoid duplicates on refresh
         eventsList2.clear();
 
-        // DataBase query -> grabs all event items, adds them to local EnventsList, where they are now local Events()
-        q.get()
-                .addOnSuccessListener(snap -> {
-                    for (DocumentSnapshot doc : snap.getDocuments()) {
-                        Event e = doc.toObject(Event.class);
-                        if (e != null) {
-                            // Keep Firestore id if useful
-                            try { e.setEventID(doc.getId()); } catch (Exception ignored) {}
-                            eventsList2.add(e);
-                            Log.d("TAG", "event added");
-                        } else {
-                            Log.w("TAG", "Skipping unmappable doc: " + doc.getId() + " -> " + doc.getData());
-                        }
-                    }
-
-                    // runs AFTER the database is done querying:
-                    Log.d("TAG", "EventsList size: " + eventsList2.size());
-                    List<String> imageURLs = new ArrayList<>();
-                    List<String> eventIDs = new ArrayList<>();
-                    addEventImagesLocally(eventsList2, imageURLs); // imageURLS <- list of imageURLs from query
-                    addEventIDsLocally(eventsList2, eventIDs); // eventIDs <- list of eventIDs from query
-
-//                    for (String image : imageURLs) {
-//                        Log.d("TAG", "Event image string: " + image);
+//        // DataBase query -> grabs all event items, adds them to local EventsList, where they are now local Events()
+//        col.get()
+//                .addOnSuccessListener(snap -> {
+//                    for (DocumentSnapshot doc : snap.getDocuments()) {
+//                        Event e = doc.toObject(Event.class);
+//                        if (e != null) {
+//                            // Keep Firestore id if useful
+//                            try { e.setEventID(doc.getId()); } catch (Exception ignored) {}
+//                            eventsList2.add(e);
+//                            Log.d("TAG", "event added");
+//                        } else {
+//                            Log.w("TAG", "Skipping unmappable doc: " + doc.getId() + " -> " + doc.getData());
+//                        }
 //                    }
-                    // replace the placeholder images after query is done:
-                    imageAdapter.replaceItems(imageURLs);
-                    // input the IDs of the same images into the imageAdapter
-                    imageAdapter.inputIDs(eventIDs);
-                    Log.d("TAG:", "ImageAdapter images Replaced");
-                })
-                .addOnFailureListener(err -> Log.e("TAG", "Failed loading events", err));
+//
+//                    // runs AFTER the database is done querying:
+//                    Log.d("TAG", "EventsList size: " + eventsList2.size());
+//                    List<String> imageURLs = new ArrayList<>();
+//                    List<String> eventIDs = new ArrayList<>();
+//                    addEventImagesLocally(eventsList2, imageURLs); // imageURLS <- list of imageURLs from query
+//                    addEventIDsLocally(eventsList2, eventIDs); // eventIDs <- list of eventIDs from query
+//
+////                    for (String image : imageURLs) {
+////                        Log.d("TAG", "Event image string: " + image);
+////                    }
+//                    // replace the placeholder images after query is done:
+//                    imageAdapter.replaceItems(imageURLs);
+//                    // input the IDs of the same images into the imageAdapter
+//                    imageAdapter.inputIDs(eventIDs);
+//                    Log.d("TAG:", "ImageAdapter images Replaced");
+//                })
+//                .addOnFailureListener(err -> Log.e("TAG", "Failed loading events", err));
+
+          eventsList3 = new EventsList(new EventsList.OnEventsLoadedListener() {
+            @Override
+            public void onEventsLoaded() { // the callback function calls this when events are loaded
+                // get fresh events:
+                List<Event> eventsList4 = eventsList3.getEventsList();
+
+                Log.d("TAG", "EVENTSLIST 4 SIZE: " + eventsList4.size());
+
+            }
+            @Override
+            public void onError(Exception err) {
+                Log.e("TAG", "Failed loading events", err);
+            }
+        });
     }
 
     // When this Fragment becomes visible, create its UI from entrant_main.xml and attach it to the container
@@ -137,6 +157,10 @@ public class EntrantMainFragment extends Fragment {
 //                    }
 //                });
 
+        for (Event event : eventsList2) {
+                                Log.d("TAG", event.getEventTitle() + "desc: " + event.getEventDescription());
+                            }
+
        // Turns the XML file entrant_main.xml into actual View objects in memory.
         View view = inflater.inflate(R.layout.entrant_main, container, false);
 
@@ -154,7 +178,8 @@ public class EntrantMainFragment extends Fragment {
         // Clicks on the viewBindHolder calls back to this onItemCLick, and this finds the event
         // associated with the click and starts a new fragment with the event data
         imageAdapter.setOnItemClick(eventId -> {
-            EventsList eventsList = new EventsList();
+
+//            EventsList eventsList = new EventsList(dummyString);
             // find the event clicked(the new events list should be updated with the database data):
             for (Event event : eventsList2) {
                 if (event.getEventID().equals(eventId)) {
@@ -172,22 +197,20 @@ public class EntrantMainFragment extends Fragment {
             }
         });
 
-
-
-        // Attach the adapter, its the bridge between the data of the images to the actual UI
-        recyclerView.setAdapter(imageAdapter);
-
-
-        // ***** Second carousel - My Open Waitlists *****
-        RecyclerView rvWaitlists = view.findViewById(R.id.entrant_rv_waitlists);
-        rvWaitlists.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        rvWaitlists.setNestedScrollingEnabled(false);
-        List<Integer> waitlistImages = Arrays.asList(
-                R.drawable.clash_royale, R.drawable.clash_royale, R.drawable.clash_royale
-        );
-        rvWaitlists.setAdapter(new EventImageAdapter(imageURLs));
-
-        // Return the inflated view
+//        // Attach the adapter, its the bridge between the data of the images to the actual UI
+//        recyclerView.setAdapter(imageAdapter);
+//
+//
+//        // ***** Second carousel - My Open Waitlists *****
+//        RecyclerView rvWaitlists = view.findViewById(R.id.entrant_rv_waitlists);
+//        rvWaitlists.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+//        rvWaitlists.setNestedScrollingEnabled(false);
+//        List<Integer> waitlistImages = Arrays.asList(
+//                R.drawable.clash_royale, R.drawable.clash_royale, R.drawable.clash_royale
+//        );
+//        rvWaitlists.setAdapter(new EventImageAdapter(imageURLs));
+//
+//        // Return the inflated view
         return view;
     }
 
@@ -202,7 +225,7 @@ public class EntrantMainFragment extends Fragment {
 
         // Create supporting objects
         QRCode qrCode = new QRCode("idk lol");
-        Poster poster = new Poster("https://cdn-useast1.kapwing.com/static/templates/spider-man-triple-meme-template-full-a9a8b78a.webp");
+        Poster poster = new Poster("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThSgs3iZWz87NhtdDjRBti_5KqKl6yf1jj8Q&s");
 
         // Create a list of tags for this event
         List<String> tagStrings = new ArrayList<>();
@@ -212,14 +235,15 @@ public class EntrantMainFragment extends Fragment {
 //        EventTagList tags = new EventTagList(tagStrings);
 
         ArrayList<String> tagslist2 = new ArrayList<>();
-        tagslist2.add("Peter");
-        tagslist2.add("Family");
+        tagslist2.add("Spongebob");
+        tagslist2.add("lol");
         tagslist2.add("Guy");
 
         // create a list of dummy entrant Ids for this event:
         ArrayList<String> event_entrant_ids = new ArrayList<>();
 
-        event_entrant_ids.add("david's_id");
+//        event_entrant_ids.add("david's_id");
+
 
         // Finally, create your dummy Event using your constructor
         Event dummyEvent = new Event(
@@ -253,6 +277,7 @@ public class EntrantMainFragment extends Fragment {
 
     // adds the strings of the events to the local list of images (images2)
     public void addEventImagesLocally(List<Event> eventsList2, List<String> imageURLs) {
+        imageURLs.clear(); // clear placeholder images
         for (Event event : eventsList2) {
             imageURLs.add(event.getPoster().getData());
             Log.d("TAG", "Poster data string: " + event.getPoster().getData());

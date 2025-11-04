@@ -85,6 +85,13 @@ public class EventViewerFragment extends Fragment {
                 .error(R.drawable.shrug )
                 .into(event_image);
 
+        // TODO: set registration start + end date, actual event date, and lottery draw date:
+
+        // set date:
+        dateView = view.findViewById(R.id.valueDateTime);
+//        String dateString = even
+
+
         // handle navigation back to mainEntrantView on back button click
         toolbar.setOnMenuItemClickListener(item -> {
             int id = item.getItemId();
