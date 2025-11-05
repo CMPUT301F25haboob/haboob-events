@@ -61,7 +61,8 @@ import kotlinx.serialization.descriptors.PrimitiveKind;
 
 public class EntrantMainFragment extends Fragment {
     FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private String deviceId = "9662d2bd2595742d";
+//    private String deviceId = "9662d2bd2595742d";
+    private String deviceId;
     String userID = "davids_id";
     // prepare a list of sample imageURLs:
 //    List<String> imageURLs = Arrays.asList("https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/396e9/MainBefore.jpg", "https://blog.en.uptodown.com/files/2017/08/clash-royale-consejos-novato-featured.jpg", "https://media.cnn.com/api/v1/images/stellar/prod/130214161738-01-michael-jordan.jpg?q=w_3072,h_1728,x_0,y_0,c_fill");
@@ -86,17 +87,17 @@ public class EntrantMainFragment extends Fragment {
     }
 
     // queries for the DeviceID ****************** commented out rn because I want to test using my own IDs
-//    @SuppressLint("HardwareIds")
-//    @Override
-//    public void onAttach(@NonNull Context ctx) {
-//
-//        super.onAttach(ctx);
-//        deviceId = Settings.Secure.getString(
-//                ctx.getContentResolver(),
-//                Settings.Secure.ANDROID_ID
-//        );
-//        if (deviceId == null) deviceId = "unknown";
-//    }
+    @SuppressLint("HardwareIds")
+    @Override
+    public void onAttach(@NonNull Context ctx) {
+
+        super.onAttach(ctx);
+        deviceId = Settings.Secure.getString(
+                ctx.getContentResolver(),
+                Settings.Secure.ANDROID_ID
+        );
+        if (deviceId == null) deviceId = "unknown";
+    }
 
     // queries the dataBase, relies on a callback to adds events to local EventList Array, updates the imageAdapter with the new images from the database
     private void loadEventsForUser(String userId) {
