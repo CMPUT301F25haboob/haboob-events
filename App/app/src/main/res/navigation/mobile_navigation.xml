@@ -9,9 +9,18 @@
     <fragment android:id="@+id/navigation_home"
         android:name="com.example.haboob.ui.home.EntrantMainFragment"
         android:label="Main Entrant"
-        tools:layout="@layout/entrant_main"
-        />
+        tools:layout="@layout/entrant_main">
+        <action
+            android:id="@+id/action_mainEntrantView___to___EventView"
+            app:destination="@id/entrant_event_view" />
+    </fragment>
 
+    <!-- Entrant Event Viewer Fragment -->
+    <fragment android:id="@+id/entrant_event_view"
+        android:name="com.example.haboob.ui.home.EventViewerFragment"
+        android:label="Entrant Event Viewer"
+        tools:layout="@layout/entrant_event_view">
+    </fragment>
     <fragment
         android:id="@+id/navigation_dashboard"
         android:name="com.example.haboob.ui.dashboard.DashboardFragment"
@@ -23,4 +32,5 @@
         android:name="com.example.haboob.ui.notifications.NotificationsFragment"
         android:label="@string/title_notifications"
         tools:layout="@layout/fragment_notifications" />
+
 </navigation>
