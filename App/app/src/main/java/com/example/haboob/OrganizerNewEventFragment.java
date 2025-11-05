@@ -41,6 +41,7 @@ public class OrganizerNewEventFragment extends Fragment {
         EditText etDescription = view.findViewById(R.id.event_details);
         EditText etCapacity = view.findViewById(R.id.num_selected);
         EditText etSignupLimit = view.findViewById(R.id.num_allowed_signup);
+        EditText etTags = view.findViewById(R.id.tags);
         CalendarView signupStartView = view.findViewById(R.id.start_date);
         CalendarView signupEndView = view.findViewById(R.id.end_date);
         Switch geoSwitch = view.findViewById(R.id.geo_data_required);
@@ -68,10 +69,15 @@ public class OrganizerNewEventFragment extends Fragment {
             // Get user-inputted data
             String eventTitle = etTitle.getText().toString();
             String eventDetails = etDescription.getText().toString();
+            String eventTags = etTags.getText().toString();
+
+            // Seperate and create new tags list here
+            ArrayList<String> tags = createTagsList(eventTags);
+
             String eventCapacity = etCapacity.getText().toString();
             int capacity = 0;
             String signupLimit = etSignupLimit.getText().toString();
-            int limit = -1;
+            int limit;
             Date signupStart = startDate[0];
             Date signupEnd = endDate[0];
             boolean geoData = geoSwitch.isChecked();
@@ -85,6 +91,25 @@ public class OrganizerNewEventFragment extends Fragment {
             // Then try to parse integer
             try {
                 capacity = Integer.parseInt(eventCapacity);
+                if (signupLimit.isEmpty()) {
+                    limit = -1;
+                } else {
+
+                    // Try to parse limit for number
+                    try {
+                        limit = Integer.parseInt(signupLimit);
+                    } catch (NumberFormatException e) {
+                        Toast.makeText(requireContext(), "Please enter in an integer number > capacity for limit or leave blank otherwise", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                }
+
+
+                if (capacity < 0 || ((limit != -1) && (limit < capacity))) {
+                    Toast.makeText(requireContext(), "Limit must be no less than capacity and capacity must be greater than 0", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
             } catch (NumberFormatException e) {
                 Toast.makeText(requireContext(), "Please enter in an integer number for capacity and/or limit", Toast.LENGTH_SHORT).show();
                 return;
@@ -115,29 +140,42 @@ public class OrganizerNewEventFragment extends Fragment {
                 return;
             }
 
-            // If they input any limit then try to parse the int
-            if (!signupLimit.isEmpty()) {
-                try {
-                    limit = Integer.parseInt(signupLimit);
-                } catch (NumberFormatException e) {
-                    Toast.makeText(requireContext(), "Please enter in an integer number for capacity and/or limit", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-            }
-
 
             // Create new Event object (pass in dummy data for now)
             QRCode qrCode = new QRCode("test");
             Poster poster = new Poster("test");
-            ArrayList<String> tags = new ArrayList<>();
-            tags.add("test");
             Event newEvent = new Event(currentOrganizer.getOrganizerID(), signupStart, signupEnd, eventTitle, eventDetails, geoData, capacity, limit, qrCode, poster, tags);
 
             // Add Event to organizer's eventList
             currentOrganizer.getEventList().addEvent(newEvent);
+
+
             getParentFragmentManager().popBackStack();
         });
 
         return view;
+    }
+
+    // Separates the different tags by commas and returns an ArrayList<String> type
+    public ArrayList<String> createTagsList(String tagString) {
+
+        // Ensure input isn't null or empty space
+        if (tagString == null || tagString.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        String[] tags = tagString.split(",");
+        ArrayList<String> tagList = new ArrayList<>();
+
+        for (String tag : tags) {
+            String cleanTag = tag.trim().toLowerCase();
+
+            // Ensure that we don't have tags of just space ", , "
+            if (!cleanTag.isEmpty()) {
+                tagList.add(cleanTag);
+            }
+        }
+
+        return tagList;
     }
 }

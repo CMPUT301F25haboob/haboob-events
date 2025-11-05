@@ -19,17 +19,20 @@ import java.util.List;
  * filterEvents(ArrayList<String> tags) return a list of filtered events based of a list of tags
  * getOrganizerEvents(Organizer o) // Returns a list of events had by a specific Organizer ID
  */
-public class EventsList {
+public class EventsList  {
     private ArrayList<Event> eventsList;
     private FirebaseFirestore db;
     private CollectionReference eventsListRef;
     private boolean isLoaded = false;
+
+
 
     // Callback interface for async operations
     public interface OnEventsLoadedListener {
         void onEventsLoaded();
         void onError(Exception e);
     }
+
 
     // Constructor - automatically loads events on creation
     public EventsList() {
@@ -41,7 +44,6 @@ public class EventsList {
         this.loadEventsList();
     }
 
-    // Optional: Constructor with callback for when you need to know when loading completes
     public EventsList(OnEventsLoadedListener listener) {
         eventsList = new ArrayList<>();
         db = FirebaseFirestore.getInstance();
@@ -67,7 +69,6 @@ public class EventsList {
         return isLoaded;
     }
 
-    // Updated loadEventsList with callback
     public void loadEventsList(OnEventsLoadedListener listener) {
         eventsListRef.get()
                 .addOnSuccessListener(snapshots -> {
@@ -89,13 +90,12 @@ public class EventsList {
                 });
     }
 
-    // Overloaded version without callback for backward compatibility
     public void loadEventsList() {
         loadEventsList(null);
     }
 
     // Add event to db and set events unique Firestore ID
-    public void addEvent(Event e, OnEventsLoadedListener listener) {
+    public String addEvent(Event e, OnEventsLoadedListener listener) {
         eventsListRef.add(e)
                 .addOnSuccessListener(docRef -> {
                     String id = docRef.getId();
@@ -122,11 +122,12 @@ public class EventsList {
                         listener.onError(ex);
                     }
                 });
+        return e.getEventID();
     }
 
     // Backward compatible version
-    public void addEvent(Event e) {
-        addEvent(e, null);
+    public String addEvent(Event e) {
+        return addEvent(e, null);
     }
 
     // Delete event from db using its unique Firestore ID
@@ -170,7 +171,6 @@ public class EventsList {
                 });
     }
 
-    // Backward compatible version
     public void deleteEvent(Event e) {
         deleteEvent(e, null);
     }
