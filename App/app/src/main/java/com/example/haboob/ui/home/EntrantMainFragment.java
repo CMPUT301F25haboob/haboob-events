@@ -140,6 +140,16 @@ public class EntrantMainFragment extends Fragment {
        // Turns the XML file entrant_main.xml into actual View objects in memory.
         View view = inflater.inflate(R.layout.entrant_main, container, false);
 
+        /*
+        // Dan
+        // ***** Profile Button Navigation *****
+        Button profileButton = view.findViewById(R.id.btn_profile);
+        profileButton.setOnClickListener(v -> {
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.action_entrantMain_to_profile);
+        });
+        */
+
         // ***** First carousel - My upcoming events *****
         // Find RecyclerView by ID
         RecyclerView recyclerView = view.findViewById(R.id.entrant_rv_upcoming);
