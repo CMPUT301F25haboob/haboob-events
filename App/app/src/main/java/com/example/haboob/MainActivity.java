@@ -29,6 +29,8 @@ public class MainActivity extends AppCompatActivity {
         return eventsList;
     }
 
+    String eventID;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

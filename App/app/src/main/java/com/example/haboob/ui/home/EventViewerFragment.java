@@ -65,6 +65,12 @@ public class EventViewerFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.entrant_event_view, container, false);
 
+        Bundle args = getArguments();
+        if (args == null) {
+            // choose one: show empty state, toast, or go back
+           Log.d("TAG", "ITS NULL U DUMMY");
+//            return new View(requireContext()); // or inflate a placeholder
+        }
         // unpack the bundle:
         String eventId = requireArguments().getString(ARG_EVENT_ID);
 
