@@ -54,7 +54,6 @@ public class Event {
         // Constructor for firebase only
         this.db = FirebaseFirestore.getInstance();
         this.initLists();
-        this.loadEventLists();
     }
 
     public Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, int optionalWaitingListSize, QRCode qrCode, Poster poster, ArrayList<String> tags) {
@@ -108,28 +107,6 @@ public class Event {
         db.collection("events").document(eventID).update("cancelledEntrants", FieldValue.arrayUnion(userID));
     }
 
-
-    public void loadEventLists() {
-        // Load in all the lists from database upon creation;
-        DocumentReference docRef = db.collection("events").document(eventID);
-        docRef.get().addOnSuccessListener(documentSnapshot -> {
-            if (documentSnapshot.exists()) {
-                Event event = documentSnapshot.toObject(Event.class);
-                this.tags = event.getTags();
-                this.entrants = event.getEntrants();
-                this.invitedEntrants = event.getInvitedEntrants();
-                this.waitingEntrants = event.getWaitingEntrants();
-                this.enrolledEntrants = event.getEnrolledEntrants();
-                this.cancelledEntrants = event.getCancelledEntrants();
-
-            } else {
-                Log.d("Firestore", "No such document!");
-            }
-        }).addOnFailureListener(e -> {
-            Log.w("Firestore", "Error fetching event", e);
-        });
-
-    }
 
     public void logEventLists() {
         // TESTING FUNCTION
