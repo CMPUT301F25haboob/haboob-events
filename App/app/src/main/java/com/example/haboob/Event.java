@@ -61,7 +61,11 @@ public class Event {
         this.optionalWaitingListSize = optionalWaitingListSize;
         this.qrCode = qrCode;
         this.poster = poster;
-        this.tags = tags;
+        this.tags = (tags == null) ? new ArrayList<>() : new ArrayList<>(tags);
+    }
+
+    // For EventsListTest
+    public Event(String organizerId, Date date, Date date1, String s, String s1, boolean b, int i, Object o, Object o1, List<String> tags) {
     }
     // different constructor for tags2, which just is a list of strings instead of an EventTagList, works better in fireBase
     public Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, QRCode qrCode, Poster poster, ArrayList<String> tags, ArrayList<String> entrant_ids_for_lottery) {
@@ -129,8 +133,8 @@ public class Event {
         return this.poster;
     }
 
-    public ArrayList<String> getTags() {
-        return this.tags;
+    public List<String> getTags() {
+        return new ArrayList<>(tags);
     }
 
 //    public EntrantList getEntrants() {
