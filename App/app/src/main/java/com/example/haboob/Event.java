@@ -41,12 +41,12 @@ public class Event {
     private Poster poster;
 
     // All of the lists that events have (all other than tags will have the entries as strings of user IDs)
-    private ArrayList<String> tags;
-    private ArrayList<String> entrants;
-    private ArrayList<String> invitedEntrants;
-    private ArrayList<String> waitingEntrants;
-    private ArrayList<String> enrolledEntrants;
-    private ArrayList<String> cancelledEntrants;
+    private ArrayList<String> tags;  // -> List of tags associated to the event
+    private ArrayList<String> entrants;  // -> List of all entrants who signed up for the lottery selection process
+    private ArrayList<String> invitedEntrants;  // -> List of all entrants who got selected for the lottery
+    private ArrayList<String> waitingEntrants;  // -> List of all entrants who were not selected for the lottery, didn't cancel, and are waiting to fill in upon entrant cancellation
+    private ArrayList<String> enrolledEntrants;  // -> List of all entrants who accepted their invite
+    private ArrayList<String> cancelledEntrants;  // -> List of all entrants who cancelled their invite or were cancelled by the organizer
 
 
     // Constructor for an event
