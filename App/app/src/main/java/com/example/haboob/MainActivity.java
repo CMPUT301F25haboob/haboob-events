@@ -1,8 +1,12 @@
 package com.example.haboob;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.example.haboob.ui.home.EntrantMainFragment;
+import com.example.haboob.ui.home.EventViewerFragment;
 //import com.example.haboob.ui.home.myCallback;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -52,6 +56,48 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
 //        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
+
+        // If we scanned a qrcode, we need to handle that by naviagting to the correct
+        // event fragment
+        handleDeepLink(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleDeepLink(intent);
+    }
+
+    /**
+     * Author: Dan
+     * Handles deep link navigation from QR code scans
+     * Essentially just adds the eventID to a Bundle and then navigates to the EventViewerFragment
+     * that corresponds to the eventID
+     * Expected format: haboob://event?id={eventID}
+     * @param intent The intent containing the deep link data
+     */
+    private void handleDeepLink(Intent intent) {
+        Uri data = intent.getData();
+        if (data != null && "haboob".equals(data.getScheme()) && "event".equals(data.getHost())) {
+            String eventId = data.getQueryParameter("id");
+
+            if (eventId != null && !eventId.isEmpty()) {
+                Log.d("MainActivity", "Deep link detected for event: " + eventId);
+
+                // Navigate to EventViewerFragment with the event ID
+                NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+
+                // Create a bundle with the event ID
+                Bundle args = new Bundle();
+                args.putString(EventViewerFragment.ARG_EVENT_ID, eventId);
+
+                // Navigate to the event viewer fragment
+                navController.navigate(R.id.entrant_event_view, args);
+            } else {
+                Log.e("MainActivity", "Deep link missing event ID parameter");
+            }
+        }
     }
 
 }

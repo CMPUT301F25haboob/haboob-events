@@ -13,6 +13,9 @@
         <action
             android:id="@+id/action_mainEntrantView___to___EventView"
             app:destination="@id/entrant_event_view" />
+        <action
+            android:id="@+id/action_entrantMain_to_profile"
+            app:destination="@id/profile_fragment" />
     </fragment>
 
     <!-- Entrant Event Viewer Fragment -->
@@ -20,7 +23,21 @@
         android:name="com.example.haboob.ui.home.EventViewerFragment"
         android:label="Entrant Event Viewer"
         tools:layout="@layout/entrant_event_view">
+        <action
+            android:id="@+id/action_eventViewer_to_eventQRCode"
+            app:destination="@id/event_qr_code_fragment" />
     </fragment>
+
+    <!-- Event QR Code Fragment -->
+    <fragment android:id="@+id/event_qr_code_fragment"
+        android:name="com.example.haboob.EventQRCodeFragment"
+        android:label="Event QR Code"
+        tools:layout="@layout/fragment_event_qr_code">
+        <argument
+            android:name="arg_event_id"
+            app:argType="string" />
+    </fragment>
+
     <fragment
         android:id="@+id/navigation_dashboard"
         android:name="com.example.haboob.ui.dashboard.DashboardFragment"
@@ -32,5 +49,12 @@
         android:name="com.example.haboob.ui.notifications.NotificationsFragment"
         android:label="@string/title_notifications"
         tools:layout="@layout/fragment_notifications" />
+
+    <!-- Profile Fragment -->
+    <fragment
+        android:id="@+id/profile_fragment"
+        android:name="com.example.haboob.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile" />
 
 </navigation>

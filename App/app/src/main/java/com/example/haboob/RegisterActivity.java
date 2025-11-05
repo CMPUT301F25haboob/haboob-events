@@ -45,6 +45,41 @@ public class RegisterActivity extends AppCompatActivity {
                 Settings.Secure.ANDROID_ID
         );
 
+        db.collection("users")
+                .whereEqualTo("device_id", deviceId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (!querySnapshot.isEmpty()) {
+                        // User already registered — retrieve their account type
+                        String accountType = querySnapshot.getDocuments()
+                                .get(0)
+                                .getString("account_type");
+
+                        Intent intent;
+                        if ("Entrant".equals(accountType)) {
+                            intent = new Intent(RegisterActivity.this, MainActivity.class);
+                        } else {
+                            intent = new Intent(RegisterActivity.this, OrganizerMainActivity.class);
+                        }
+
+                        // Pass the data if needed
+                        intent.putExtra("device_id", deviceId);
+                        startActivity(intent);
+                        finish(); // Don’t show Register screen again
+                    } else {
+                        // No user found — show the registration UI
+                        showRegistrationUI();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Error checking registration: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    showRegistrationUI(); // Still show the registration screen if check fails
+                });
+
+    }
+
+    private void showRegistrationUI()
+    {
         // Find all the components we need
         firstNameInput = findViewById(R.id.first_name_input);
         lastNameInput = findViewById(R.id.last_name_input);
@@ -113,7 +148,7 @@ public class RegisterActivity extends AppCompatActivity {
 
 
             // Add the user to 'users' collection first
-            db.collection("users").add(user)
+            db.collection("users").document(deviceId).set(user)
                     .addOnSuccessListener(userDocRef -> {
                         // After successfully adding to 'users', add to the specific collection
                         db.collection(userAccountType.toLowerCase()).add(user)
