@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
@@ -17,18 +18,19 @@
         <activity
             android:name=".SplashActivity"
             android:exported="true"
-            android:label="@string/app_name" />
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
-        <!-- 👇 MainActivity is now the LAUNCHER activity -->
+        <!-- MainActivity -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:launchMode="singleTask">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
 
             <!-- Deep link intent filter for QR code scanning -->
             <intent-filter>
@@ -41,15 +43,17 @@
             </intent-filter>
         </activity>
 
+        <!-- RegisterActivity - LAUNCHER -->
         <activity
             android:name=".RegisterActivity"
-            android:exported="false"
-            android:label="@string/app_name" />
+            android:exported="true"
+            android:label="@string/app_name">
+        </activity>
 
         <activity
             android:name=".OrganizerMainActivity"
             android:exported="false"
             android:label="@string/app_name" />
-    </application>
 
+    </application>
 </manifest>

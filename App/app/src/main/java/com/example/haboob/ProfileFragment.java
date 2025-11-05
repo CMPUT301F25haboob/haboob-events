@@ -14,7 +14,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -46,6 +48,7 @@ public class ProfileFragment extends Fragment {
     private TextView accountTypeTextView;
     private MaterialButton saveButton;
     private MaterialButton deleteButton;
+    private MaterialToolbar toolbar;
 
     // Firebase
     private FirebaseFirestore db;
@@ -75,6 +78,7 @@ public class ProfileFragment extends Fragment {
         accountTypeTextView = view.findViewById(R.id.accountTypeTextView);
         saveButton = view.findViewById(R.id.btnSaveProfile);
         deleteButton = view.findViewById(R.id.btnDeleteProfile);
+        toolbar = view.findViewById(R.id.topAppBar);
 
         // Load user data
         loadUserData();
@@ -82,6 +86,20 @@ public class ProfileFragment extends Fragment {
         // Set up button listeners
         saveButton.setOnClickListener(v -> saveProfileChanges());
         deleteButton.setOnClickListener(v -> confirmDeleteProfile());
+
+        // Reused code from EventViewerFragment for navigating back to home
+        // when the back button is pressed
+        toolbar.setOnMenuItemClickListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.action_goBack) {
+                NavHostFragment.findNavController(this)
+                        .navigate(R.id.navigation_home);
+                return true;
+            }
+
+            return false;
+        });
 
         return view;
     }
@@ -97,14 +115,14 @@ public class ProfileFragment extends Fragment {
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         // Populate fields with existing data
-                        firstNameEditText.setText(documentSnapshot.getString("firstName"));
-                        lastNameEditText.setText(documentSnapshot.getString("lastName"));
+                        firstNameEditText.setText(documentSnapshot.getString("first_name"));
+                        lastNameEditText.setText(documentSnapshot.getString("last_name"));
                         emailEditText.setText(documentSnapshot.getString("email"));
 
                         String phone = documentSnapshot.getString("phone");
                         phoneEditText.setText(phone != null ? phone : "");
 
-                        accountType = documentSnapshot.getString("accountType");
+                        accountType = documentSnapshot.getString("account_type");
                         accountTypeTextView.setText(accountType != null ? accountType : "Unknown");
 
                         Log.d(TAG, "User data loaded successfully");
@@ -147,22 +165,36 @@ public class ProfileFragment extends Fragment {
         updates.put("phone", phone);
 
         // Update in users collection
-        db.collection("users").document(deviceId)
-                .update(updates)
-                .addOnSuccessListener(aVoid -> {
-                    // Also update in account-specific collection (entrant/organizer)
-                    if (accountType != null) {
-                        updateAccountTypeCollection(updates, accountType);
+        db.collection("users").whereEqualTo("device_id", deviceId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (!querySnapshot.isEmpty()) {
+                        DocumentSnapshot doc = querySnapshot.getDocuments().get(0);
+                        String docId = doc.getId(); // Firestore-generated document ID
+
+                        db.collection("users").document(docId)
+                                .update(updates)
+                                .addOnSuccessListener(aVoid -> {
+                                    if (accountType != null) {
+                                        updateAccountTypeCollection(updates, accountType);
+                                    } else {
+                                        onSaveSuccess();
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e(TAG, "Error updating profile", e);
+                                    Toast.makeText(getContext(), "Failed to save changes: " + e.getMessage(),
+                                            Toast.LENGTH_LONG).show();
+                                    saveButton.setEnabled(true);
+                                    saveButton.setText("Save Changes");
+                                });
                     } else {
-                        onSaveSuccess();
+                        Toast.makeText(getContext(), "User not found", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error updating profile", e);
-                    Toast.makeText(getContext(), "Failed to save changes: " + e.getMessage(),
-                            Toast.LENGTH_LONG).show();
-                    saveButton.setEnabled(true);
-                    saveButton.setText("Save Changes");
+                    Log.e(TAG, "Error finding user", e);
+                    Toast.makeText(getContext(), "Failed to find user: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 

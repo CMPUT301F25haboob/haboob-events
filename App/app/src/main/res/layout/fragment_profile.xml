@@ -15,6 +15,7 @@
         android:background="?attr/colorSurface"
         app:title="Profile"
         app:titleCentered="false"
+        app:menu="@menu/menu_event_detail"
         app:titleTextColor="@android:color/black" />
 
     <!-- Scrollable Content -->
