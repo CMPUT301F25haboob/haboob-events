@@ -117,11 +117,11 @@ public class EntrantMainFragment extends Fragment {
 //                        Log.d("TAG", "Device ID: "+  event.getEntrant_ids_for_lottery().toString());
 //                }
 
-//                for (Event event: listOfEvents){
-//                    if (event.getEntrant_ids_for_lottery().contains(deviceId)){
-//                        listOfFILTEREDEvents.add(event);
-//                    }
-//                }
+                for (Event event: listOfEvents){
+                    if (event.getEntrant_ids_for_lottery().contains(deviceId)){
+                        listOfFILTEREDEvents.add(event);
+                    }
+                }
 
 //                for (Event event: listOfFILTEREDEvents){
 //                   Log.d("TAG", "Device ID: "+  event.getEntrant_ids_for_lottery().toString());
@@ -129,11 +129,11 @@ public class EntrantMainFragment extends Fragment {
                 Log.d("TAG", "FILTERED EVENTSLIST SIZE: " + listOfFILTEREDEvents.size());
 
                 // runs AFTER the database is done querying:
-                Log.d("TAG", "EVENTSLIST 4 SIZE: " + listOfEvents.size());
+//                Log.d("TAG", "EVENTSLIST 4 SIZE: " + listOfEvents.size());
                 List<String> imageURLs = new ArrayList<>();
                 List<String> eventIDs = new ArrayList<>();
-                addEventImagesLocally(listOfEvents, imageURLs); // imageURLS <- list of imageURLs from query
-                addEventIDsLocally(listOfEvents, eventIDs); // eventIDs <- list of eventIDs from query
+                addEventImagesLocally(listOfFILTEREDEvents, imageURLs); // imageURLS <- list of imageURLs from query
+                addEventIDsLocally(listOfFILTEREDEvents, eventIDs); // eventIDs <- list of eventIDs from query
 
                 // replace the placeholder images after query is done:
                 imageAdapter.replaceItems(imageURLs);
