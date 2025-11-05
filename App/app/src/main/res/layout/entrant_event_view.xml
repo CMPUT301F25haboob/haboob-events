@@ -35,7 +35,7 @@
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
             android:paddingBottom="16dp"
-            android:paddingTop="24dp">>
+            android:paddingTop="24dp">
 
             <!-- Hero image -->
             <ImageView
@@ -173,11 +173,26 @@
                 app:iconTint="@android:color/white"
                 android:textColor="@android:color/white"/>
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnViewQRCode"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="52dp"
+                android:text="Share This Event!"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                app:cornerRadius="16dp"
+                app:layout_constraintTop_toBottomOf="@id/btnLeaveWaitlist"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:backgroundTint="@android:color/black"
+                android:textColor="@android:color/white"/>
+
             <!-- Bottom spacer so buttons never hide behind the nav bar -->
             <Space
                 android:layout_width="0dp"
                 android:layout_height="24dp"
-                app:layout_constraintTop_toBottomOf="@id/btnLeaveWaitlist"
+                app:layout_constraintTop_toBottomOf="@id/btnViewQRCode"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"/>

@@ -20,7 +20,21 @@
         android:name="com.example.haboob.ui.home.EventViewerFragment"
         android:label="Entrant Event Viewer"
         tools:layout="@layout/entrant_event_view">
+        <action
+            android:id="@+id/action_eventViewer_to_eventQRCode"
+            app:destination="@id/event_qr_code_fragment" />
     </fragment>
+
+    <!-- Event QR Code Fragment -->
+    <fragment android:id="@+id/event_qr_code_fragment"
+        android:name="com.example.haboob.EventQRCodeFragment"
+        android:label="Event QR Code"
+        tools:layout="@layout/fragment_event_qr_code">
+        <argument
+            android:name="arg_event_id"
+            app:argType="string" />
+    </fragment>
+
     <fragment
         android:id="@+id/navigation_dashboard"
         android:name="com.example.haboob.ui.dashboard.DashboardFragment"
