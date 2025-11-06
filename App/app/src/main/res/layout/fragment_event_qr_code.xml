@@ -16,7 +16,8 @@
         app:menu="@menu/menu_event_detail"
         app:title="Event QR Code"
         app:titleCentered="false"
-        app:titleTextColor="@android:color/black" />
+        app:titleTextColor="@android:color/black"
+        android:paddingTop="24dp"/>
 
     <!-- QR Code Content -->
     <androidx.constraintlayout.widget.ConstraintLayout

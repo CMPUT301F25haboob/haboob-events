@@ -3,6 +3,7 @@ package com.example.haboob;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.example.haboob.ui.home.EntrantMainFragment;
@@ -17,6 +18,7 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.example.haboob.databinding.ActivityMainBinding;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
     public EventsList getEventsList() {
         return eventsList;
     }
+
+    String eventID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

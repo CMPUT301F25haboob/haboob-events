@@ -25,14 +25,11 @@ public class EventsList  {
     private CollectionReference eventsListRef;
     private boolean isLoaded = false;
 
-
-
     // Callback interface for async operations
     public interface OnEventsLoadedListener {
         void onEventsLoaded();
         void onError(Exception e);
     }
-
 
     // Constructor - automatically loads events on creation
     public EventsList() {
@@ -44,6 +41,7 @@ public class EventsList  {
         this.loadEventsList();
     }
 
+    // Optional: Constructor with callback for when you need to know when loading completes
     public EventsList(OnEventsLoadedListener listener) {
         eventsList = new ArrayList<>();
         db = FirebaseFirestore.getInstance();
@@ -69,6 +67,7 @@ public class EventsList  {
         return isLoaded;
     }
 
+    // Updated loadEventsList with callback
     public void loadEventsList(OnEventsLoadedListener listener) {
         eventsListRef.get()
                 .addOnSuccessListener(snapshots -> {
@@ -90,6 +89,7 @@ public class EventsList  {
                 });
     }
 
+    // Overloaded version without callback for backward compatibility
     public void loadEventsList() {
         loadEventsList(null);
     }
@@ -171,6 +171,7 @@ public class EventsList  {
                 });
     }
 
+    // Backward compatible version
     public void deleteEvent(Event e) {
         deleteEvent(e, null);
     }

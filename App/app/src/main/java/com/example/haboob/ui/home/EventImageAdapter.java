@@ -71,7 +71,7 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
         this.eventIDs.clear();
         this.eventIDs.addAll(eventIDs);
         notifyDataSetChanged();
-        Log.d("TAG", "InputIDs ran, size: " + eventIDs.size() + " userIDs: " + eventIDs.toString());
+        Log.d("TAG", "InputIDs ran, size: " + eventIDs.size() + " EventIDs: " + eventIDs.toString());
     }
 
     @NonNull
@@ -103,10 +103,12 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
 
         // set an onClicklistener callback:
         holder.itemView.setOnClickListener(v -> {
+            Log.d("TAG", "eventIDS size: " + eventIDs.size());
+
             Toast.makeText(v.getContext(), "Clicked " + position, Toast.LENGTH_SHORT).show();
 
             // navigate using an action
-            Navigation.findNavController(v).navigate(R.id.action_mainEntrantView___to___EventView);
+//            Navigation.findNavController(v).navigate(R.id.action_mainEntrantView___to___EventView);
 
             // call back to the fragment, with the position data passed:
             int pos = holder.getBindingAdapterPosition();
@@ -115,6 +117,9 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
 
                 if (onItemClick != null) {              // 'onItemClick' is the  instance field
                     onItemClick.onClick(eventIDs.get(pos));   // invoke the actual callback
+                }
+                else{
+                    Log.d("TAG", "onItemClick was null");
                 }
             }
         });

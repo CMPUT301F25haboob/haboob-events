@@ -1,10 +1,15 @@
 package com.example.haboob.ui.home;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
@@ -12,6 +17,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,61 +61,109 @@ import kotlinx.serialization.descriptors.PrimitiveKind;
 
 public class EntrantMainFragment extends Fragment {
     FirebaseFirestore db = FirebaseFirestore.getInstance();
+//    private String deviceId = "9662d2bd2595742d";
+    private String deviceId;
     String userID = "davids_id";
     // prepare a list of sample imageURLs:
-    List<String> imageURLs = Arrays.asList("https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/396e9/MainBefore.jpg", "https://blog.en.uptodown.com/files/2017/08/clash-royale-consejos-novato-featured.jpg", "https://media.cnn.com/api/v1/images/stellar/prod/130214161738-01-michael-jordan.jpg?q=w_3072,h_1728,x_0,y_0,c_fill");
+//    List<String> imageURLs = Arrays.asList("https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/396e9/MainBefore.jpg", "https://blog.en.uptodown.com/files/2017/08/clash-royale-consejos-novato-featured.jpg", "https://media.cnn.com/api/v1/images/stellar/prod/130214161738-01-michael-jordan.jpg?q=w_3072,h_1728,x_0,y_0,c_fill");
+    List<String> imageURLs = new ArrayList<>();
     EventImageAdapter imageAdapter = new EventImageAdapter(imageURLs);
+    EventImageAdapter imageAdapter2 = new EventImageAdapter(imageURLs);
     boolean createDummyEvent = false;
 
-    // will hold the local Events list, query will add to this eventsList
-    private final List<Event> eventsList2 = new ArrayList<>();
-
-    List<Integer> images = Arrays.asList(R.drawable.hockey_ex, R.drawable.bob_ross, R.drawable.clash_royale, R.drawable.swimming_lessons);
+    List<Event> listOfEvents = new ArrayList<>(); // making a List<Event> So I can iterate through the events, cant do that with an EventsList object
+    private EventsList eventsList3; // declare the eventsList object
 
     public EntrantMainFragment() {
         // Required empty public constructor
     }
 
-    // queries the dataBase, adds events to local EventList Array, note that this takes a while to run!!
+    @Override
+    // runs ONCE as opposed to onCreateView, so not making a new dummy variable every time we navigate back to main screen
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (createDummyEvent){
+            createDummyEvent();
+        }
+    }
+
+    // queries for the DeviceID, runs BEFORE onCreate and onCreateView
+    @SuppressLint("HardwareIds")
+    @Override
+    public void onAttach(@NonNull Context ctx) {
+
+        super.onAttach(ctx);
+        deviceId = Settings.Secure.getString(
+                ctx.getContentResolver(),
+                Settings.Secure.ANDROID_ID
+        );
+        if (deviceId == null) deviceId = "unknown";
+    }
+
+    // queries the dataBase, relies on a callback to adds events to local EventList Array, updates the imageAdapter with the new images from the database
     private void loadEventsForUser(String userId) {
-        CollectionReference col = db.collection("events");
-        Query q = col;
 
-        // Clear current list to avoid duplicates on refresh
-        eventsList2.clear();
+            Log.d("TAG", "device ID: " + deviceId);
 
-        // DataBase query -> grabs all event items, adds them to local EnventsList, where they are now local Events()
-        q.get()
-                .addOnSuccessListener(snap -> {
-                    for (DocumentSnapshot doc : snap.getDocuments()) {
-                        Event e = doc.toObject(Event.class);
-                        if (e != null) {
-                            // Keep Firestore id if useful
-                            try { e.setEventID(doc.getId()); } catch (Exception ignored) {}
-                            eventsList2.add(e);
-                            Log.d("TAG", "event added");
-                        } else {
-                            Log.w("TAG", "Skipping unmappable doc: " + doc.getId() + " -> " + doc.getData());
+            listOfEvents.clear(); // discard duplicate events
+
+          eventsList3 = new EventsList(new EventsList.OnEventsLoadedListener() {
+            @Override
+            public void onEventsLoaded() { // the callback function calls this when events are loaded
+
+                listOfEvents = eventsList3.getEventsList();
+                List<Event> listOfFILTEREDEvents = new ArrayList<>();
+
+//                for (Event event: listOfEvents){
+//                    if (event.getEntrant_ids_for_lottery() != null)
+//                        Log.d("TAG", "Device ID: "+  event.getEntrant_ids_for_lottery().toString());
+//                }
+
+                for (Event event: listOfEvents){
+                    if ((event.getEntrant_ids_for_lottery() != null) && (!event.getEntrant_ids_for_lottery().isEmpty()) && (event != null))
+                    {
+                        if (event.getEntrant_ids_for_lottery().contains(deviceId)) {
+                            listOfFILTEREDEvents.add(event);
                         }
+                    } else {
+                        Log.d("TAG", "SOMETHING IS NULL");
                     }
+                }
 
-                    // runs AFTER the database is done querying:
-                    Log.d("TAG", "EventsList size: " + eventsList2.size());
-                    List<String> imageURLs = new ArrayList<>();
-                    List<String> eventIDs = new ArrayList<>();
-                    addEventImagesLocally(eventsList2, imageURLs); // imageURLS <- list of imageURLs from query
-                    addEventIDsLocally(eventsList2, eventIDs); // eventIDs <- list of eventIDs from query
+//                for (Event event: listOfFILTEREDEvents){
+//                   Log.d("TAG", "Device ID: "+  event.getEntrant_ids_for_lottery().toString());
+//                }
+                Log.d("TAG", "FILTERED EVENTSLIST SIZE: " + listOfFILTEREDEvents.size());
 
-//                    for (String image : imageURLs) {
-//                        Log.d("TAG", "Event image string: " + image);
-//                    }
-                    // replace the placeholder images after query is done:
-                    imageAdapter.replaceItems(imageURLs);
-                    // input the IDs of the same images into the imageAdapter
-                    imageAdapter.inputIDs(eventIDs);
-                    Log.d("TAG:", "ImageAdapter images Replaced");
-                })
-                .addOnFailureListener(err -> Log.e("TAG", "Failed loading events", err));
+                // runs AFTER the database is done querying:
+//                Log.d("TAG", "EVENTSLIST 4 SIZE: " + listOfEvents.size());
+                List<String> imageURLs = new ArrayList<>();
+                List<String> eventIDs = new ArrayList<>();
+
+                addEventImagesLocally(listOfFILTEREDEvents, imageURLs); // imageURLS <- list of imageURLs from query
+                addEventIDsLocally(listOfFILTEREDEvents, eventIDs); // eventIDs <- list of eventIDs from query
+
+                // replace the placeholder images after query is done:
+                imageAdapter.replaceItems(imageURLs);
+                // input the IDs of the same images into the imageAdapter
+                imageAdapter.inputIDs(eventIDs);
+                Log.d("TAG", "ImageAdapter images Replaced");
+
+                // to see ALL events for testing:
+                addEventImagesLocally(listOfEvents, imageURLs);
+                addEventIDsLocally(listOfEvents, eventIDs);
+                // replace the placeholder images
+                imageAdapter2.replaceItems(imageURLs);
+                // input the IDs of the same images into the imageAdapter
+                imageAdapter2.inputIDs(eventIDs);
+                Log.d("TAG", "ImageAdapter images Replaced");
+
+            }
+            @Override
+            public void onError(Exception err) {
+                Log.e("TAG", "Failed loading events", err);
+            }
+        });
     }
 
     // When this Fragment becomes visible, create its UI from entrant_main.xml and attach it to the container
@@ -118,27 +172,32 @@ public class EntrantMainFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         loadEventsForUser(userID);
-        if (createDummyEvent)
-            createDummyEvent();
 
         // DEBUG: Logging each ID in the database:
-//        db.collection("events")
-//                .get()
-//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-//                        if (task.isSuccessful()) {
-//                            for (QueryDocumentSnapshot document : task.getResult()) {
-////                                Log.d("TAG", document.getId() + " => " + document.getData());
+        db.collection("events")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d("TAG", document.getId() + " => " + document.getData());
+                            }
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+
+//        for (Event event : listOfEvents) {
+//                                Log.d("TAG", event.getEventTitle() + "desc: " + event.getEventDescription());
 //                            }
-//                        } else {
-//                            Log.d("TAG", "Error getting documents: ", task.getException());
-//                        }
-//                    }
-//                });
+
+        Log.d("TAG", "ListOf events size: " + listOfEvents.size());
 
        // Turns the XML file entrant_main.xml into actual View objects in memory.
         View view = inflater.inflate(R.layout.entrant_main, container, false);
+
 
         // Dan
         // ***** Profile Button Navigation *****
@@ -148,7 +207,7 @@ public class EntrantMainFragment extends Fragment {
                     .navigate(R.id.action_entrantMain_to_profile);
         });
 
-        // ***** First carousel - My upcoming events *****
+        // *****  ***** ***** ***** First carousel - My upcoming events ***** ***** ***** ***** ***** ***** *****
         // Find RecyclerView by ID
         RecyclerView recyclerView = view.findViewById(R.id.entrant_rv_upcoming);
         // Prepare a list of example images from drawable
@@ -162,15 +221,23 @@ public class EntrantMainFragment extends Fragment {
         // Clicks on the viewBindHolder calls back to this onItemCLick, and this finds the event
         // associated with the click and starts a new fragment with the event data
         imageAdapter.setOnItemClick(eventId -> {
-            EventsList eventsList = new EventsList();
+
+            Log.d("TAG", "The callback worked, event ID = " + eventId);
+//            Log.d("TAG", "ListOf events size: " + listOfEvents.size());
+
+//            EventsList eventsList = new EventsList(dummyString);
             // find the event clicked(the new events list should be updated with the database data):
-            for (Event event : eventsList2) {
+            for (Event event : listOfEvents) {
                 if (event.getEventID().equals(eventId)) {
+
+                    Log.d("TAG", "GOT PAST IF ");
                     Log.d("TAG", "Event clicked: " + event.getEventTitle());
 
                     // Create a Bundle to pass data to the EventViewerFragment
                     Bundle args = new Bundle();
                     args.putString(EventViewerFragment.ARG_EVENT_ID, eventId);
+                    args.putString("device_id", deviceId);
+                    args.putBoolean("from_my_events", true); // sets JoinEvent button invisible
 
                     // navigate to the EventViewerFragment using the NavController
                     NavHostFragment.findNavController(this)
@@ -180,29 +247,76 @@ public class EntrantMainFragment extends Fragment {
             }
         });
 
-
-
-        // Attach the adapter, its the bridge between the data of the images to the actual UI
-        recyclerView.setAdapter(imageAdapter);
-
-
-        // ***** Second carousel - My Open Waitlists *****
+        // *****  ***** ***** ***** ***** ***** Second carousel - My Open Waitlists ***** ***** ***** ***** ***** ***** ***** *****
         RecyclerView rvWaitlists = view.findViewById(R.id.entrant_rv_waitlists);
         rvWaitlists.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         rvWaitlists.setNestedScrollingEnabled(false);
         List<Integer> waitlistImages = Arrays.asList(
                 R.drawable.clash_royale, R.drawable.clash_royale, R.drawable.clash_royale
         );
-        rvWaitlists.setAdapter(new EventImageAdapter(imageURLs));
+        rvWaitlists.setAdapter(imageAdapter2);
+//
+//        // set the onClickListener for the second carousel:
+        imageAdapter2.setOnItemClick(eventId -> {
 
-        // Return the inflated view
+            Log.d("TAG", "The callback worked, event ID = " + eventId + "Event title: " + eventsList3.getEventByID(eventId).getEventTitle());
+//            Log.d("TAG", "ListOf events size: " + listOfEvents.size());
+
+//            EventsList eventsList = new EventsList(dummyString);
+            // find the event clicked(the new events list should be updated with the database data):
+            for (Event event : listOfEvents) {
+                if (event.getEventID().equals(eventId)) {
+
+                    Log.d("TAG", "GOT PAST IF ");
+                    Log.d("TAG", "Event clicked: " + event.getEventTitle());
+
+                    // Create a Bundle to pass data to the EventViewerFragment
+                    Bundle args = new Bundle();
+                    args.putString(EventViewerFragment.ARG_EVENT_ID, eventId);
+                    args.putString("device_id", deviceId);
+                    args.putBoolean("from_my_events", false); // sets leaveEvent button invisible
+
+                    if (event.getEntrant_ids_for_lottery().contains(deviceId)) {
+                        args.putBoolean("in_waitlist", true); // sets leaveEvent button invisible
+                    }
+                    // navigate to the EventViewerFragment using the NavController
+                    NavHostFragment.findNavController(this)
+                            .navigate(R.id.entrant_event_view, args);
+
+                }
+            }
+        });
+//
+//        // Return the inflated view
         return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+
+        // set a listener that listens to EventViewerFragment, if a user ID got added to an event entrant_ids_for_lottery, update the image carousels
+        getParentFragmentManager().setFragmentResultListener(
+                "USER_JOINED_WAITLIST", this, (reqKey, bundle) -> loadEventsForUser(userID)
+        );
+
+        // set a listener that listens to EventViewerFragment, if a user ID got added to an event entrant_ids_for_lottery, update the image carousels
+        getParentFragmentManager().setFragmentResultListener(
+                "USER_LEFT_WAITLIST", this, (reqKey, bundle) -> loadEventsForUser(userID)
+        );
+
+
     }
 
     public void createDummyEvent() {
         // *********** create a new dummy event: ********************************************************************
         MainActivity mainAct = (MainActivity) getActivity(); // find the instance of mainActivity thats currently running
         EventsList eventsList = mainAct.getEventsList();
+        if (eventsList == null) {
+            Log.w("EntrantMainFragment", "eventsList was null");
+            return;
+        }
 
         // Build registration dates
         Date regStart = new GregorianCalendar(2025, Calendar.NOVEMBER, 1).getTime();
@@ -210,7 +324,7 @@ public class EntrantMainFragment extends Fragment {
 
         // Create supporting objects
         QRCode qrCode = new QRCode("idk lol");
-        Poster poster = new Poster("https://cdn-useast1.kapwing.com/static/templates/spider-man-triple-meme-template-full-a9a8b78a.webp");
+        Poster poster = new Poster("https://shapes.inc/api/public/avatar/johnpork-qwb7");
 
         // Create a list of tags for this event
         List<String> tagStrings = new ArrayList<>();
@@ -220,22 +334,23 @@ public class EntrantMainFragment extends Fragment {
 //        EventTagList tags = new EventTagList(tagStrings);
 
         ArrayList<String> tagslist2 = new ArrayList<>();
-        tagslist2.add("Peter");
-        tagslist2.add("Family");
+        tagslist2.add("Spongebob");
+        tagslist2.add("lol");
         tagslist2.add("Guy");
 
         // create a list of dummy entrant Ids for this event:
         ArrayList<String> event_entrant_ids = new ArrayList<>();
 
-        event_entrant_ids.add("david's_id");
+        event_entrant_ids.add(deviceId);
+
 
         // Finally, create your dummy Event using your constructor
         Event dummyEvent = new Event(
                 "org12345",                                  // organizer
                 regStart,                                    // registrationStartDate
                 regEnd,                                      // registrationEndDate
-                "Spoodermen",                          // eventTitle
-                "Petah griff",             // eventDescription
+                "John Pork Meet N Greet",                          // eventTitle
+                "RIP jon :(",             // eventDescription
                 true,                                        // geoLocationRequired
                 100,                                         // lotterySampleSize
                 qrCode,                                      // QRCode object
@@ -246,9 +361,6 @@ public class EntrantMainFragment extends Fragment {
 
 //        Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, QRCode qrCode, Poster poster, ArrayList<String> tags, ArrayList<String> entrant_ids_for_lottery) {
 
-
-        // the actual creation of the event: commented out for now so we're not
-        // overpopulating the database
         if (eventsList != null){
             eventsList.addEvent(dummyEvent);
             Log.d("TAG", "eventsList is not null");
@@ -261,17 +373,34 @@ public class EntrantMainFragment extends Fragment {
 
     // adds the strings of the events to the local list of images (images2)
     public void addEventImagesLocally(List<Event> eventsList2, List<String> imageURLs) {
+
+        if (eventsList2 == null) {
+            Log.w("EntrantMainFragment", "eventsList2 was null");
+            return;
+        }
+
+        imageURLs.clear(); // clear placeholder images
         for (Event event : eventsList2) {
-            imageURLs.add(event.getPoster().getData());
-            Log.d("TAG", "Poster data string: " + event.getPoster().getData());
+            if (event == null) continue;
+
+            Poster poster = event.getPoster();
+            if (poster != null && poster.getData() != null && !poster.getData().isEmpty()) {
+                imageURLs.add(poster.getData());
+            } else {
+                Log.w("EntrantMainFragment",
+                        "Missing poster for event ID:" + event.getEventID() + ", title=" + event.getEventTitle());
+                // either SKIP or add a placeholder entry your adapter can render
+                 imageURLs.add("https://media.tenor.com/hG6eR9HM_fkAAAAM/the-simpsons-homer-simpson.gif");
+            }
         }
     }
 
     // adds the strings of the events to the local list of images (images2)
     public void addEventIDsLocally(List<Event> eventsList2, List<String> eventIDs) {
+        eventIDs.clear();
         for (Event event : eventsList2) {
             eventIDs.add(event.getEventID());
-            Log.d("TAG", "Event: " + event.getEventTitle() + " ID string: " + event.getEventID());
+//            Log.d("TAG", "Event: " + event.getEventTitle() + " ID string: " + event.getEventID());
         }
     }
 }
