@@ -1,5 +1,7 @@
 package com.example.haboob.ui.home;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -29,10 +31,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.haboob.Event;
+import com.example.haboob.EventQRCodeFragment;
 import com.example.haboob.EventsList;
 import com.example.haboob.MainActivity;
 import com.example.haboob.Poster;
-import com.example.haboob.QRCode;
 import com.example.haboob.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -55,57 +57,125 @@ import java.util.List;
 public class EventViewerFragment extends Fragment {
 
     private String eventID;
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
-    //    private String deviceId = "9662d2bd2595742d";
-    private String deviceId;
     public static final String ARG_EVENT_ID = "arg_event_id";
     private TextView dateView, locView; // declare the view buttons we'll need to update
     private ImageView event_image;
     private MaterialToolbar toolbar;
+    private FirebaseFirestore db;
+    private String deviceId;
+    MaterialButton acceptInvitationButton, leaveWaitlistButton;
+
 
     public EventViewerFragment() {
         // Required empty public constructor
+    }
+
+    // queries for the DeviceID, runs BEFORE onCreate and onCreateView
+    @SuppressLint("HardwareIds")
+    @Override
+    public void onAttach(@NonNull Context ctx) {
+
+        super.onAttach(ctx);
+        deviceId = Settings.Secure.getString(
+                ctx.getContentResolver(),
+                Settings.Secure.ANDROID_ID
+        );
+        if (deviceId == null) deviceId = "unknown";
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.entrant_event_view, container, false);
+        db = FirebaseFirestore.getInstance();
 
-        Bundle args = getArguments();
-        if (args == null) {
-            // choose one: show empty state, toast, or go back
-           Log.d("TAG", "The bundle passed to EventViewerFragment from EntrantMainFragment was NULL");
-//            return new View(requireContext()); // or inflate a placeholder
-        }
+        // Initialize views
+        toolbar = view.findViewById(R.id.topAppBar);
+        event_image = view.findViewById(R.id.heroImage);
+        acceptInvitationButton = view.findViewById(R.id.btnAccept);
+        leaveWaitlistButton = view.findViewById(R.id.btnLeaveWaitlist);
+
+        assert getArguments() != null;
+        boolean fromMy = getArguments().getBoolean("from_my_events", false);
+        acceptInvitationButton.setVisibility(fromMy ? View.GONE : View.VISIBLE);
+        leaveWaitlistButton.setVisibility(fromMy ? View.VISIBLE : View.GONE);
+
         // unpack the bundle:
         String eventId = requireArguments().getString(ARG_EVENT_ID);
-        deviceId = requireArguments().getString("device_id");
-        Log.d("TAG", "deviceId from bundle: " + deviceId);
 
         // grab the details of event:
         EventsList eventsList = ((MainActivity) getActivity()).getEventsList();
         Event eventToDisplay = eventsList.getEventByID(eventId);
 
+        assert eventId != null;
+
+        // Dan
+        // If event is not in EventsList yet, load from Firebase
+        // This is to get around the EventsList taking along time to load and causing errors
+        if (eventToDisplay == null) {
+            Log.d("EventViewerFragment", "Event not in list, loading from Firebase: " + eventId);
+            loadEventFromFirebase(eventId, view);
+        } else {
+            Log.d("EventViewerFragment", "Event found in list, displaying: " + eventId);
+            displayEvent(eventToDisplay, view, eventId);
+        }
+
+        return view;
+    }
+
+    /**
+     * Author: Dan
+     * Loads event from Firebase when not available in EventsList
+     * @param eventId The event ID to load
+     * @param view The fragment view
+     */
+    private void loadEventFromFirebase(String eventId, View view) {
+        toolbar.setTitle("Loading...");
+
+        db.collection("events").document(eventId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        Event event = documentSnapshot.toObject(Event.class);
+                        if (event != null) {
+                            event.setEventID(documentSnapshot.getId());
+                            Log.d("EventViewerFragment", "Event loaded from Firebase: " + eventId);
+                            displayEvent(event, view, eventId);
+                        } else {
+                            showError("Event data is invalid");
+                        }
+                    } else {
+                        showError("Event not found");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("EventViewerFragment", "Error loading event: " + e.getMessage());
+                    showError("Failed to load event");
+                });
+    }
+
+    /**
+     * Author: Dan
+     * Displays the event information in the UI
+     * @param event The event to display
+     * @param view The fragment view
+     * @param eventId The event ID
+     */
+    private void displayEvent(Event event, View view, String eventId) {
         // set title:
-        toolbar = view.findViewById(R.id.topAppBar);
-        toolbar.setTitle(eventToDisplay.getEventTitle());
+        toolbar.setTitle(event.getEventTitle());
 
         // set image using the event URL:
-        event_image = view.findViewById(R.id.heroImage);
-        String event_url = eventToDisplay.getPoster().getData();
-        Glide.with(event_image.getContext())
-                .load(event_url)
-                .placeholder(R.drawable.shrug)
-                .error(R.drawable.shrug )
-                .into(event_image);
-
-        // TODO: set registration start + end date, actual event date, and lottery draw date:
-
-        // set date:
-        dateView = view.findViewById(R.id.valueDateTime);
-//        String dateString = even
-
+        if (event.getPoster() != null && event.getPoster().getData() != null) {
+            String event_url = event.getPoster().getData();
+            Glide.with(event_image.getContext())
+                    .load(event_url)
+                    .placeholder(R.drawable.shrug)
+                    .error(R.drawable.shrug)
+                    .into(event_image);
+        } else {
+            event_image.setImageResource(R.drawable.shrug);
+        }
 
         // handle navigation back to mainEntrantView on back button click
         toolbar.setOnMenuItemClickListener(item -> {
@@ -116,20 +186,23 @@ public class EventViewerFragment extends Fragment {
                         .navigate(R.id.navigation_home);
                 return true;
             }
-
             return false;
         });
 
-        MaterialButton acceptInvitationButton = view.findViewById(R.id.btnAccept);
-        MaterialButton leaveWaitlistButton = view.findViewById(R.id.btnLeaveWaitlist);
-
-        assert eventId != null;
-        boolean fromMy = getArguments().getBoolean("from_my_events", false);
-        acceptInvitationButton.setVisibility(fromMy ? View.GONE : View.VISIBLE);
-        leaveWaitlistButton.setVisibility(fromMy ? View.VISIBLE : View.GONE);
+        // View QR Code button
+        Button viewQRCodeButton = view.findViewById(R.id.btnViewQRCode);
+        viewQRCodeButton.setOnClickListener(v -> {
+            // Navigate to EventQRCodeFragment with event ID
+            Bundle args = new Bundle();
+            args.putString(EventQRCodeFragment.ARG_EVENT_ID, eventId);
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.action_eventViewer_to_eventQRCode, args);
+        });
 
         // set an onClicklistener for accepting joining the waitlist
+        assert acceptInvitationButton != null;
         acceptInvitationButton.setOnClickListener(v -> {
+            Toast.makeText(v.getContext(), "Accepted invitation! ", Toast.LENGTH_SHORT).show();
             Toast.makeText(v.getContext(), "Joined waitlist! ", Toast.LENGTH_SHORT).show();
 
             acceptInvitationButton.setText("Joined!");
@@ -155,6 +228,7 @@ public class EventViewerFragment extends Fragment {
         });
 
         // set an onClicklistener for leaving the waitlist
+        assert leaveWaitlistButton != null;
         leaveWaitlistButton.setOnClickListener(v -> {
             Toast.makeText(v.getContext(), "Left waitlist! ", Toast.LENGTH_SHORT).show();
 
@@ -184,11 +258,19 @@ public class EventViewerFragment extends Fragment {
                         Toast.makeText(v.getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
         });
-
-
-
-        return view;
     }
 
-
+    /**
+     * Author: Dan
+     * Shows an error message to the user if the event id is null
+     * Basically displays a default event instead of crashing
+     * @param message The error message to display
+     */
+    private void showError(String message) {
+        if (getContext() != null) {
+            Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+            Log.e("EventViewerFragment", message);
+        }
+        toolbar.setTitle("Error");
+    }
 }
