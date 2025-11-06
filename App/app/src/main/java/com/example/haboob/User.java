@@ -65,4 +65,29 @@ public abstract class User {
         this.accountType = accountType;
     }
 
+    // Getter methods
+    public String getDeviceId() {
+        return deviceId;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public String getAccountType() {
+        return accountType;
+    }
+
 }
