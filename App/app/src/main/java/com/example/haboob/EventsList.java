@@ -8,7 +8,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Date;
 /*
  * This class holds a list of all events and manages the events database on Firestore
  * getEventsList() Return a list of all events objects
@@ -249,5 +249,21 @@ public class EventsList  {
         return waitlistedEventList;
     }
 
+    // Return a list of events that aren't past their registration end date
+    public ArrayList<Event> getLiveEvents() {
+        ArrayList<Event> liveEvents = new ArrayList<>();
+
+        Date currentDate = new Date(); // current date/time
+
+        for (Event e : eventsList) {
+            Date endDate = e.getRegistrationEndDate();
+            // Add event if it has no end date OR the end date is after the current date
+            if (endDate == null || endDate.after(currentDate)) {
+                liveEvents.add(e);
+            }
+        }
+
+        return liveEvents;
+    }
 
 }
