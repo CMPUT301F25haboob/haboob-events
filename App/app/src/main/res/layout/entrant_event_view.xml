@@ -163,7 +163,7 @@
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"
                 android:textStyle="bold"
-                app:backgroundTint="@android:color/black"
+                app:backgroundTint="#BF1D2A"
                 app:cornerRadius="16dp"
                 app:iconTint="@android:color/white"
                 app:layout_constraintEnd_toEndOf="parent"

@@ -1,6 +1,7 @@
 package com.example.haboob.ui.home;
 
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -15,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.MenuProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
@@ -35,8 +37,10 @@ import com.example.haboob.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButton;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -51,6 +55,9 @@ import java.util.List;
 public class EventViewerFragment extends Fragment {
 
     private String eventID;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    //    private String deviceId = "9662d2bd2595742d";
+    private String deviceId;
     public static final String ARG_EVENT_ID = "arg_event_id";
     private TextView dateView, locView; // declare the view buttons we'll need to update
     private ImageView event_image;
@@ -68,11 +75,13 @@ public class EventViewerFragment extends Fragment {
         Bundle args = getArguments();
         if (args == null) {
             // choose one: show empty state, toast, or go back
-           Log.d("TAG", "ITS NULL U DUMMY");
+           Log.d("TAG", "The bundle passed to EventViewerFragment from EntrantMainFragment was NULL");
 //            return new View(requireContext()); // or inflate a placeholder
         }
         // unpack the bundle:
         String eventId = requireArguments().getString(ARG_EVENT_ID);
+        deviceId = requireArguments().getString("device_id");
+        Log.d("TAG", "deviceId from bundle: " + deviceId);
 
         // grab the details of event:
         EventsList eventsList = ((MainActivity) getActivity()).getEventsList();
@@ -111,17 +120,72 @@ public class EventViewerFragment extends Fragment {
             return false;
         });
 
-        Button acceptInvitationButton = view.findViewById(R.id.btnAccept);
+        MaterialButton acceptInvitationButton = view.findViewById(R.id.btnAccept);
+        MaterialButton leaveWaitlistButton = view.findViewById(R.id.btnLeaveWaitlist);
 
+        assert eventId != null;
+        boolean fromMy = getArguments().getBoolean("from_my_events", false);
+        acceptInvitationButton.setVisibility(fromMy ? View.GONE : View.VISIBLE);
+        leaveWaitlistButton.setVisibility(fromMy ? View.VISIBLE : View.GONE);
 
-        // set an onClicklistener toast for accepting invitation
+        // set an onClicklistener for accepting joining the waitlist
         acceptInvitationButton.setOnClickListener(v -> {
-        Toast.makeText(v.getContext(), "Accepted invitation! ", Toast.LENGTH_SHORT).show();
+            Toast.makeText(v.getContext(), "Joined waitlist! ", Toast.LENGTH_SHORT).show();
 
-        acceptInvitationButton.setText("Accepted!");
-        acceptInvitationButton.setBackgroundColor(getResources().getColor(R.color.accept_green));
+            acceptInvitationButton.setText("Joined!");
+            acceptInvitationButton.setBackgroundColor(getResources().getColor(R.color.accept_green));
 
-    });
+            assert eventId != null;
+            DocumentReference ref = FirebaseFirestore.getInstance()
+                    .collection("events")
+                    .document(eventId);
+
+            // add the device ID to the  Event entrant_ids_for_lottery list in the database:
+            ref.update("entrant_ids_for_lottery", FieldValue.arrayUnion(deviceId))
+                    .addOnSuccessListener(unused -> {
+                        // NOTE: It's okay if it the deviceID is already in the list, firebase won't add another, but the toast still runs
+                        Toast.makeText(v.getContext(), "Joined lottery!", Toast.LENGTH_SHORT).show();
+                        acceptInvitationButton.setText("Accepted!");
+                        getParentFragmentManager().setFragmentResult("USER_JOINED_WAITLIST", new Bundle());
+                    })
+                    .addOnFailureListener(e -> {
+                        acceptInvitationButton.setEnabled(true);
+                        Toast.makeText(v.getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+        });
+
+        // set an onClicklistener for leaving the waitlist
+        leaveWaitlistButton.setOnClickListener(v -> {
+            Toast.makeText(v.getContext(), "Left waitlist! ", Toast.LENGTH_SHORT).show();
+
+            assert eventId != null;
+            DocumentReference ref = FirebaseFirestore.getInstance()
+                    .collection("events")
+                    .document(eventId);
+
+            // add the device ID to the  Event entrant_ids_for_lottery list in the database:
+            ref.update("entrant_ids_for_lottery", FieldValue.arrayRemove(deviceId))
+                    .addOnSuccessListener(unused -> {
+                        // NOTE: It's okay if it the deviceID is not in the list, firebase wont error, but the toast still runs
+                        Toast.makeText(v.getContext(), "Left waitlist!", Toast.LENGTH_SHORT).show();
+                        acceptInvitationButton.setText("Join Waitlist");
+                        acceptInvitationButton.setBackgroundColor(
+                                ContextCompat.getColor(v.getContext(), R.color.accept_green)
+                        );
+
+                        leaveWaitlistButton.setText("Left waitlist!");
+                        leaveWaitlistButton.setBackgroundColor(getResources().getColor(R.color.black));
+
+                        // notify EntrantMainFragment to update carousels, as the user left the list
+                        getParentFragmentManager().setFragmentResult("USER_LEFT_WAITLIST", new Bundle());
+                    })
+                    .addOnFailureListener(e -> {
+                        acceptInvitationButton.setEnabled(true);
+                        Toast.makeText(v.getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+        });
+
+
 
         return view;
     }
