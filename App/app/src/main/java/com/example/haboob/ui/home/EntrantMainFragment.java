@@ -276,6 +276,9 @@ public class EntrantMainFragment extends Fragment {
                     args.putString("device_id", deviceId);
                     args.putBoolean("from_my_events", false); // sets leaveEvent button invisible
 
+                    if (event.getEntrant_ids_for_lottery().contains(deviceId)) {
+                        args.putBoolean("in_waitlist", true); // sets leaveEvent button invisible
+                    }
                     // navigate to the EventViewerFragment using the NavController
                     NavHostFragment.findNavController(this)
                             .navigate(R.id.entrant_event_view, args);

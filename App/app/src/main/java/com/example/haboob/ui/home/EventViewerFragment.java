@@ -64,7 +64,8 @@ public class EventViewerFragment extends Fragment {
     private FirebaseFirestore db;
     private String deviceId;
     MaterialButton acceptInvitationButton, leaveWaitlistButton;
-
+    TextView userWaitListStatus;
+    private String currentWaitListStatus;
 
     public EventViewerFragment() {
         // Required empty public constructor
@@ -94,11 +95,12 @@ public class EventViewerFragment extends Fragment {
         event_image = view.findViewById(R.id.heroImage);
         acceptInvitationButton = view.findViewById(R.id.btnAccept);
         leaveWaitlistButton = view.findViewById(R.id.btnLeaveWaitlist);
+        userWaitListStatus = view.findViewById(R.id.userWaitListStatus);
 
         assert getArguments() != null;
-        boolean fromMy = getArguments().getBoolean("from_my_events", false);
-        acceptInvitationButton.setVisibility(fromMy ? View.GONE : View.VISIBLE);
-        leaveWaitlistButton.setVisibility(fromMy ? View.VISIBLE : View.GONE);
+        Bundle args = getArguments();
+
+        setButtons(args); // sets buttons based on the current waitlist status
 
         // unpack the bundle:
         String eventId = requireArguments().getString(ARG_EVENT_ID);
@@ -121,6 +123,39 @@ public class EventViewerFragment extends Fragment {
         }
 
         return view;
+    }
+
+    /**
+     * Author: David
+     * Sets the accepted or leave buttons for the open waitlist carousel, sets current status
+     * @param args the bundle containing the event ID
+     */
+    public void setButtons(Bundle args){
+        //TODO: set the buttons based on the current waitlist status
+        assert args != null;
+        String eventId = args.getString(ARG_EVENT_ID);
+
+        EventsList eventsList = new EventsList();
+        Event eventToDisplay = eventsList.getEventByID(eventId);
+
+        boolean currentlyInWaitlist = args.getBoolean("in_waitlist", false);
+        if (currentlyInWaitlist) {
+            leaveWaitlistButton.setVisibility(View.VISIBLE);
+            acceptInvitationButton.setText("Joined!");
+            acceptInvitationButton.setBackgroundColor(getResources().getColor(R.color.accept_green));
+            userWaitListStatus.setText(R.string.waitlist_status_registered);
+        }
+        else{
+            leaveWaitlistButton.setVisibility(View.INVISIBLE);
+            userWaitListStatus.setVisibility(View.INVISIBLE);
+        }
+
+//        acceptInvitationButton.setVisibility(fromWaitListCarousel ? View.GONE : View.VISIBLE);
+//        boolean currentlyInWaitlist = args.getBoolean("in_waitlist", false);
+
+
+//        currentWaitListStatus = eventToDisplay.getWaitlist_status();
+
     }
 
     /**
@@ -207,6 +242,12 @@ public class EventViewerFragment extends Fragment {
 
             acceptInvitationButton.setText("Joined!");
             acceptInvitationButton.setBackgroundColor(getResources().getColor(R.color.accept_green));
+            leaveWaitlistButton.setVisibility(View.VISIBLE);
+            leaveWaitlistButton.setText("Leave waitlist");
+            leaveWaitlistButton.setBackgroundColor(getResources().getColor(R.color.leaving_red));
+            userWaitListStatus.setVisibility(View.VISIBLE);
+            userWaitListStatus.setText(R.string.waitlist_status_registered);
+
 
             assert eventId != null;
             DocumentReference ref = FirebaseFirestore.getInstance()
@@ -218,7 +259,6 @@ public class EventViewerFragment extends Fragment {
                     .addOnSuccessListener(unused -> {
                         // NOTE: It's okay if it the deviceID is already in the list, firebase won't add another, but the toast still runs
                         Toast.makeText(v.getContext(), "Joined lottery!", Toast.LENGTH_SHORT).show();
-                        acceptInvitationButton.setText("Accepted!");
                         getParentFragmentManager().setFragmentResult("USER_JOINED_WAITLIST", new Bundle());
                     })
                     .addOnFailureListener(e -> {
@@ -247,8 +287,10 @@ public class EventViewerFragment extends Fragment {
                                 ContextCompat.getColor(v.getContext(), R.color.accept_green)
                         );
 
-                        leaveWaitlistButton.setText("Left waitlist!");
+                        leaveWaitlistButton.setText("Left Waitlist!");
                         leaveWaitlistButton.setBackgroundColor(getResources().getColor(R.color.black));
+                        userWaitListStatus.setVisibility(View.INVISIBLE);
+
 
                         // notify EntrantMainFragment to update carousels, as the user left the list
                         getParentFragmentManager().setFragmentResult("USER_LEFT_WAITLIST", new Bundle());

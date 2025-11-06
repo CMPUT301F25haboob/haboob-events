@@ -142,14 +142,14 @@
                 style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="56dp"
                 android:text="Accept Invitation"
                 android:textAllCaps="false"
                 android:textStyle="bold"
                 app:backgroundTint="@color/white"
                 app:cornerRadius="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/labelAmount"
                 tools:backgroundTint="#35C759" />
@@ -187,6 +187,19 @@
 <!--                app:backgroundTint="@android:color/black"-->
 <!--                app:iconTint="@android:color/white"-->
 <!--                android:textColor="@android:color/white"/>-->
+
+            <TextView
+                android:id="@+id/userWaitListStatus"
+                android:layout_width="388dp"
+                android:layout_height="54dp"
+                android:layout_marginTop="36dp"
+                android:text="Waitlist Status"
+                android:textSize="14sp"
+                android:textStyle="italic"
+                app:layout_constraintEnd_toStartOf="@id/valueAmount"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/labelDrawDate" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnViewQRCode"
@@ -237,6 +250,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"/>
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 
