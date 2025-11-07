@@ -17,7 +17,6 @@ import com.example.haboob.EventsList;
 import com.example.haboob.R;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -25,11 +24,17 @@ public class WaitlistsFragment extends Fragment {
 
     private WaitlistAdapter adapter;
     private EventsList eventsList = new EventsList(); // declare the eventsList object
-    private List<Event> listOfEvents = new ArrayList<>();
+    private List<Event> entrantWaitList = new ArrayList<>();
+    public static final String ARG_DEVICE_ID = "device_id";
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        // unpack the bundle from entrantMainFragment(called on waitlist button click):
+        String deviceId = getArguments() != null
+                ? getArguments().getString(ARG_DEVICE_ID)
+                : null;
 
         loadEventsForUser("davids_id"); // load events for thw waitListAdapter, resets the adapter's list of events
 
@@ -38,9 +43,11 @@ public class WaitlistsFragment extends Fragment {
         ListView list = v.findViewById(R.id.waitlistsListView);
         SearchView search = v.findViewById(R.id.searchView);
 
-        List<Event> listOfEvents = eventsList.getEventsList(); // making a List<Event> So I can iterate through the events, cant do that with an EventsList object
+        entrantWaitList = eventsList.getEntrantWaitlistEvents(deviceId);
 
-        adapter = new WaitlistAdapter(requireContext(), new ArrayList<>(listOfEvents));
+//        List<Event> listOfEvents = eventsList.getEventsList(); // making a List<Event> So I can iterate through the events, cant do that with an EventsList object
+
+        adapter = new WaitlistAdapter(requireContext(), new ArrayList<>(entrantWaitList));
         list.setAdapter(adapter);
 
         // Search -> adapter filter
@@ -77,10 +84,10 @@ public class WaitlistsFragment extends Fragment {
             @Override
             public void onEventsLoaded() { // the callback function calls this when events are loaded
 
-                listOfEvents = eventsList.getEventsList();
-                Log.d("TAG", "waitList EVENTSLIST SIZE: " + listOfEvents.size());
+                entrantWaitList = eventsList.getEventsList();
+                Log.d("TAG", "waitList EVENTSLIST SIZE: " + entrantWaitList.size());
 
-                adapter.replaceAll(listOfEvents);
+                adapter.replaceAll(entrantWaitList);
                 Log.d("TAG", "ImageAdapter images Replaced");
 
             }

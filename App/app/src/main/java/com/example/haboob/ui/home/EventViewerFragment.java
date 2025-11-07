@@ -309,7 +309,7 @@ public class EventViewerFragment extends Fragment {
         // Leave waitlist OnclickListener
         assert leaveWaitlistButton != null;
         leaveWaitlistButton.setOnClickListener(v -> {
-            Toast.makeText(v.getContext(), "Left waitlist! ", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(v.getContext(), "Left waitlist! ", Toast.LENGTH_SHORT).show();
 
 
             eventToDisplay.removeEntrantFromWaitingEntrants(deviceId); // remove the device ID from the waitingEntrantsList for the lottery
@@ -317,7 +317,7 @@ public class EventViewerFragment extends Fragment {
             leaveWaitlistButton.setBackgroundColor(getResources().getColor(R.color.black));
             userWaitListStatus.setVisibility(View.INVISIBLE);
             acceptInvitationButton.setText("Join Waitlist");
-            // notify EntrantMainFragment to update carousels, as the user left the list
+//             notify EntrantMainFragment to update carousels, as the user left the list
             getParentFragmentManager().setFragmentResult("USER_LEFT_WAITLIST", new Bundle());
 
 //            assert eventId != null;
@@ -347,8 +347,48 @@ public class EventViewerFragment extends Fragment {
 //                        acceptInvitationButton.setEnabled(true);
 //                        Toast.makeText(v.getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
 //                    });
-//        });
+        });
 
+        // Leave event OnclickListener
+        assert leaveEventButton != null;
+        leaveEventButton.setOnClickListener(v -> {
+//            Toast.makeText(v.getContext(), "Left waitlist! ", Toast.LENGTH_SHORT).show();
+
+
+            eventToDisplay.removeEntrantFromEnrolledEntrants(deviceId); // remove the device ID from the waitingEntrantsList for the lottery
+            leaveEventButton.setText("Left event!");
+            userWaitListStatus.setVisibility(View.INVISIBLE);
+            acceptInvitationButton.setVisibility(View.INVISIBLE);
+//             notify EntrantMainFragment to update carousels, as the user left the list
+            getParentFragmentManager().setFragmentResult("USER_LEFT_WAITLIST", new Bundle());
+
+//            assert eventId != null;
+//            DocumentReference ref = FirebaseFirestore.getInstance()
+//                    .collection("events")
+//                    .document(eventId);
+
+            // Leave Waitlist OnclickListener: remove the device ID from the waitingEntrantsList in the lottery
+//            ref.update("waitingEntrants", FieldValue.arrayRemove(deviceId))
+//                    .addOnSuccessListener(unused -> {
+//                        // NOTE: It's okay if it the deviceID is not in the list, firebase wont error, but the toast still runs
+//                        Toast.makeText(v.getContext(), "Left waitlist!", Toast.LENGTH_SHORT).show();
+//                        acceptInvitationButton.setText("Join Waitlist");
+//                        acceptInvitationButton.setBackgroundColor(
+//                                ContextCompat.getColor(v.getContext(), R.color.accept_green)
+//                        );
+//
+//                        leaveWaitlistButton.setText("Left Waitlist!");
+//                        leaveWaitlistButton.setBackgroundColor(getResources().getColor(R.color.black));
+//                        userWaitListStatus.setVisibility(View.INVISIBLE);
+//
+//
+//                        // notify EntrantMainFragment to update carousels, as the user left the list
+//                        getParentFragmentManager().setFragmentResult("USER_LEFT_WAITLIST", new Bundle());
+//                    })
+//                    .addOnFailureListener(e -> {
+//                        acceptInvitationButton.setEnabled(true);
+//                        Toast.makeText(v.getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+//                    });
         });
     }
 

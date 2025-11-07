@@ -367,9 +367,12 @@ public class EntrantMainFragment extends Fragment {
 
         // set a listener that listens for myWaitlists button click, on navigate, it navigates there
         myWaitlists = view.findViewById(R.id.btn_my_waitlists);
+        Bundle args = new Bundle();
+        args.putString("device_id", deviceId); // args <- deviceID
+
         myWaitlists.setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
-                        .navigate(R.id.waitlists_view_fragment)
+                        .navigate(R.id.waitlists_view_fragment, args)
         );
 
     }
