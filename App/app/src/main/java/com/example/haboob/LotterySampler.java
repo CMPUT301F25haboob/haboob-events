@@ -23,7 +23,7 @@ public class LotterySampler {
             throw new IllegalArgumentException("Event cannot be null");
         }
 
-        ArrayList<String> entrants = event.getEntrants();
+        ArrayList<String> entrants = event.getWaitingEntrants();
         if (entrants == null || entrants.isEmpty()) {
             throw new IllegalArgumentException("Event has no entrants to sample from");
         }
@@ -39,17 +39,11 @@ public class LotterySampler {
 
         // Add selected entrants to invitedEntrants
         for (String entrantId : selectedEntrants) {
+            // TODO: Remove the entrant form the waiting list
             event.addEntrantToInvitedEntrants(entrantId);
+            // TODO: Send a notification saying they were picked
         }
 
-        // Add remaining entrants to waitingEntrants
-        // TODO: We just want to keep the entrants on the waiting list here
-        // TODO: is this code correct for that case? Check with Spencer and David
-        for (String entrantId : entrants) {
-            if (!selectedEntrants.contains(entrantId)) {
-                event.addEntrantToWaitingEntrants(entrantId);
-            }
-        }
     }
 
     /**
@@ -74,5 +68,40 @@ public class LotterySampler {
 
         int numToSelect = Math.min(sampleSize, shuffledEntrants.size());
         return new ArrayList<>(shuffledEntrants.subList(0, numToSelect));
+    }
+
+    /**
+     * Fills a vacancy by selecting one entrant from the waiting list.
+     * Called when an invited entrant cancels their invitation.
+     *
+     * @param event The event to fill a vacancy for
+     * @return The ID of the newly selected entrant, or null if no one is waiting
+     * @throws IllegalArgumentException if event is null
+     */
+    public String fillVacancyFromWaitlist(Event event) {
+        if (event == null) {
+            throw new IllegalArgumentException("Event cannot be null");
+        }
+
+        ArrayList<String> waitingEntrants = event.getWaitingEntrants();
+        if (waitingEntrants == null || waitingEntrants.isEmpty()) {
+            return null; // No one waiting
+        }
+
+        // Randomly select one entrant from the waiting list
+        List<String> selected = sampleEntrants(waitingEntrants, 1);
+
+        if (!selected.isEmpty()) {
+            String selectedEntrantId = selected.get(0);
+
+            // Move from waiting to invited
+            event.addEntrantToInvitedEntrants(selectedEntrantId);
+            // TODO: Remove from waiting list - need to add removeEntrantFromWaitingEntrants() method to Event class
+            // TODO: Send notification to the newly selected entrant
+
+            return selectedEntrantId;
+        }
+
+        return null;
     }
 }
