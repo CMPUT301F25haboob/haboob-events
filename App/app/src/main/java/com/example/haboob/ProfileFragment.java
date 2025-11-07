@@ -49,6 +49,7 @@ public class ProfileFragment extends Fragment {
     private MaterialButton saveButton;
     private MaterialButton deleteButton;
     private MaterialToolbar toolbar;
+    private TextView accountTextTextView;
 
     // Firebase
     private FirebaseFirestore db;
@@ -79,6 +80,7 @@ public class ProfileFragment extends Fragment {
         saveButton = view.findViewById(R.id.btnSaveProfile);
         deleteButton = view.findViewById(R.id.btnDeleteProfile);
         toolbar = view.findViewById(R.id.topAppBar);
+        accountTextTextView = view.findViewById(R.id.SCIbutton);
 
         // Load user data
         loadUserData();
@@ -86,6 +88,9 @@ public class ProfileFragment extends Fragment {
         // Set up button listeners
         saveButton.setOnClickListener(v -> saveProfileChanges());
         deleteButton.setOnClickListener(v -> confirmDeleteProfile());
+
+        // Set up admin textview button listener
+        accountTextTextView.setOnClickListener(v -> goToAdmin());
 
         // Reused code from EventViewerFragment for navigating back to home
         // when the back button is pressed
@@ -305,4 +310,14 @@ public class ProfileFragment extends Fragment {
                     deleteButton.setText("Delete Profile");
                 });
     }
+
+
+    private void goToAdmin(){
+        NavHostFragment.findNavController(this)
+                .navigate(R.id.navigation_admin);
+    }
+
+
+
+
 }
