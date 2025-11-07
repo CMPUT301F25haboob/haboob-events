@@ -525,13 +525,7 @@ public class Event implements Serializable {
     public String getOrganizer() {
         return this.organizerID;
     }
-
-    /**
-     * @return list of entrant IDs included in the lottery
-     */
-    public ArrayList<String> getEntrant_ids_for_lottery() {
-        return this.entrant_ids_for_lottery;
-    }
+    
 
     /**
      * @return event UUID stored in the document field
