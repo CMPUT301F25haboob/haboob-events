@@ -77,8 +77,8 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Vi
         public ViewHolder(View view) {
             super(view);
             posterCard = view.findViewById(R.id.card_admin_poster);
-            posterImage = view.findViewById(R.id.poster_image_preview);
-            posterTitle = view.findViewById(R.id.event_title_text);
+            posterImage = view.findViewById(R.id.poster_image_view);
+            posterTitle = view.findViewById(R.id.event_title);
             posterStatus = view.findViewById(R.id.poster_select_checkbox);
         }
     }

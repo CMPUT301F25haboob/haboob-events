@@ -21,6 +21,14 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.List;
 
+// Helper class to simulate the object returned by Poster.getImageSource().
+// This class must be defined here so the MockPoster can use it.
+class MockImageObject {
+    public final int imageResId;
+    public MockImageObject(int imageResId) { this.imageResId = imageResId; }
+}
+
+
 /**
  * Fragment to display a filtered list of events (only those with posters) for admin management.
  */
@@ -30,9 +38,26 @@ public class AdminPosterFragment extends Fragment implements AdminPosterAdapter.
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
     private AdminPosterAdapter adapter;
-    // The list now stores Events, but filtered to those with posters
     private List<Event> eventList;
     private FirebaseFirestore db;
+
+    private EventsList eventsListManager;
+    // Helper class to mock the Poster methods required by the Adapter
+    // NOTE: This assumes your actual Poster class returns an Object for getImageSource().
+    private static class MockPoster extends Poster {
+        private final MockImageObject imageSource;
+
+        public MockPoster(String posterId, int imageResId) {
+            super(posterId);
+            this.imageSource = new MockImageObject(imageResId);
+        }
+
+        // Mock implementation of the required method, returning the mock picture object
+        public Object getImageSource() {
+            return imageSource;
+        }
+    }
+
 
     public AdminPosterFragment() {
         // Required empty public constructor
@@ -52,9 +77,20 @@ public class AdminPosterFragment extends Fragment implements AdminPosterAdapter.
         // Setup Firestore
         db = FirebaseFirestore.getInstance();
 
-        // Setup Toolbar Navigation
-        toolbar.setNavigationOnClickListener(v -> {
-            NavHostFragment.findNavController(this).popBackStack();
+        eventsListManager = new EventsList(true);
+
+        // **FIX: Ensure this back navigation listener is correctly set.**
+        // **FIX: Use navigateUp() for the definitive "Up" navigation action.**
+        toolbar.setOnMenuItemClickListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.action_goBack) {
+                NavHostFragment.findNavController(this)
+                        .navigate(R.id.navigation_admin);
+                return true;
+            }
+
+            return false;
         });
 
         // Setup RecyclerView
@@ -66,8 +102,36 @@ public class AdminPosterFragment extends Fragment implements AdminPosterAdapter.
         adapter = new AdminPosterAdapter(eventList, this);
         recyclerView.setAdapter(adapter);
 
-        // Load data
-        loadEventsWithPosters();
+        // FIX: Start loading data from Firestore using the EventsList constructor with a listener.
+        progressBar.setVisibility(View.VISIBLE);
+
+        eventsListManager = new EventsList(new EventsList.OnEventsLoadedListener() {
+            @Override
+            public void onEventsLoaded() {
+                // Data loading succeeded. Filter and update UI on the main thread.
+                eventList.clear();
+
+                // Filter logic: Only add events that have a Poster object (not null).
+                for (Event event : eventsListManager.getEventsList()) {
+                    if (event.getPoster() != null) {
+                        eventList.add(event);
+                    }
+                }
+
+                // Update UI
+                adapter.notifyDataSetChanged();
+                progressBar.setVisibility(View.GONE);
+                Log.d(TAG, "Events with Posters loaded: " + eventList.size());
+            }
+
+            @Override
+            public void onError(Exception e) {
+                // Handle the loading failure
+                progressBar.setVisibility(View.GONE);
+                Log.e(TAG, "Error loading events: " + e.getMessage());
+                Toast.makeText(getContext(), "Error loading posters: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
 
         return view;
     }
@@ -78,30 +142,34 @@ public class AdminPosterFragment extends Fragment implements AdminPosterAdapter.
     private void loadEventsWithPosters() {
         progressBar.setVisibility(View.VISIBLE);
 
-        // --- MOCK DATA FOR DEMONSTRATION ---
-        // Create a Poster object to attach to events
-        Poster mockPoster = new Poster("P1");
+        // Use EventsList to load data asynchronously
+        eventsListManager.loadEventsList(new EventsList.OnEventsLoadedListener() {
+            @Override
+            public void onEventsLoaded() {
+                // 1. Clear the current list
+                eventList.clear();
 
-        // Mock Events with IDs matching the map in AdminPosterAdapter.java
-        // These IDs trigger specific drawable loading in the adapter
-        Event mockEvent1 = new Event(); mockEvent1.setEventID("E1_HOCKEY"); mockEvent1.setEventTitle("Youth Hockey Tournament"); mockEvent1.setPoster(mockPoster);
-        Event mockEvent2 = new Event(); mockEvent2.setEventID("E2_SWIM"); mockEvent2.setEventTitle("Local Swimming Meet"); mockEvent2.setPoster(mockPoster);
-        Event mockEvent3 = new Event(); mockEvent3.setEventID("E3_ART"); mockEvent3.setEventTitle("Bob Ross Painting Class"); mockEvent3.setPoster(mockPoster);
-        Event mockEvent4 = new Event(); mockEvent4.setEventID("E4_CLASH"); mockEvent4.setEventTitle("Clash Royale Esports Open"); mockEvent4.setPoster(mockPoster);
-        Event mockEvent5 = new Event(); mockEvent5.setEventID("E5_NOPOSTER"); mockEvent5.setEventTitle("Board Game Night"); // No Poster
+                // 2. Iterate over all events loaded from Firestore
+                for (Event event : eventsListManager.getEventsList()) {
+                    // 3. Filter logic: Only add events that have a Poster object (not null).
+                    if (event.getPoster() != null) {
+                        eventList.add(event);
+                    }
+                }
 
-        // Filter logic: Only add events with a poster object.
-        if (mockEvent1.getPoster() != null) eventList.add(mockEvent1);
-        if (mockEvent2.getPoster() != null) eventList.add(mockEvent2);
-        if (mockEvent3.getPoster() != null) eventList.add(mockEvent3);
-        if (mockEvent4.getPoster() != null) eventList.add(mockEvent4);
-        // mockEvent5 is filtered out because getPoster() returns null.
+                // 4. Update UI
+                adapter.notifyDataSetChanged();
+                progressBar.setVisibility(View.GONE);
+                Log.d(TAG, "Events with Posters loaded: " + eventList.size());
+            }
 
-        // --- END MOCK DATA ---
-
-        adapter.notifyDataSetChanged();
-        progressBar.setVisibility(View.GONE);
-        Log.d(TAG, "Events with Posters loaded: " + eventList.size());
+            @Override
+            public void onError(Exception e) {
+                progressBar.setVisibility(View.GONE);
+                Log.e(TAG, "Error loading events: " + e.getMessage());
+                Toast.makeText(getContext(), "Error loading posters.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**
@@ -119,8 +187,6 @@ public class AdminPosterFragment extends Fragment implements AdminPosterAdapter.
         Bundle bundle = new Bundle();
         bundle.putString("poster_id", eventId);
 
-        // You must replace R.id.navigation_admin_poster_detail with the actual ID
-        // of your AdminPosterDetailFragment destination in your mobile_navigation.xml
         // NavHostFragment.findNavController(this).navigate(R.id.navigation_admin_poster_detail, bundle);
 
         Log.d(TAG, "Attempting to navigate to detail for Event ID: " + eventId);

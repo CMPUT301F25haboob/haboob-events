@@ -76,7 +76,11 @@
         android:id="@+id/navigation_admin"
         android:name="com.example.haboob.AdminMainFragment"
         android:label="AdminMain"
-        tools:layout="@layout/admin_main_fragment" />
+        tools:layout="@layout/admin_main_fragment" >
+        <action
+            android:id="@+id/action_adminMain_to_adminPosters"
+            app:destination="@id/navigation_admin_posters" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_admin_notifications"

@@ -42,7 +42,7 @@ public class AdminMainFragment extends Fragment {
         Button sendNotificationsButton = view.findViewById(R.id.admin_view_notifications_button);
         ImageButton viewBackButton = view.findViewById(R.id.btn_admin_back);
 
-        viewBackButton.setOnClickListener(v-> goToMain());
+        viewBackButton.setOnClickListener(v-> goBack());
 
 
 
@@ -62,19 +62,21 @@ public class AdminMainFragment extends Fragment {
         });
 
 
-        /* tmp
+
         // Set click listener for View Events
         viewEventsButton.setOnClickListener(v -> {
             try {
                 // TODO: Replace with your actual action ID from mobile_navigation.xml
                 NavHostFragment.findNavController(AdminMainFragment.this)
-                        .navigate(R.id.navigation_admin_events);
+                        .navigate(R.id.navigation_admin_posters);
             } catch (Exception e) {
                 Log.e("AdminMainFragment", "Navigation to events failed. Is the action ID set?", e);
                 Toast.makeText(getContext(), "View Events (Not Implemented)", Toast.LENGTH_SHORT).show();
             }
         });
 
+
+         /* tmp
         // Set click listener for View Users
         viewUsersButton.setOnClickListener(v -> {
             try {
@@ -101,8 +103,8 @@ public class AdminMainFragment extends Fragment {
     }
 
 
-    private void goToMain(){
+    private void goBack(){
         NavHostFragment.findNavController(this)
-                .navigate(R.id.navigation_home);
+                .navigate(R.id.profile_fragment);
     }
 }
