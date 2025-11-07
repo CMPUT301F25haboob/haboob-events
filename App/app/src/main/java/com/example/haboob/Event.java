@@ -62,6 +62,13 @@ public class Event implements Serializable {
         this.initLists();
     }
 
+    public Event(boolean inMemoryOnly) {
+        if (!inMemoryOnly) {
+            this.db = FirebaseFirestore.getInstance();
+        }
+        this.initLists();
+    }
+
     public Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, int optionalWaitingListSize, QRCode qrCode, Poster poster, ArrayList<String> tags) {
         this.eventID = UUID.randomUUID().toString();
         this.db = FirebaseFirestore.getInstance();
