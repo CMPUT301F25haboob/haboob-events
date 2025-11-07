@@ -11,18 +11,40 @@ import java.util.Date;
 import static org.junit.Assert.*;
 
 /**
- * Local unit tests for EventsList logic that does not require Firestore.
- * Place this file under: src/test/java/com/example/haboob/EventsListTest.java
+ * Unit tests for {@link EventsList} logic that can be executed without Firestore or Android.
+ * <p>
+ * This test suite validates all in-memory behaviors of {@code EventsList}, including:
+ * <ul>
+ *   <li>Finding events by ID</li>
+ *   <li>Filtering events by tags (case-insensitive)</li>
+ *   <li>Retrieving events by organizer</li>
+ *   <li>Finding waitlist membership by entrant</li>
+ *   <li>Determining which events are still "live"</li>
+ * </ul>
+ * <p>
+ * The tests use the in-memory constructor {@code new EventsList(true)} to avoid
+ * Firebase initialization, and mock {@link Event} objects created directly with setters.
+ * <p>
+ * Place this file under:
+ * <pre>src/test/java/com/example/haboob/EventsListTest.java</pre>
  */
 public class EventsListTest {
 
+    /** The in-memory instance of EventsList used for testing. */
     private EventsList eventsList;
 
     // Test fixtures
-    private Event e1; // future end date, has tags ["Music","Outdoor"], organizer "orgA", waitlist ["u1"]
-    private Event e2; // null end date (treated as live), tags ["workshop"], organizer "orgB", waitlist ["u2","u3"]
-    private Event e3; // past end date, tags ["MUSIC","indoor"], organizer "orgA", waitlist []
+    /** Event with future end date, tags ["Music", "Outdoor"], organizer "orgA", waitlist ["u1"]. */
+    private Event e1;
+    /** Event with null end date (treated as live), tags ["workshop"], organizer "orgB", waitlist ["u2","u3"]. */
+    private Event e2;
+    /** Event with past end date, tags ["MUSIC","indoor"], organizer "orgA", waitlist []. */
+    private Event e3;
 
+    /**
+     * Initializes a new in-memory {@link EventsList} and populates it
+     * with three mock {@link Event} objects for testing.
+     */
     @Before
     public void setUp() {
         // Use in-memory mode so we don't touch Firestore
@@ -67,6 +89,10 @@ public class EventsListTest {
         eventsList.getEventsList().add(e3);
     }
 
+    /**
+     * Verifies that {@link EventsList#getEventByID(String)} successfully retrieves
+     * an event when the ID exists in the list.
+     */
     @Test
     public void testGetEventByID_found() {
         Event found = eventsList.getEventByID("E2");
@@ -74,12 +100,24 @@ public class EventsListTest {
         assertEquals("E2", found.getEventID());
     }
 
+    /**
+     * Verifies that {@link EventsList#getEventByID(String)} returns {@code null}
+     * for unknown or null event IDs.
+     */
     @Test
     public void testGetEventByID_notFound() {
         assertNull(eventsList.getEventByID("NOPE"));
         assertNull(eventsList.getEventByID(null));
     }
 
+    /**
+     * Tests {@link EventsList#filterEvents(java.util.List)} for:
+     * <ul>
+     *   <li>Case-insensitive tag matching</li>
+     *   <li>Requirement that all tags in the input are present in an event</li>
+     *   <li>Handling of empty or null input (returns copy of full list)</li>
+     * </ul>
+     */
     @Test
     public void testFilterEvents_caseInsensitive_andContainsAll() {
         // Should match e1 (Music + Outdoor), but not e3 (no "Outdoor")
@@ -101,6 +139,11 @@ public class EventsListTest {
         assertEquals(3, result4.size());
     }
 
+    /**
+     * Tests {@link EventsList#getOrganizerEvents(String)} to ensure it returns
+     * only the events belonging to the specified organizer.
+     * <p>Also validates behavior for null and empty IDs.</p>
+     */
     @Test
     public void testGetOrganizerEvents() {
         var orgAEvents = eventsList.getOrganizerEvents("orgA");
@@ -121,6 +164,10 @@ public class EventsListTest {
         assertTrue(nullRes.isEmpty());
     }
 
+    /**
+     * Tests {@link EventsList#getEntrantWaitlistEvents(String)} to ensure
+     * that it correctly identifies events where a user appears on the waitlist.
+     */
     @Test
     public void testGetEntrantWaitlistEvents() {
         var u1 = eventsList.getEntrantWaitlistEvents("u1");
@@ -138,6 +185,14 @@ public class EventsListTest {
         assertTrue(nullId.isEmpty());
     }
 
+    /**
+     * Tests {@link EventsList#getLiveEvents()} to confirm that:
+     * <ul>
+     *   <li>Events with null end date are treated as live</li>
+     *   <li>Events with future end date are live</li>
+     *   <li>Events with past end date are not included</li>
+     * </ul>
+     */
     @Test
     public void testGetLiveEvents_nullOrFutureEndDateAreLive() {
         var live = eventsList.getLiveEvents();
@@ -146,12 +201,22 @@ public class EventsListTest {
         assertTrue(containsEventIds(live, "E1", "E2"));
     }
 
-    // Helpers
+    // -------------------- Helper methods --------------------
 
+    /**
+     * Convenience method to build an {@link ArrayList} from varargs.
+     */
     private static ArrayList<String> arrayList(String... items) {
         return new ArrayList<>(Arrays.asList(items));
     }
 
+    /**
+     * Helper to assert that a given list of events contains all the provided event IDs.
+     *
+     * @param list the list of events to check
+     * @param ids  the event IDs expected to appear
+     * @return true if all IDs exist in the event list, false otherwise
+     */
     private static boolean containsEventIds(ArrayList<Event> list, String... ids) {
         var set = new java.util.HashSet<String>();
         for (Event e : list) set.add(e.getEventID());
@@ -162,8 +227,15 @@ public class EventsListTest {
     }
 
     /**
-     * Builds a minimal Event for tests.
-     * Adjust to your Event API (constructors / setters) as needed.
+     * Builds a minimal {@link Event} instance for unit testing with specific IDs,
+     * tags, organizer, waiting list, and end date.
+     *
+     * @param id event ID
+     * @param tags list of tags
+     * @param organizerId organizer ID
+     * @param waitingEntrants list of entrant IDs on waitlist
+     * @param registrationEndDate end date for registration (may be null)
+     * @return constructed Event object
      */
     private static Event makeEvent(String id,
                                    ArrayList<String> tags,
