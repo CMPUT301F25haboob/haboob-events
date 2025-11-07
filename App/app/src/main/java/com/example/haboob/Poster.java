@@ -3,7 +3,7 @@ package com.example.haboob;
 import android.graphics.Picture;
 
 // Not sure exactly what Picture does, maybe we can use this though?
-public class Poster {
+public class    Poster {
     private Picture imgSource;
     private String data;
 
