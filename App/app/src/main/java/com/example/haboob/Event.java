@@ -13,6 +13,7 @@ import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 public class Event implements Serializable {
 
@@ -23,7 +24,7 @@ public class Event implements Serializable {
      */
     // Database reference
     private FirebaseFirestore db;
-
+    private DocumentReference docRef;
     // The organizer of the event
     private String organizerID;
 
@@ -62,6 +63,7 @@ public class Event implements Serializable {
     }
 
     public Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, int optionalWaitingListSize, QRCode qrCode, Poster poster, ArrayList<String> tags) {
+        this.eventID = UUID.randomUUID().toString();
         this.db = FirebaseFirestore.getInstance();
         this.organizerID = organizer;
         this.registrationStartDate = registrationStartDate;
@@ -88,23 +90,124 @@ public class Event implements Serializable {
 
     public void addEntrantToInvitedEntrants(String userID) {
         this.invitedEntrants.add(userID);
-        db.collection("events").document(eventID).update("invitedEntrants", FieldValue.arrayUnion(userID));
+
+        db.collection("events")
+                .whereEqualTo("eventID", eventID)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        // Get the actual document ID from the query result
+                        String documentId = queryDocumentSnapshots.getDocuments().get(0).getId();
+
+                        // Update the document using its ID
+                        db.collection("events")
+                                .document(documentId)
+                                .update("invitedEntrants", FieldValue.arrayUnion(userID))
+                                .addOnSuccessListener(aVoid -> {
+                                    Log.d("Event", "Successfully added user to invitedEntrants");
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e("Event", "Error updating invitedEntrants", e);
+                                });
+                    } else {
+                        Log.e("Event", "No event found with eventID: " + eventID);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("Event", "Error querying event", e);
+                });
     }
 
     public void addEntrantToWaitingEntrants(String userID) {
-        this.waitingEntrants.add(userID);
-        db.collection("events").document(eventID).update("waitingEntrants", FieldValue.arrayUnion(userID));
+        this.invitedEntrants.add(userID);
+
+        db.collection("events")
+                .whereEqualTo("eventID", eventID)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        // Get the actual document ID from the query result
+                        String documentId = queryDocumentSnapshots.getDocuments().get(0).getId();
+
+                        // Update the document using its ID
+                        db.collection("events")
+                                .document(documentId)
+                                .update("waitingEntrants", FieldValue.arrayUnion(userID))
+                                .addOnSuccessListener(aVoid -> {
+                                    Log.d("Event", "Successfully added user to waitingEntrants");
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e("Event", "Error updating waitingEntrants", e);
+                                });
+                    } else {
+                        Log.e("Event", "No event found with eventID: " + eventID);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("Event", "Error querying event", e);
+                });
     }
 
     public void addEntrantToEnrolledEntrants(String userID) {
-        this.enrolledEntrants.add(userID);
-        db.collection("events").document(eventID).update("enrolledEntrants", FieldValue.arrayUnion(userID));
+        this.invitedEntrants.add(userID);
+
+        db.collection("events")
+                .whereEqualTo("eventID", eventID)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        // Get the actual document ID from the query result
+                        String documentId = queryDocumentSnapshots.getDocuments().get(0).getId();
+
+                        // Update the document using its ID
+                        db.collection("events")
+                                .document(documentId)
+                                .update("enrolledEntrants", FieldValue.arrayUnion(userID))
+                                .addOnSuccessListener(aVoid -> {
+                                    Log.d("Event", "Successfully added user to enrolledEntrants");
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e("Event", "Error updating enrolledEntrants", e);
+                                });
+                    } else {
+                        Log.e("Event", "No event found with eventID: " + eventID);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("Event", "Error querying event", e);
+                });
     }
 
     public void addEntrantToCancelledEntrants(String userID) {
         this.cancelledEntrants.add(userID);
-        db.collection("events").document(eventID).update("cancelledEntrants", FieldValue.arrayUnion(userID));
+        db.collection("events")
+                .whereEqualTo("eventID", eventID)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        // Get the actual document ID from the query result
+                        String documentId = queryDocumentSnapshots.getDocuments().get(0).getId();
+
+                        // Update the document using its ID
+                        db.collection("events")
+                                .document(documentId)
+                                .update("cancelledEntrants", FieldValue.arrayUnion(userID))
+                                .addOnSuccessListener(aVoid -> {
+                                    Log.d("Event", "Successfully added user to cancelledEntrants");
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e("Event", "Error updating cancelledEntrants", e);
+                                });
+                    } else {
+                        Log.e("Event", "No event found with eventID: " + eventID);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("Event", "Error querying event", e);
+                });
     }
+
+    // TODO: MAKE DELETE FROM LIST BUTTONS
 
 
     public void logEventLists() {

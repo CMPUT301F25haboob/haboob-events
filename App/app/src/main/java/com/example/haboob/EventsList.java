@@ -7,6 +7,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Date;
 /*
@@ -98,10 +99,9 @@ public class EventsList  {
     public String addEvent(Event e, OnEventsLoadedListener listener) {
         eventsListRef.add(e)
                 .addOnSuccessListener(docRef -> {
+                    // Get the
                     String id = docRef.getId();
-                    e.setEventID(id);
-
-                    db.collection("events").document(id).set(e)
+                    db.collection("events").add(e)
                             .addOnSuccessListener(aVoid -> {
                                 eventsList.add(e);
                                 Log.d("EventsList", "Added event with ID: " + id);
@@ -155,6 +155,7 @@ public class EventsList  {
             return;
         }
 
+        eventsListRef.whereEqualTo("eventID", e.getEventID()).get()
         eventsListRef.document(e.getEventID()).delete()
                 .addOnSuccessListener(aVoid -> {
                     eventsList.remove(e);
