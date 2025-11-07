@@ -61,4 +61,7 @@ dependencies {
 
     // JUnit 4 for local unit tests
     testImplementation("junit:junit:4.13.2")
+
+    // JavaDocs
+    // implementation(files("home/user/Android/Sdk/platforms/android-36/android.jar"))
 }

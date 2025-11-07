@@ -15,15 +15,38 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
 /**
- * A simple {@link Fragment} subclass for the main admin panel.
- * It provides buttons to navigate to other admin sections.
+ * Main administrative panel fragment providing navigation to various admin sections.
+ *
+ * <p>This fragment serves as the central hub for administrative functions, offering
+ * buttons to navigate to different management areas such as:</p>
+ * <ul>
+ *   <li>Viewing and managing event posters</li>
+ *   <li>Viewing and managing events</li>
+ *   <li>Viewing and managing users (commented out)</li>
+ *   <li>Sending notifications to users (commented out)</li>
+ * </ul>
+ *
+ * @author Haboob Team
+ * @version 1.0
+ * @see Fragment
  */
 public class AdminMainFragment extends Fragment {
 
+    /**
+     * Required empty public constructor for Fragment instantiation.
+     */
     public AdminMainFragment() {
         // Required empty public constructor
     }
 
+    /**
+     * Inflates the fragment's layout from XML.
+     *
+     * @param inflater The LayoutInflater object to inflate views
+     * @param container The parent view that the fragment's UI should be attached to
+     * @param savedInstanceState Previously saved state of the fragment, if any
+     * @return The root View for the fragment's UI
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -31,6 +54,16 @@ public class AdminMainFragment extends Fragment {
         return inflater.inflate(R.layout.admin_main_fragment, container, false);
     }
 
+    /**
+     * Sets up UI components and click listeners after the view is created.
+     *
+     * <p>This method initializes all navigation buttons and sets up their click
+     * listeners to navigate to appropriate admin sections. Some features are
+     * currently commented out (users, notifications).</p>
+     *
+     * @param view The View returned by onCreateView
+     * @param savedInstanceState Previously saved state of the fragment, if any
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -44,15 +77,9 @@ public class AdminMainFragment extends Fragment {
 
         viewBackButton.setOnClickListener(v-> goBack());
 
-
-
-
-
         // Set click listener for View Posters
         viewPostersButton.setOnClickListener(v -> {
             try {
-                // TODO: Replace with your actual action ID from mobile_navigation.xml
-                // Example: <action android:id="@+id/action_adminMainFragment_to_adminPostersFragment" ... />
                 NavHostFragment.findNavController(AdminMainFragment.this)
                         .navigate(R.id.navigation_admin_posters);
             } catch (Exception e) {
@@ -61,12 +88,9 @@ public class AdminMainFragment extends Fragment {
             }
         });
 
-
-
         // Set click listener for View Events
         viewEventsButton.setOnClickListener(v -> {
             try {
-                // TODO: Replace with your actual action ID from mobile_navigation.xml
                 NavHostFragment.findNavController(AdminMainFragment.this)
                         .navigate(R.id.navigation_admin_posters);
             } catch (Exception e) {
@@ -74,35 +98,12 @@ public class AdminMainFragment extends Fragment {
                 Toast.makeText(getContext(), "View Events (Not Implemented)", Toast.LENGTH_SHORT).show();
             }
         });
-
-
-         /* tmp
-        // Set click listener for View Users
-        viewUsersButton.setOnClickListener(v -> {
-            try {
-                // TODO: Replace with your actual action ID from mobile_navigation.xml
-                NavHostFragment.findNavController(AdminMainFragment.this)
-                        .navigate(R.id.navigation_admin_users);
-            } catch (Exception e) {
-                Log.e("AdminMainFragment", "Navigation to users failed. Is the action ID set?", e);
-                Toast.makeText(getContext(), "View Users (Not Implemented)", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        // Set click listener for Send Notifications
-        sendNotificationsButton.setOnClickListener(v -> {
-            try {
-                // TODO: Replace with your actual action ID from mobile_navigation.xml
-                NavHostFragment.findNavController(AdminMainFragment.this)
-                        .navigate(R.id.navigation_admin_notifications);
-            } catch (Exception e) {
-                Log.e("AdminMainFragment", "Navigation to notifications failed. Is the action ID set?", e);
-                Toast.makeText(getContext(), "Send Notifications (Not Implemented)", Toast.LENGTH_SHORT).show();
-            }
-        }); */
     }
 
-
+    /**
+     * Navigates back to the profile fragment.
+     * This method is called when the back button is pressed.
+     */
     private void goBack(){
         NavHostFragment.findNavController(this)
                 .navigate(R.id.profile_fragment);
