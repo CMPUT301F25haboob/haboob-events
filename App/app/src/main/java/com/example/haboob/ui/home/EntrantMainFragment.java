@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -26,6 +27,7 @@ import com.example.haboob.QRCode;
 import com.example.haboob.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.button.MaterialButton;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -84,6 +86,7 @@ public class EntrantMainFragment extends Fragment {
     }
 
     private EventsList eventsList3; // declare the eventsList object
+    private Button myWaitlists;
 
     public EntrantMainFragment() {
         // Required empty public constructor
@@ -362,6 +365,12 @@ public class EntrantMainFragment extends Fragment {
                 "USER_LEFT_EVENT", this, (reqKey, bundle) -> loadEventsForUser(userID)
         );
 
+        // set a listener that listens for myWaitlists button click, on navigate, it navigates there
+        myWaitlists = view.findViewById(R.id.btn_my_waitlists);
+        myWaitlists.setOnClickListener(v ->
+                NavHostFragment.findNavController(this)
+                        .navigate(R.id.waitlists_view_fragment)
+        );
 
     }
 

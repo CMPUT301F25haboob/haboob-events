@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Search -->
+    <SearchView
+        android:id="@+id/searchView"
+        android:iconifiedByDefault="false"
+        android:queryHint="Search waitlists"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="12dp"/>
+
+    <!-- Results -->
+    <ListView
+        android:id="@+id/waitlistsListView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="?android:attr/listDivider"
+        android:dividerHeight="1dp"
+        android:fastScrollEnabled="true" />
+</LinearLayout>

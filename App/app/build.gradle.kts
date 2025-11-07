@@ -64,4 +64,7 @@ dependencies {
 
     // JavaDocs
     // implementation(files("home/user/Android/Sdk/platforms/android-36/android.jar"))
+
+    // flexbox for event filters:
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
 }
