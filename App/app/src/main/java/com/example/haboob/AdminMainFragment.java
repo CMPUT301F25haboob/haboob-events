@@ -26,7 +26,7 @@ import androidx.navigation.fragment.NavHostFragment;
  *   <li>Sending notifications to users (commented out)</li>
  * </ul>
  *
- * @author Haboob Team
+ * @author Jeff
  * @version 1.0
  * @see Fragment
  */

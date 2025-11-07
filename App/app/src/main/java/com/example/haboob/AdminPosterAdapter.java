@@ -28,7 +28,7 @@ import java.util.List;
  *   <li>Checkbox support for multi-selection (future functionality)</li>
  * </ul>
  *
- * @author Haboob Team
+ * @author Jeff
  * @version 1.0
  * @see Event
  * @see Poster
