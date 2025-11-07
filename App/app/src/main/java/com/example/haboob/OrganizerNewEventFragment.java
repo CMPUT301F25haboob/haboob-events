@@ -16,11 +16,31 @@ import androidx.fragment.app.Fragment;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * {@code OrganizerNewEventFragment} is responsible for creating a new {@link Event}
+ * in the organizer’s account. It handles user input for event title, description,
+ * capacity, registration limits, tags, and registration dates.
+ *
+ * <p>The fragment validates all inputs (dates, numeric fields, and required text)
+ * before creating an {@link Event} object and adding it to the current organizer’s
+ * {@link EventsList}. The user can specify optional geolocation requirements
+ * using a {@link Switch} and tag the event for later filtering.</p>
+ *
+ * <p>Once an event is successfully created, it is added to Firestore via
+ * {@link EventsList#addEvent(Event)} and the fragment returns to the previous
+ * screen in the navigation stack.</p>
+ */
 public class OrganizerNewEventFragment extends Fragment {
 
+    /**
+     * Inflates the layout for creating a new event and handles all form submission logic.
+     *
+     * @param inflater  LayoutInflater used to inflate the fragment layout
+     * @param container Parent ViewGroup container
+     * @param savedInstanceState Previously saved instance state, if available
+     * @return The inflated View for this fragment
+     */
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -104,7 +124,6 @@ public class OrganizerNewEventFragment extends Fragment {
                     }
                 }
 
-
                 if (capacity < 0 || ((limit != -1) && (limit < capacity))) {
                     Toast.makeText(requireContext(), "Limit must be no less than capacity and capacity must be greater than 0", Toast.LENGTH_SHORT).show();
                     return;
@@ -140,7 +159,6 @@ public class OrganizerNewEventFragment extends Fragment {
                 return;
             }
 
-
             // Create new Event object (pass in dummy data for now)
             QRCode qrCode = new QRCode("test");
             Poster poster = new Poster("test");
@@ -149,14 +167,22 @@ public class OrganizerNewEventFragment extends Fragment {
             // Add Event to organizer's eventList
             currentOrganizer.getEventList().addEvent(newEvent);
 
-
+            // Navigate back to previous fragment
             getParentFragmentManager().popBackStack();
         });
 
         return view;
     }
 
-    // Separates the different tags by commas and returns an ArrayList<String> type
+    /**
+     * Separates the user-inputted tags string by commas and returns a cleaned list of tags.
+     * <p>
+     * Each tag is trimmed of whitespace and converted to lowercase. Empty entries
+     * (such as multiple commas with no text) are ignored.
+     *
+     * @param tagString Comma-separated list of tags entered by the user
+     * @return ArrayList of cleaned, lowercase tags; empty list if none are valid
+     */
     public ArrayList<String> createTagsList(String tagString) {
 
         // Ensure input isn't null or empty space

@@ -10,34 +10,69 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
+/**
+ * {@code OrganizerOptionsFragment} is the main fragment displayed for organizers
+ * after logging in. It allows organizers to:
+ * <ul>
+ *     <li>View all events they have created</li>
+ *     <li>Create new events</li>
+ *     <li>Edit event posters</li>
+ *     <li>View event entrant lists</li>
+ *     <li>Draw lotteries for events with randomized selection</li>
+ * </ul>
+ *
+ * <p>This fragment communicates with the {@link OrganizerMainActivity} to access the
+ * currently logged-in {@link Organizer} and their associated {@link EventsList}.
+ * It also handles loading event data from Firestore and refreshing the UI when new
+ * events are added or edited.</p>
+ */
 public class OrganizerOptionsFragment extends Fragment {
 
-    // On screen attributes
+    // ---------- UI COMPONENTS ----------
+    /** ListView that displays all events created by the organizer. */
     private ListView organizerEventsView;
+
+    /** List of events belonging to the organizer. */
     private ArrayList<Event> organizerEvents;
+
+    /** List of event titles (displayed in the ListView). */
     private ArrayList<String> eventNames;
+
+    /** Adapter that connects event titles to the ListView. */
     private ArrayAdapter<String> organizerEventsAdapter;
+
+    /** Keeps track of which event (position) was clicked in the list. */
     private int selectedPosition = -1;
+
+    // ---------- STATE ----------
+    /** The currently active organizer (retrieved from OrganizerMainActivity). */
     private Organizer currentOrganizer;
+
+    /** The event currently selected by the user in the ListView. */
     private Event clickedEvent;
 
-    // NOTE: Can check LogCat to help debug processes
 
+    /**
+     * Inflates the organizer options UI, initializes components, and sets up event button logic.
+     *
+     * @param inflater  LayoutInflater for inflating views
+     * @param container Parent view group
+     * @param savedInstanceState Saved state bundle
+     * @return The inflated fragment view
+     */
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.organizer_screen, container, false);
 
-        // Get current organizer with logging
+        // Retrieve the organizer from the parent activity
         OrganizerMainActivity parent = (OrganizerMainActivity) getActivity();
         if (parent == null) {
             Log.e("OrganizerOptions", "Parent activity is null");
@@ -51,44 +86,39 @@ public class OrganizerOptionsFragment extends Fragment {
             return view;
         }
 
-        // Can check LogCat to see which organizer is creating/viewing their events (debugging purposes)
         Log.d("OrganizerOptions", "Organizer (" + currentOrganizer.getOrganizerID() + ") loaded successfully");
 
-        // Initialize lists to use/display
+        // Initialize local lists
         organizerEvents = new ArrayList<>();
         eventNames = new ArrayList<>();
 
-        // Set up adapter for list items
+        // Attach adapter to the ListView
         organizerEventsAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, eventNames);
-
-        // Set up ListView -> attach ArrayAdapter to the ListView
         organizerEventsView = view.findViewById(R.id.organizer_events);
         organizerEventsView.setAdapter(organizerEventsAdapter);
 
-        // Buttons to do different things to events
+        // Retrieve buttons
         Button createEventButton = view.findViewById(R.id.create_event);
         Button editPosterButton = view.findViewById(R.id.edit_poster_button);
         Button viewListsButton = view.findViewById(R.id.view_lists_button);
         Button drawLotteryButton = view.findViewById(R.id.draw_lottery_button);
 
-        // Set buttons to invisible until an event is clicked
-        editPosterButton.setVisibility(View.INVISIBLE);
-        viewListsButton.setVisibility(View.INVISIBLE);
-        drawLotteryButton.setVisibility(View.INVISIBLE);
+        // Hide event action buttons until an event is selected
+        editPosterButton.setVisibility(INVISIBLE);
+        viewListsButton.setVisibility(INVISIBLE);
+        drawLotteryButton.setVisibility(INVISIBLE);
 
-        // Logic for seeing different lists for each event
+        // --- Event Selection Logic ---
         organizerEventsView.setOnItemClickListener((parent1, view1, position, id) -> {
-
-            // Get the event that was clicked
             clickedEvent = organizerEvents.get(position);
-
-            // Show buttons
             editPosterButton.setVisibility(View.VISIBLE);
             viewListsButton.setVisibility(View.VISIBLE);
             drawLotteryButton.setVisibility(View.VISIBLE);
         });
 
-        // Logic for creating an event on button click
+        // --- Button Logic ---
+
+        // Create new event
         createEventButton.setOnClickListener(v -> {
             getParentFragmentManager()
                     .beginTransaction()
@@ -97,15 +127,13 @@ public class OrganizerOptionsFragment extends Fragment {
                     .commit();
         });
 
-        // Logic for editing a poster on button click
+        // Edit event poster
         editPosterButton.setOnClickListener(v -> {
-            // Create fragment and pass the event through
             OrganizerEditPosterFragment editPosterFragment = new OrganizerEditPosterFragment();
             Bundle bundle = new Bundle();
             bundle.putSerializable("event", clickedEvent);
             editPosterFragment.setArguments(bundle);
 
-            // Navigate to fragment with event data loaded
             getParentFragmentManager()
                     .beginTransaction()
                     .replace(R.id.organizer_fragment_container, editPosterFragment)
@@ -113,15 +141,13 @@ public class OrganizerOptionsFragment extends Fragment {
                     .commit();
         });
 
-        // Logic for viewing the different entrant lists on button click
+        // View entrant lists for selected event
         viewListsButton.setOnClickListener(v -> {
-            // Create fragment and pass the event through
             OrganizerAllListsFragment allListsFragment = new OrganizerAllListsFragment();
             Bundle bundle = new Bundle();
             bundle.putSerializable("event", clickedEvent);
             allListsFragment.setArguments(bundle);
 
-            // Navigate to fragment with event data loaded
             getParentFragmentManager()
                     .beginTransaction()
                     .replace(R.id.organizer_fragment_container, allListsFragment)
@@ -129,14 +155,14 @@ public class OrganizerOptionsFragment extends Fragment {
                     .commit();
         });
 
-        // Logic for drawing an event's lottery on button click
+        // Draw lottery for selected event
         drawLotteryButton.setOnClickListener(v -> {
             // TODO: Just calls a function (Dan made?)
             LotterySampler sampler  = new LotterySampler();
             sampler.performLottery(clickedEvent);
         });
 
-        // Load events from Firestore
+        // Load events for the organizer
         try {
             loadEventsFromFirestore();
         } catch (Exception e) {
@@ -147,41 +173,39 @@ public class OrganizerOptionsFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Loads the organizer’s events from Firestore into memory.
+     * <p>
+     * If events are already loaded, it immediately refreshes the UI. Otherwise,
+     * it registers an {@link EventsList.OnEventsLoadedListener} to wait until
+     * Firestore loading completes.
+     */
     private void loadEventsFromFirestore() {
 
-        // Ensure our organizer is still valid
         if (currentOrganizer == null) {
             Log.e("OrganizerOptions", "currentOrganizer is null in loadEventsFromFirestore");
             return;
         }
 
-        // Ensure we still have an eventslist
         if (currentOrganizer.getEventList() == null) {
             Log.e("OrganizerOptions", "EventList is null! Check your Organizer class initialization");
             Toast.makeText(getContext(), "Error: Event list not initialized", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Check if events are already loaded into our current eventslist
         if (currentOrganizer.getEventList().isLoaded()) {
-            // Data is already there, just refresh the UI immediately
             refreshEventList();
             return;
         }
 
         Log.d("OrganizerOptions", "Events not loaded yet, waiting for Firestore...");
 
-        // Load events with callback (WITH HELP FROM CLAUDE -> Suggested the event loaded listener to ensure synced data)
         currentOrganizer.getEventList().loadEventsList(new EventsList.OnEventsLoadedListener() {
             @Override
             public void onEventsLoaded() {
                 Log.d("OrganizerOptions", "onEventsLoaded callback triggered");
-
                 if (getActivity() != null) {
-                    getActivity().runOnUiThread(() -> {
-                        // Just tells the app to refresh
-                        refreshEventList();
-                    });
+                    getActivity().runOnUiThread(OrganizerOptionsFragment.this::refreshEventList);
                 } else {
                     Log.e("OrganizerOptions", "Activity is null in onEventsLoaded");
                 }
@@ -190,19 +214,22 @@ public class OrganizerOptionsFragment extends Fragment {
             @Override
             public void onError(Exception e) {
                 Log.e("OrganizerOptions", "Error loading events", e);
-
                 if (getActivity() != null) {
-                    getActivity().runOnUiThread(() -> {
-                        Toast.makeText(getContext(),
-                                "Failed to load events: " + e.getMessage(),
-                                Toast.LENGTH_SHORT).show();
-                    });
+                    getActivity().runOnUiThread(() ->
+                            Toast.makeText(getContext(),
+                                    "Failed to load events: " + e.getMessage(),
+                                    Toast.LENGTH_SHORT).show());
                 }
             }
         });
     }
 
-    // Force reload from Firestore to get fresh data
+    /**
+     * Forces a full reload of all organizer events from Firestore.
+     * <p>
+     * This method is called in {@link #onResume()} to ensure the list is up to date
+     * after returning from creating or editing an event.
+     */
     private void reloadEventsFromFirestore() {
         Log.d("OrganizerOptions", "reloadEventsFromFirestore called - forcing fresh data");
 
@@ -210,61 +237,60 @@ public class OrganizerOptionsFragment extends Fragment {
             return;
         }
 
-
-        // Always reload from Firestore to get latest data
         currentOrganizer.getEventList().loadEventsList(new EventsList.OnEventsLoadedListener() {
             @Override
             public void onEventsLoaded() {
                 Log.d("OrganizerOptions", "Fresh data loaded from Firestore");
-
                 if (getActivity() != null) {
-                    getActivity().runOnUiThread(() -> {
-                        refreshEventList();
-                    });
+                    getActivity().runOnUiThread(OrganizerOptionsFragment.this::refreshEventList);
                 }
             }
 
             @Override
             public void onError(Exception e) {
                 Log.e("OrganizerOptions", "Error reloading events", e);
-
                 if (getActivity() != null) {
-                    getActivity().runOnUiThread(() -> {
-                        Toast.makeText(getContext(),
-                                "Failed to reload events: " + e.getMessage(),
-                                Toast.LENGTH_SHORT).show();
-                    });
+                    getActivity().runOnUiThread(() ->
+                            Toast.makeText(getContext(),
+                                    "Failed to reload events: " + e.getMessage(),
+                                    Toast.LENGTH_SHORT).show());
                 }
             }
         });
     }
 
+    /**
+     * Called when the fragment becomes visible again.
+     * <p>
+     * Ensures that any newly created or modified events are reflected
+     * in the organizer’s list by calling {@link #reloadEventsFromFirestore()}.
+     */
     @Override
     public void onResume() {
         super.onResume();
-        // When we return from creating an event, force reload to get fresh data to display
         reloadEventsFromFirestore();
     }
 
+    /**
+     * Refreshes the event list UI using the latest data from {@link EventsList}.
+     * <p>
+     * Filters events belonging to the current organizer, updates displayed event
+     * titles, and notifies the adapter to refresh the {@link ListView}.
+     */
     private void refreshEventList() {
         Log.d("OrganizerOptions", "refreshEventList called");
 
-        if (currentOrganizer == null) {
-            Log.e("OrganizerOptions", "currentOrganizer is null in refreshEventList");
-            return;
-        }
-
-        if (currentOrganizer.getEventList() == null) {
-            Log.e("OrganizerOptions", "EventList is null in refreshEventList");
+        if (currentOrganizer == null || currentOrganizer.getEventList() == null) {
+            Log.e("OrganizerOptions", "Organizer or EventList is null during refresh");
             return;
         }
 
         try {
-            // Get the updated events list
-            organizerEvents = currentOrganizer.getEventList().getOrganizerEvents(currentOrganizer.getOrganizerID());
+            organizerEvents = currentOrganizer.getEventList()
+                    .getOrganizerEvents(currentOrganizer.getOrganizerID());
+
             Log.d("OrganizerOptions", "Found " + organizerEvents.size() + " events for organizer");
 
-            // Update event names
             eventNames.clear();
             for (Event e : organizerEvents) {
                 if (e != null && e.getEventTitle() != null) {
@@ -274,7 +300,6 @@ public class OrganizerOptionsFragment extends Fragment {
                 }
             }
 
-            // Notify adapter of changes
             if (organizerEventsAdapter != null) {
                 organizerEventsAdapter.notifyDataSetChanged();
                 Log.d("OrganizerOptions", "Adapter updated with " + eventNames.size() + " event names");
@@ -283,7 +308,9 @@ public class OrganizerOptionsFragment extends Fragment {
             }
         } catch (Exception e) {
             Log.e("OrganizerOptions", "Error in refreshEventList", e);
-            Toast.makeText(getContext(), "Error refreshing events: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(),
+                    "Error refreshing events: " + e.getMessage(),
+                    Toast.LENGTH_SHORT).show();
         }
     }
 }
