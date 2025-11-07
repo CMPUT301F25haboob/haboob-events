@@ -44,7 +44,7 @@ dependencies {
 
     implementation(libs.appcompat)
     implementation(libs.material)
-    //implementation("com.google.android.material:material:1.12.0")
+    implementation("com.google.android.material:material:1.12.0")
     implementation(libs.constraintlayout)
     implementation(libs.lifecycle.livedata.ktx)
     implementation(libs.lifecycle.viewmodel.ktx)
@@ -71,5 +71,5 @@ dependencies {
     //androidTestImplementation("androidx.test.ext:junit:1.1.5")
     //androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     // JavaDocs
-    // implementation(files("home/user/Android/Sdk/platforms/android-36/android.jar"))
+    // implementation(files("/home/user/Android/Sdk/platforms/android-36/android.jar"))
 }
