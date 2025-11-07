@@ -1,6 +1,7 @@
 package com.example.haboob;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -164,8 +165,8 @@ public class ProfileFragment extends Fragment {
 
         // Create update map
         Map<String, Object> updates = new HashMap<>();
-        updates.put("firstName", firstName);
-        updates.put("lastName", lastName);
+        updates.put("first_name", firstName);
+        updates.put("last_name", lastName);
         updates.put("email", email);
         updates.put("phone", phone);
 
@@ -296,10 +297,16 @@ public class ProfileFragment extends Fragment {
                                 .addOnSuccessListener(aVoid2 -> {
                                     Toast.makeText(getContext(), "Profile deleted successfully",
                                             Toast.LENGTH_SHORT).show();
-                                    // You might want to navigate to login/register screen here
+                                    navigateToRegisterActivity();
                                 })
-                                .addOnFailureListener(e -> Log.w(TAG, "Could not delete from " +
-                                        collection, e));
+                                .addOnFailureListener(e -> {
+                                    Log.w(TAG, "Could not delete from " + collection, e);
+                                    // Still navigate even if account-specific deletion fails
+                                    navigateToRegisterActivity();
+                                });
+                    } else {
+                        // No account type, just navigate after users deletion
+                        navigateToRegisterActivity();
                     }
                 })
                 .addOnFailureListener(e -> {
@@ -311,6 +318,17 @@ public class ProfileFragment extends Fragment {
                 });
     }
 
+    /**
+     * Navigates to RegisterActivity and finishes the current activity
+     */
+    private void navigateToRegisterActivity() {
+        Intent intent = new Intent(getActivity(), RegisterActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        if (getActivity() != null) {
+            getActivity().finish();
+        }
+    }
 
     private void goToAdmin(){
         NavHostFragment.findNavController(this)

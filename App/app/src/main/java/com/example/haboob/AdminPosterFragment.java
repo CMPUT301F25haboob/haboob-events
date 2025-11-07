@@ -21,48 +21,74 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.List;
 
-// Helper class to simulate the object returned by Poster.getImageSource().
-// This class must be defined here so the MockPoster can use it.
-class MockImageObject {
-    public final int imageResId;
-    public MockImageObject(int imageResId) { this.imageResId = imageResId; }
-}
-
-
 /**
- * Fragment to display a filtered list of events (only those with posters) for admin management.
+ * Fragment for displaying a filtered list of events with posters for administrative management.
+ *
+ * <p>This fragment:</p>
+ * <ul>
+ *   <li>Displays only events that have associated poster images</li>
+ *   <li>Uses a grid layout (2 columns) for poster display</li>
+ *   <li>Loads event data asynchronously from Firestore</li>
+ *   <li>Provides navigation back to the admin main screen</li>
+ *   <li>Handles click events on individual posters</li>
+ * </ul>
+ *
+ * <p>The fragment uses {@link EventsList} to manage event data and filters
+ * out events that don't have a Poster object attached.</p>
+ *
+ * @author Haboob Team
+ * @version 1.0
+ * @see Fragment
+ * @see AdminPosterAdapter
+ * @see EventsList
  */
 public class AdminPosterFragment extends Fragment implements AdminPosterAdapter.OnPosterClickListener {
 
+    /** Tag for logging purposes */
     private static final String TAG = "AdminPosterFragment";
+
+    /** RecyclerView for displaying the grid of posters */
     private RecyclerView recyclerView;
+
+    /** ProgressBar shown while data is loading */
     private ProgressBar progressBar;
+
+    /** Adapter for binding event data to the RecyclerView */
     private AdminPosterAdapter adapter;
+
+    /** List of events with posters to be displayed */
     private List<Event> eventList;
+
+    /** Firestore database instance for data access */
     private FirebaseFirestore db;
 
+    /** EventsList manager for loading and managing event data */
     private EventsList eventsListManager;
-    // Helper class to mock the Poster methods required by the Adapter
-    // NOTE: This assumes your actual Poster class returns an Object for getImageSource().
-    private static class MockPoster extends Poster {
-        private final MockImageObject imageSource;
 
-        public MockPoster(String posterId, int imageResId) {
-            super(posterId);
-            this.imageSource = new MockImageObject(imageResId);
-        }
-
-        // Mock implementation of the required method, returning the mock picture object
-        public Object getImageSource() {
-            return imageSource;
-        }
-    }
-
-
+    /**
+     * Required empty public constructor for Fragment instantiation.
+     */
     public AdminPosterFragment() {
         // Required empty public constructor
     }
 
+    /**
+     * Inflates the fragment's layout and initializes all UI components and data loading.
+     *
+     * <p>This method sets up:</p>
+     * <ul>
+     *   <li>RecyclerView with GridLayoutManager (2 columns)</li>
+     *   <li>Toolbar with back navigation</li>
+     *   <li>Progress bar for loading indication</li>
+     *   <li>Firestore connection</li>
+     *   <li>EventsList loading with callback</li>
+     * </ul>
+     *
+     * @param inflater The LayoutInflater object to inflate views
+     * @param container The parent view that the fragment's UI should be attached to
+     * @param savedInstanceState Previously saved state of the fragment, if any
+     * @return The root View for the fragment's UI
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -79,8 +105,7 @@ public class AdminPosterFragment extends Fragment implements AdminPosterAdapter.
 
         eventsListManager = new EventsList(true);
 
-        // **FIX: Ensure this back navigation listener is correctly set.**
-        // **FIX: Use navigateUp() for the definitive "Up" navigation action.**
+        // Back navigation listener
         toolbar.setOnMenuItemClickListener(item -> {
             int id = item.getItemId();
 
@@ -102,7 +127,7 @@ public class AdminPosterFragment extends Fragment implements AdminPosterAdapter.
         adapter = new AdminPosterAdapter(eventList, this);
         recyclerView.setAdapter(adapter);
 
-        // FIX: Start loading data from Firestore using the EventsList constructor with a listener.
+        // Start loading data from Firestore using the EventsList constructor with a listener
         progressBar.setVisibility(View.VISIBLE);
 
         eventsListManager = new EventsList(new EventsList.OnEventsLoadedListener() {
@@ -137,7 +162,18 @@ public class AdminPosterFragment extends Fragment implements AdminPosterAdapter.
     }
 
     /**
-     * Loads the list of events, but only includes those that have a Poster attached.
+     * Loads the list of events from Firestore, filtering to include only events with posters.
+     *
+     * <p>This method:</p>
+     * <ol>
+     *   <li>Shows a progress bar while loading</li>
+     *   <li>Uses EventsList to fetch data asynchronously</li>
+     *   <li>Filters events to include only those with non-null Poster objects</li>
+     *   <li>Updates the RecyclerView adapter with filtered results</li>
+     *   <li>Hides the progress bar when complete</li>
+     * </ol>
+     *
+     * <p>If an error occurs during loading, a Toast message is displayed to the user.</p>
      */
     private void loadEventsWithPosters() {
         progressBar.setVisibility(View.VISIBLE);
@@ -173,9 +209,18 @@ public class AdminPosterFragment extends Fragment implements AdminPosterAdapter.
     }
 
     /**
-     * Handles the click event for an individual event poster item.
-     * Navigates to the AdminPosterDetailFragment, passing the Event ID.
-     * @param event The Event object whose poster was clicked.
+     * Handles click events on individual poster cards.
+     *
+     * <p>When a poster is clicked, this method:</p>
+     * <ul>
+     *   <li>Displays a Toast with the event title</li>
+     *   <li>Logs the navigation attempt</li>
+     *   <li>Prepares a Bundle with the event ID</li>
+     *   <li>Would navigate to detail view (currently commented out)</li>
+     * </ul>
+     *
+     * @param event The Event object whose poster was clicked
+     * :TODO Uncomment navigation code to enable detail view navigation
      */
     @Override
     public void onPosterClick(Event event) {
