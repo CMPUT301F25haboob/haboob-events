@@ -159,8 +159,8 @@ public class ProfileFragment extends Fragment {
 
         // Create update map
         Map<String, Object> updates = new HashMap<>();
-        updates.put("firstName", firstName);
-        updates.put("lastName", lastName);
+        updates.put("first_name", firstName);
+        updates.put("last_name", lastName);
         updates.put("email", email);
         updates.put("phone", phone);
 
