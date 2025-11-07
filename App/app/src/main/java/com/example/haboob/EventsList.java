@@ -137,12 +137,16 @@ public class EventsList  {
 
         // Delete the Firestore document using its ID
         db.collection("events")
-                .document(e.getEventID())
-                .delete()
-                .addOnSuccessListener(aVoid -> {
+                .whereEqualTo("eventID", e.getEventID())
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
 
                     // Remove from local list only after Firestore success
                     eventsList.remove(e);
+
+                    // Delete the firestore document
+                    String docId = querySnapshot.getDocuments().get(0).getId();
+                    db.collection("events").document(docId).delete();
 
                     Log.d("EventsList", "Event deleted from Firestore and local list");
 
