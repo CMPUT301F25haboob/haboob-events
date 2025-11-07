@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class OrganizerOptionsFragment extends Fragment {
 
@@ -29,7 +30,7 @@ public class OrganizerOptionsFragment extends Fragment {
     private int selectedPosition = -1;
     private Organizer currentOrganizer;
     private Event clickedEvent;
-
+    private Date date;
     // NOTE: Can check LogCat to help debug processes
 
     @Nullable
@@ -132,6 +133,11 @@ public class OrganizerOptionsFragment extends Fragment {
         // Logic for drawing an event's lottery on button click
         drawLotteryButton.setOnClickListener(v -> {
             // TODO: Just calls a function (Dan made?)
+            date = new Date();
+            if (clickedEvent.getRegistrationEndDate().after(date)) {
+                Toast.makeText(getContext(), "Cannot draw yet, registration has not closed", Toast.LENGTH_LONG).show();
+                return;
+            }
             LotterySampler sampler  = new LotterySampler();
             sampler.performLottery(clickedEvent);
         });
