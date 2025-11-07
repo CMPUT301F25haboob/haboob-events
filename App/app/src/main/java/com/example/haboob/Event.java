@@ -7,13 +7,14 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.io.Serializable;
 import java.sql.Array;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class Event {
+public class Event implements Serializable {
 
     /* Event has an organizer, as well as lists for all:
      * tags, entrants, invitedUsers, enrolledUsers, and cancelledUsers.
@@ -43,7 +44,6 @@ public class Event {
 
     // All of the lists that events have (all other than tags will have the entries as strings of user IDs)
     private ArrayList<String> tags;  // -> List of tags associated to the event
-    private ArrayList<String> entrants;  // -> List of all entrants who signed up for the lottery selection process
     private ArrayList<String> invitedEntrants;  // -> List of all entrants who got selected for the lottery
     private ArrayList<String> waitingEntrants;  // -> List of all entrants who were not selected for the lottery, didn't cancel, and are waiting to fill in upon entrant cancellation
     private ArrayList<String> enrolledEntrants;  // -> List of all entrants who accepted their invite
@@ -80,16 +80,10 @@ public class Event {
     public void initLists() {
         // Initialize all the lists to use/populate later
         this.tags = new ArrayList<String>();
-        this.entrants = new ArrayList<String>();
         this.invitedEntrants = new ArrayList<String>();
         this.waitingEntrants = new ArrayList<String>();
         this.enrolledEntrants = new ArrayList<String>();
         this.cancelledEntrants = new ArrayList<String>();
-    }
-
-    public void addEntrantToEntrants(String userID) {
-        this.entrants.add(userID);
-        db.collection("events").document(eventID).update("entrants", FieldValue.arrayUnion(userID));
     }
 
     public void addEntrantToInvitedEntrants(String userID) {
@@ -115,7 +109,6 @@ public class Event {
 
     public void logEventLists() {
         // TESTING FUNCTION
-        Log.d("Event", "Entrants: " + this.entrants);
         Log.d("Event", "Invited Entrants: " + this.invitedEntrants);
         Log.d("Event", "Waiting Entrants: " + this.waitingEntrants);
         Log.d("Event", "Enrolled Entrants: " + this.enrolledEntrants);
@@ -196,9 +189,6 @@ public class Event {
         return new ArrayList<>(tags);
     }
 
-    public ArrayList<String> getEntrants() {
-        return this.entrants;
-    }
 
     public ArrayList<String> getInvitedEntrants() {
         return this.invitedEntrants;
@@ -267,10 +257,6 @@ public class Event {
 
     public void setTags(ArrayList<String> tags) {
         this.tags = tags;
-    }
-
-    public void setEntrantsList(ArrayList<String> entrants) {
-        this.entrants = entrants;
     }
 
     public void setInvitedEntrantsList(ArrayList<String> invitedEntrants) {

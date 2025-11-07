@@ -1,5 +1,7 @@
 package com.example.haboob;
 
+import static android.view.View.INVISIBLE;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,6 +16,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 public class OrganizerOptionsFragment extends Fragment {
@@ -25,6 +28,7 @@ public class OrganizerOptionsFragment extends Fragment {
     private ArrayAdapter<String> organizerEventsAdapter;
     private int selectedPosition = -1;
     private Organizer currentOrganizer;
+    private Event clickedEvent;
 
     // NOTE: Can check LogCat to help debug processes
 
@@ -55,21 +59,79 @@ public class OrganizerOptionsFragment extends Fragment {
         eventNames = new ArrayList<>();
 
         // Set up adapter for list items
-        organizerEventsAdapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_list_item_1, eventNames);
+        organizerEventsAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, eventNames);
 
         // Set up ListView -> attach ArrayAdapter to the ListView
         organizerEventsView = view.findViewById(R.id.organizer_events);
         organizerEventsView.setAdapter(organizerEventsAdapter);
 
-        // Logic for creating an event on button click
+        // Buttons to do different things to events
         Button createEventButton = view.findViewById(R.id.create_event);
+        Button editPosterButton = view.findViewById(R.id.edit_poster_button);
+        Button viewListsButton = view.findViewById(R.id.view_lists_button);
+        Button drawLotteryButton = view.findViewById(R.id.draw_lottery_button);
+
+        // Set buttons to invisible until an event is clicked
+        editPosterButton.setVisibility(View.INVISIBLE);
+        viewListsButton.setVisibility(View.INVISIBLE);
+        drawLotteryButton.setVisibility(View.INVISIBLE);
+
+        // Logic for seeing different lists for each event
+        organizerEventsView.setOnItemClickListener((parent1, view1, position, id) -> {
+
+            // Get the event that was clicked
+            clickedEvent = organizerEvents.get(position);
+
+            // Show buttons
+            editPosterButton.setVisibility(View.VISIBLE);
+            viewListsButton.setVisibility(View.VISIBLE);
+            drawLotteryButton.setVisibility(View.VISIBLE);
+        });
+
+        // Logic for creating an event on button click
         createEventButton.setOnClickListener(v -> {
             getParentFragmentManager()
                     .beginTransaction()
                     .replace(R.id.organizer_fragment_container, new OrganizerNewEventFragment())
                     .addToBackStack(null)
                     .commit();
+        });
+
+        // Logic for editing a poster on button click
+        editPosterButton.setOnClickListener(v -> {
+            // Create fragment and pass the event through
+            OrganizerEditPosterFragment editPosterFragment = new OrganizerEditPosterFragment();
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("event", clickedEvent);
+            editPosterFragment.setArguments(bundle);
+
+            // Navigate to fragment with event data loaded
+            getParentFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.organizer_fragment_container, editPosterFragment)
+                    .addToBackStack(null)
+                    .commit();
+        });
+
+        // Logic for viewing the different entrant lists on button click
+        viewListsButton.setOnClickListener(v -> {
+            // Create fragment and pass the event through
+            OrganizerAllListsFragment allListsFragment = new OrganizerAllListsFragment();
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("event", clickedEvent);
+            allListsFragment.setArguments(bundle);
+
+            // Navigate to fragment with event data loaded
+            getParentFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.organizer_fragment_container, allListsFragment)
+                    .addToBackStack(null)
+                    .commit();
+        });
+
+        // Logic for drawing an event's lottery on button click
+        drawLotteryButton.setOnClickListener(v -> {
+            // TODO: Just calls a function (Dan made?)
         });
 
         // Load events from Firestore

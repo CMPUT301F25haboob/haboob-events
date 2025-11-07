@@ -122,13 +122,16 @@
 
             <!-- Account Type Display (Read-only) -->
             <TextView
+                android:id="@+id/SCIbutton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Account Type"
                 android:textStyle="bold"
                 android:textSize="12sp"
                 android:textColor="@android:color/darker_gray"
-                android:layout_marginBottom="4dp"/>
+                android:layout_marginBottom="4dp"
+                android:clickable="true"
+                />
 
             <TextView
                 android:id="@+id/accountTypeTextView"
