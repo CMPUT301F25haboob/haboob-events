@@ -41,6 +41,29 @@ import java.util.List;
 // Author: David T, created on Sunday, oct 26 2025
 // this fragment represents the main fragment that the entrant will see when entering the app
 
+/**
+ * Displays the entrant home screen containing two carousels:
+ * <ul>
+ *   <li><b>My upcoming events</b> – events the current device/user is enrolled in</li>
+ *   <li><b>My open waitlists</b> – events the user is currently waiting on (or all for testing)</li>
+ * </ul>
+ *
+ * <p>This Fragment:
+ * <ol>
+ *   <li>Resolves a stable device identifier in {@link #onAttach(Context)}</li>
+ *   <li>Loads events asynchronously via {@link EventsList} and the
+ *       {@link EventsList.OnEventsLoadedListener} callback</li>
+ *   <li>Transforms loaded events into image URLs and event IDs for two {@link EventImageAdapter}s</li>
+ *   <li>Navigates to {@code EventViewerFragment} when a carousel item is tapped</li>
+ *   <li>Listens for result events (join/leave) and refreshes data</li>
+ * </ol>
+ *
+ * <p><b>Lifecycle notes:</b> Heavy work (Firestore/EventsList) is triggered from
+ * {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)} via {@link #loadEventsForUser(String)}.
+ * The device ID is prepared earlier in {@link #onAttach(Context)}.</p>
+ *
+ * <p>Author: David T, created on Sunday, Oct 26, 2025.</p>
+ */
 public class EntrantMainFragment extends Fragment {
     FirebaseFirestore db = FirebaseFirestore.getInstance();
 //    private String deviceId = "9662d2bd2595742d";
@@ -55,14 +78,24 @@ public class EntrantMainFragment extends Fragment {
 
     List<Event> waitListEvents = new ArrayList<>(); // making a List<Event> So I can iterate through the events, cant do that with an EventsList object
     List<Event> enrolledEventsList = new ArrayList<>(); // has a list of events the user is enrolled in
+
+    public EventsList getEventsList3() {
+        return eventsList3;
+    }
+
     private EventsList eventsList3; // declare the eventsList object
 
     public EntrantMainFragment() {
         // Required empty public constructor
     }
 
+    /**
+     * Called once for the fragment’s creation. Optionally creates a debug dummy event if
+     * {@link #createDummyEvent} is enabled.
+     *
+     * @param savedInstanceState previously saved state (unused)
+     */
     @Override
-    // runs ONCE as opposed to onCreateView, so not making a new dummy variable every time we navigate back to main screen
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (createDummyEvent){
@@ -70,7 +103,14 @@ public class EntrantMainFragment extends Fragment {
         }
     }
 
-    // queries for the DeviceID, runs BEFORE onCreate and onCreateView
+    /**
+     * Earliest lifecycle hook with a valid {@link Context}. Retrieves ANDROID_ID and stores it
+     * in {@link #deviceId} for filtering events by device.
+     *
+     * <p>Runs before {@link #onCreate(Bundle)} and {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.</p>
+     *
+     * @param ctx host context
+     */
     @SuppressLint("HardwareIds")
     @Override
     public void onAttach(@NonNull Context ctx) {
@@ -82,8 +122,20 @@ public class EntrantMainFragment extends Fragment {
         );
         if (deviceId == null) deviceId = "unknown";
     }
-
-    // queries the dataBase, relies on a callback to adds events to local EventList Array, updates the imageAdapter with the new images from the database
+    /**
+     * Loads events for the given user/device asynchronously.
+     *
+     * <p>Side effects:</p>
+     * <ul>
+     *   <li>Clears local event caches</li>
+     *   <li>Constructs a new {@link EventsList} which fetches data</li>
+     *   <li>On callback, populates {@link #enrolledEventsList} and {@link #waitListEvents}</li>
+     *   <li>Builds image URL and ID lists and updates both adapters via
+     *       {@link EventImageAdapter#replaceItems(List)} and {@link EventImageAdapter#inputIDs(List)}</li>
+     * </ul>
+     *
+     * @param userId logical user identifier; current filtering relies on {@link #deviceId}
+     */
     private void loadEventsForUser(String userId) {
 
             Log.d("TAG", "device ID: " + deviceId);
@@ -151,8 +203,15 @@ public class EntrantMainFragment extends Fragment {
         });
     }
 
-    // When this Fragment becomes visible, create its UI from entrant_main.xml and attach it to the container
-    @Override
+    /**
+     * Inflates the entrant main layout, wires RecyclerViews/adapters, starts data loading,
+     * and attaches item click handlers that navigate to {@code EventViewerFragment}.
+     *
+     * @param inflater  layout inflater
+     * @param container parent container
+     * @param savedInstanceState saved state (unused)
+     * @return the inflated root {@link View}
+     */ @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
@@ -276,6 +335,13 @@ public class EntrantMainFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Called after the view hierarchy has been created. Registers fragment result listeners
+     * so that when the user joins/leaves waitlists or leaves an event, the carousels refresh.
+     *
+     * @param view root view
+     * @param savedInstanceState saved state (unused)
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -299,6 +365,12 @@ public class EntrantMainFragment extends Fragment {
 
     }
 
+    /**
+     * Debug helper to create and add a single dummy {@link Event} to the shared {@link EventsList}
+     * owned by {@link MainActivity}. No-ops if the list cannot be retrieved.
+     *
+     * <p>Uses current {@link #deviceId} to seed entrant IDs.</p>
+     */
     public void createDummyEvent() {
         // *********** create a new dummy event: ********************************************************************
         MainActivity mainAct = (MainActivity) getActivity(); // find the instance of mainActivity thats currently running
@@ -377,7 +449,13 @@ public class EntrantMainFragment extends Fragment {
 
     }
 
-    // adds the strings of the events to the local list of images (images2)
+    /**
+     * Converts a list of {@link Event} objects into a list of poster image URLs suitable for
+     * submission to an {@link EventImageAdapter}. Missing posters are replaced with a placeholder.
+     *
+     * @param eventsList2 source events (may be {@code null})
+     * @param imageURLs   destination list; cleared before population
+     */
     public void addEventImagesLocally(List<Event> eventsList2, List<String> imageURLs) {
 
         if (eventsList2 == null) {
@@ -401,7 +479,12 @@ public class EntrantMainFragment extends Fragment {
         }
     }
 
-    // adds the strings of the events to the local list of images (images2)
+    /**
+     * Extracts {@link Event#getEventID()} from each event into {@code eventIDs}, preserving order.
+     *
+     * @param eventsList2 source events
+     * @param eventIDs    destination list; cleared before population
+     */
     public void addEventIDsLocally(List<Event> eventsList2, List<String> eventIDs) {
         eventIDs.clear();
         for (Event event : eventsList2) {
