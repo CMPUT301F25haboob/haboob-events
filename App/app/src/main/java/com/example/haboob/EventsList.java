@@ -75,7 +75,8 @@ public class EventsList  {
                 .addOnSuccessListener(snapshots -> {
                     eventsList.clear();
                     for (QueryDocumentSnapshot doc : snapshots) {
-                        eventsList.add(doc.toObject(Event.class));
+                        Event e = doc.toObject(Event.class); // Turn data back into object
+                        eventsList.add(e);
                     }
                     isLoaded = true;
                     if (listener != null) {
@@ -166,10 +167,9 @@ public class EventsList  {
 
     // Find event by ID and return it
     public Event getEventByID(String eventID) {
-        for (Event e: eventsList) {
-            if (e.getEventID().equals(eventID)) {
-                return e;
-            }
+        if (eventID == null) return null;
+        for (Event e : eventsList) {
+            if (e != null && eventID.equals(e.getEventID())) return e;
         }
         return null;
     }
@@ -177,68 +177,52 @@ public class EventsList  {
     // Return list of all events that have the same tag(s) as the input given
     public ArrayList<Event> filterEvents(List<String> tags) {
         if (tags == null || tags.isEmpty()) return new ArrayList<>(eventsList);
-
-        // Lowercase
         ArrayList<String> lowerTags = new ArrayList<>(tags.size());
         for (String t : tags) lowerTags.add(t.toLowerCase());
 
-        ArrayList<Event> filteredEventList = new ArrayList<>();
+        ArrayList<Event> filtered = new ArrayList<>();
         for (Event e : eventsList) {
-            ArrayList<String> eventTagsLower = new ArrayList<>(e.getTags().size());
-            for (String t : e.getTags()) eventTagsLower.add(t.toLowerCase());
-
-            if (eventTagsLower.containsAll(lowerTags)) filteredEventList.add(e);
+            if (e == null) continue;
+            List<String> eTags = e.getTags();
+            if (eTags == null) continue;
+            ArrayList<String> eLower = new ArrayList<>(eTags.size());
+            for (String t : eTags) eLower.add(t.toLowerCase());
+            if (eLower.containsAll(lowerTags)) filtered.add(e);
         }
-        return filteredEventList;
+        return filtered;
     }
 
     // Returns a list of events had by a specific Organizer ID
     public ArrayList<Event> getOrganizerEvents(String organizerID) {
-        ArrayList<Event> organizerEventList = new ArrayList<>();
-
-        if (organizerID == null || organizerID.isEmpty()) {
-            return organizerEventList;
-        }
-
+        ArrayList<Event> out = new ArrayList<>();
+        if (organizerID == null || organizerID.isEmpty()) return out;
         for (Event e : eventsList) {
-            if (e != null && organizerID.equals(e.getOrganizer())) {
-                organizerEventList.add(e);
-            }
+            if (e != null && organizerID.equals(e.getOrganizer())) out.add(e);
         }
-
-        return organizerEventList;
+        return out;
     }
-
 
     // Return all events the given entrant is waitlisted for
     public ArrayList<Event> getEntrantWaitlistEvents(String entrantID) {
-        ArrayList<Event> waitlistedEventList = new ArrayList<>();
-
-        for (Event e: eventsList) {
-            // If given entrants
-            if (e.getWaitingEntrants().contains(entrantID)) {
-                waitlistedEventList.add(e);
-            }
+        ArrayList<Event> out = new ArrayList<>();
+        if (entrantID == null) return out;
+        for (Event e : eventsList) {
+            List<String> waiting = (e != null) ? e.getWaitingEntrants() : null;
+            if (waiting != null && waiting.contains(entrantID)) out.add(e);
         }
-
-        return waitlistedEventList;
+        return out;
     }
 
     // Return a list of events that aren't past their registration end date
     public ArrayList<Event> getLiveEvents() {
-        ArrayList<Event> liveEvents = new ArrayList<>();
-
-        Date currentDate = new Date(); // current date/time
-
+        ArrayList<Event> live = new ArrayList<>();
+        Date now = new Date();
         for (Event e : eventsList) {
-            Date endDate = e.getRegistrationEndDate();
-            // Add event if it has no end date OR the end date is after the current date
-            if (endDate == null || endDate.after(currentDate)) {
-                liveEvents.add(e);
-            }
+            if (e == null) continue;
+            Date end = e.getRegistrationEndDate();
+            if (end == null || end.after(now)) live.add(e);
         }
-
-        return liveEvents;
+        return live;
     }
 
 }
