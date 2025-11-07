@@ -2,6 +2,9 @@ package com.example.haboob;
 
 import static android.view.View.INVISIBLE;
 
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,8 +17,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -90,6 +96,8 @@ public class OrganizerAllListsFragment extends Fragment {
         Button csvDataButton = view.findViewById(R.id.csv_data_button);
         Button cancelEntrantButton = view.findViewById(R.id.cancel_entrant_button);
 
+        // TODO: Functionality of this when we click an element in the certain lists
+        cancelEntrantButton.setVisibility(INVISIBLE);
 
         // Create onClick listeners for all buttons:
         backButton.setOnClickListener(v ->  {
@@ -101,8 +109,19 @@ public class OrganizerAllListsFragment extends Fragment {
 
         csvDataButton.setOnClickListener(v -> {
 
-            // TODO: Call this function to export csv data of final enrolled lists
-            Toast.makeText(this.getContext(), "CSV data not implemented yet sorry", Toast.LENGTH_SHORT).show();
+            // Generate CSV text
+            String csv = generateCsv(selectedEvent);  // event you're exporting
+
+            // 2. Save it to a file
+            String fileName = "entrants_" + selectedEvent.getEventID() + ".csv";
+            Uri uri = saveCsvToFile(getContext(), csv, fileName);
+
+            if (uri != null) {
+                // 3. Launch sharing dialog
+                shareCsv(getContext(), uri);
+            } else {
+                Toast.makeText(getContext(), "Failed to create CSV file", Toast.LENGTH_SHORT).show();
+            }
         });
 
         cancelEntrantButton.setOnClickListener(v -> {
@@ -112,8 +131,52 @@ public class OrganizerAllListsFragment extends Fragment {
         });
 
 
-        // TODO: Functionality of this when we click an element in the certain lists
-        cancelEntrantButton.setVisibility(INVISIBLE);
 
+
+    }
+
+    // CSV-related functions
+    private String generateCsv(Event event) {
+        StringBuilder sb = new StringBuilder();
+
+        // Header row
+        sb.append("Enrolled Entrant IDs\n");
+
+        // Add each enrolled entrant
+        for (String entrant : event.getEnrolledEntrants()) {
+            sb.append(entrant).append("\n");
+        }
+
+        return sb.toString();
+    }
+
+    private Uri saveCsvToFile(Context context, String csvText, String fileName) {
+        try {
+            File path = context.getExternalFilesDir(null); // app external directory
+            File file = new File(path, fileName);
+
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write(csvText.getBytes());
+            fos.close();
+
+            // Return a sharable URI
+            return FileProvider.getUriForFile(
+                    context,
+                    context.getPackageName() + ".provider",
+                    file
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private void shareCsv(Context context, Uri fileUri) {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/csv");
+        intent.putExtra(Intent.EXTRA_STREAM, fileUri);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        context.startActivity(Intent.createChooser(intent, "Export Entrants CSV"));
     }
 }
