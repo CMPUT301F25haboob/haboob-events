@@ -221,22 +221,9 @@ public class EventsList  {
         return organizerEventList;
     }
 
-    // Return all events the given entrant is a part of
-    public ArrayList<Event> getEntrantEvents(String entrantID) {
-        ArrayList<Event> entrantEventList = new ArrayList<>();
-
-        for (Event e: eventsList) {
-            // If given entrants
-            if (e.getEntrants().contains(entrantID)) {
-                entrantEventList.add(e);
-            }
-        }
-
-        return entrantEventList;
-    }
 
     // Return all events the given entrant is waitlisted for
-    public ArrayList<Event> getEntrantWaitlistedEvents(String entrantID) {
+    public ArrayList<Event> getEntrantWaitlistEvents(String entrantID) {
         ArrayList<Event> waitlistedEventList = new ArrayList<>();
 
         for (Event e: eventsList) {
