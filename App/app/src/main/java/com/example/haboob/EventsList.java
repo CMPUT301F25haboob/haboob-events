@@ -73,7 +73,11 @@ public class EventsList  {
                 .addOnSuccessListener(snapshots -> {
                     eventsList.clear();
                     for (QueryDocumentSnapshot doc : snapshots) {
-                        eventsList.add(doc.toObject(Event.class));
+//                        eventsList.add(doc.toObject(Event.class));
+
+                        Event e  = doc.toObject(Event.class);
+                        e.setEventID(doc.getId());
+                        eventsList.add(e);
                     }
                     isLoaded = true;
                     if (listener != null) {
@@ -227,6 +231,7 @@ public class EventsList  {
         ArrayList<Event> waitlistedEventList = new ArrayList<>();
 
         for (Event e: eventsList) {
+            if (e.getWaitingEntrants() == null) continue; // David: if the list is null, there's no event ids in it, so continue
             // If given entrants
             if (e.getWaitingEntrants().contains(entrantID)) {
                 waitlistedEventList.add(e);
@@ -234,6 +239,21 @@ public class EventsList  {
         }
 
         return waitlistedEventList;
+    }
+
+    // Return all events the given entrant is waitlisted for
+    public ArrayList<Event> getEntrantEnrolledEvents(String entrantID) {
+        ArrayList<Event> EnrolledEventList = new ArrayList<>();
+
+        for (Event e: eventsList) {
+            if (e.getEnrolledEntrants() == null) continue; // David: if the list is null, there's no event ids in it, so continue
+            // If given entrants
+            if (e.getEnrolledEntrants().contains(entrantID)) {
+                EnrolledEventList.add(e);
+            }
+        }
+
+        return EnrolledEventList;
     }
 
     // Return a list of events that aren't past their registration end date

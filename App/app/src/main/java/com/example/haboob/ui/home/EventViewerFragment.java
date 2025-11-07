@@ -63,7 +63,7 @@ public class EventViewerFragment extends Fragment {
     private MaterialToolbar toolbar;
     private FirebaseFirestore db;
     private String deviceId;
-    MaterialButton acceptInvitationButton, leaveWaitlistButton;
+    MaterialButton acceptInvitationButton, leaveWaitlistButton, leaveEventButton;
     TextView userWaitListStatus;
     private String currentWaitListStatus;
 
@@ -96,6 +96,7 @@ public class EventViewerFragment extends Fragment {
         acceptInvitationButton = view.findViewById(R.id.btnAccept);
         leaveWaitlistButton = view.findViewById(R.id.btnLeaveWaitlist);
         userWaitListStatus = view.findViewById(R.id.userWaitListStatus);
+        leaveEventButton = view.findViewById(R.id.btnLeaveEvent);
 
         assert getArguments() != null;
         Bundle args = getArguments();
@@ -139,16 +140,26 @@ public class EventViewerFragment extends Fragment {
         Event eventToDisplay = eventsList.getEventByID(eventId);
 
         boolean currentlyInWaitlist = args.getBoolean("in_waitlist", false);
+        boolean currentlyEnrolled = args.getBoolean("from_enrolledEvents", false);
+
         if (currentlyInWaitlist) {
-            leaveWaitlistButton.setVisibility(View.VISIBLE);
-            acceptInvitationButton.setText("Joined!");
+            leaveWaitlistButton.setVisibility(View.VISIBLE); // set leavewaitlist to visible
+            acceptInvitationButton.setText("Joined!"); // set accept to joined
             acceptInvitationButton.setBackgroundColor(getResources().getColor(R.color.accept_green));
             userWaitListStatus.setText(R.string.waitlist_status_registered);
+            leaveEventButton.setVisibility(View.INVISIBLE);
+        }
+        else if (currentlyEnrolled){
+            acceptInvitationButton.setVisibility(View.INVISIBLE);
+            leaveWaitlistButton.setVisibility(View.INVISIBLE);
+            userWaitListStatus.setText(R.string.enrolledInEvent);
         }
         else{
             leaveWaitlistButton.setVisibility(View.INVISIBLE);
             userWaitListStatus.setVisibility(View.INVISIBLE);
         }
+
+
 
 //        acceptInvitationButton.setVisibility(fromWaitListCarousel ? View.GONE : View.VISIBLE);
 //        boolean currentlyInWaitlist = args.getBoolean("in_waitlist", false);
@@ -297,6 +308,40 @@ public class EventViewerFragment extends Fragment {
                     })
                     .addOnFailureListener(e -> {
                         acceptInvitationButton.setEnabled(true);
+                        Toast.makeText(v.getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+        });
+
+        // Leave event OnclickListener:
+        assert leaveEventButton != null;
+        leaveEventButton.setOnClickListener(v -> {
+
+            
+            Toast.makeText(v.getContext(), "Left Event! ", Toast.LENGTH_SHORT).show();
+
+            assert eventId != null;
+            DocumentReference ref = FirebaseFirestore.getInstance()
+                    .collection("events")
+                    .document(eventId);
+
+            // add the device ID to the  Event EnrolledList list in the database:
+            ref.update("enrolledEntrants", FieldValue.arrayRemove(deviceId))
+                    .addOnSuccessListener(unused -> {
+
+
+                        // NOTE: It's okay if it the deviceID is already in the list, firebase won't add another, but the toast still runs
+                        Toast.makeText(v.getContext(), "User Left event, updated in database", Toast.LENGTH_SHORT).show();
+
+                        ref.update("cancelledEntrants", FieldValue.arrayUnion(deviceId))
+                        .addOnSuccessListener(unused2 -> {
+                            Toast.makeText(v.getContext(), "User added to cancelled entrants", Toast.LENGTH_SHORT).show();
+                            getParentFragmentManager().setFragmentResult("USER_LEFT_EVENT", new Bundle()); // tell mainFragment to update carousels
+                            NavHostFragment.findNavController(this).navigate(R.id.navigation_home); // nav back to main view
+                        });
+
+                    })
+                    .addOnFailureListener(e -> {
+                        leaveEventButton.setEnabled(true);
                         Toast.makeText(v.getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
         });

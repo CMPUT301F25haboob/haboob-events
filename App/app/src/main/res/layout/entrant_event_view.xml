@@ -171,6 +171,23 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/btnAccept" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnLeaveEvent"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="60dp"
+                android:text="Leave Event"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                app:backgroundTint="#BF1D2A"
+                app:cornerRadius="16dp"
+                app:iconTint="@android:color/white"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnAccept" />
+
             <TextView
                 android:id="@+id/labelAmount"
                 android:layout_width="0dp"
