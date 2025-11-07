@@ -69,7 +69,8 @@ public class EntrantMainFragment extends Fragment {
     List<String> imageURLs = new ArrayList<>();
     EventImageAdapter imageAdapter = new EventImageAdapter(imageURLs);
     EventImageAdapter imageAdapter2 = new EventImageAdapter(imageURLs);
-    boolean createDummyEvent = false;
+    boolean createDummyEvent = true;
+    Button myWaitlists;
 
     List<Event> listOfEvents = new ArrayList<>(); // making a List<Event> So I can iterate through the events, cant do that with an EventsList object
     private EventsList eventsList3; // declare the eventsList object
@@ -306,6 +307,11 @@ public class EntrantMainFragment extends Fragment {
                 "USER_LEFT_WAITLIST", this, (reqKey, bundle) -> loadEventsForUser(userID)
         );
 
+        // set a listener that listens for myWaitlists button click, on navigate, it navigates there
+        myWaitlists = view.findViewById(R.id.btn_my_waitlists);
+        myWaitlists.setOnClickListener(v ->
+                Navigation.findNavController(v)
+                        .navigate(R.id.waitlists_view_fragment));
 
     }
 
@@ -324,7 +330,7 @@ public class EntrantMainFragment extends Fragment {
 
         // Create supporting objects
         QRCode qrCode = new QRCode("idk lol");
-        Poster poster = new Poster("https://shapes.inc/api/public/avatar/johnpork-qwb7");
+        Poster poster = new Poster("https://platform.theverge.com/wp-content/uploads/sites/2/chorus/uploads/chorus_asset/file/16352008/fortnite_pro_am_nstatt_1.jpg?quality=90&strip=all&crop=15.477888730385%2C0%2C69.04422253923%2C100&w=2400");
 
         // Create a list of tags for this event
         List<String> tagStrings = new ArrayList<>();
@@ -349,8 +355,8 @@ public class EntrantMainFragment extends Fragment {
                 "org12345",                                  // organizer
                 regStart,                                    // registrationStartDate
                 regEnd,                                      // registrationEndDate
-                "John Pork Meet N Greet",                          // eventTitle
-                "RIP jon :(",             // eventDescription
+                "Fortnite Tournament",                          // eventTitle
+                "get cracked",             // eventDescription
                 true,                                        // geoLocationRequired
                 100,                                         // lotterySampleSize
                 qrCode,                                      // QRCode object
@@ -358,6 +364,9 @@ public class EntrantMainFragment extends Fragment {
                 tagslist2,                // tagsList<String>
                 event_entrant_ids                             // entrant event ids
         );
+
+        // add myself to the entrant waiting list
+        dummyEvent.addEntrantToWaitingEntrants(deviceId);
 
 //        Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, QRCode qrCode, Poster poster, ArrayList<String> tags, ArrayList<String> entrant_ids_for_lottery) {
 

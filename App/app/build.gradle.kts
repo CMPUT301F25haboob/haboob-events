@@ -50,6 +50,7 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
 
     // dependencies for using URLS to display images
     implementation("com.github.bumptech.glide:glide:4.16.0")
@@ -61,4 +62,7 @@ dependencies {
 
     // JUnit 4 for local unit tests
     testImplementation("junit:junit:4.13.2")
+
+    // david tryin to fix this navView
+    implementation("androidx.navigation:navigation-fragment:2.8.3")
 }

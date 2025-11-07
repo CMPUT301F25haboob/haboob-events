@@ -16,7 +16,8 @@
         app:title="Profile"
         app:titleCentered="false"
         app:menu="@menu/menu_event_detail"
-        app:titleTextColor="@android:color/black" />
+        app:titleTextColor="@android:color/black"
+        android:paddingTop="24dp"/>
 
     <!-- Scrollable Content -->
     <androidx.core.widget.NestedScrollView

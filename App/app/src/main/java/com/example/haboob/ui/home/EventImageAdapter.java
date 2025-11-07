@@ -107,10 +107,7 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
 
             Toast.makeText(v.getContext(), "Clicked " + position, Toast.LENGTH_SHORT).show();
 
-            // navigate using an action
-//            Navigation.findNavController(v).navigate(R.id.action_mainEntrantView___to___EventView);
-
-            // call back to the fragment, with the position data passed:
+            // call back to the fragment, with the position data passed, lets EntrantMainFragment handle navigation:
             int pos = holder.getBindingAdapterPosition();
             if (pos != RecyclerView.NO_POSITION && pos < eventIDs.size()) {
                 String eventId = eventIDs.get(pos);
