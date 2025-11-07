@@ -87,6 +87,9 @@ public class ProfileFragment extends Fragment {
         saveButton.setOnClickListener(v -> saveProfileChanges());
         deleteButton.setOnClickListener(v -> confirmDeleteProfile());
 
+        // Set up admin textview button listener
+        accountTypeTextView.setOnClickListener(v -> goToAdmin());
+
         // Reused code from EventViewerFragment for navigating back to home
         // when the back button is pressed
         toolbar.setOnMenuItemClickListener(item -> {
@@ -305,4 +308,14 @@ public class ProfileFragment extends Fragment {
                     deleteButton.setText("Delete Profile");
                 });
     }
+
+
+    private void goToAdmin(){
+        NavHostFragment.findNavController(this)
+                .navigate(R.id.navigation_admin);
+    }
+
+
+
+
 }

@@ -61,14 +61,22 @@
     <!-- android:name="com.example.haboob.ui" -->
     <fragment
         android:id="@+id/navigation_admin_posters"
+
         android:label="AdminPosters"
         tools:layout="@layout/poster_admin"
         />
 
     <fragment
         android:id="@+id/navigation_admin_events"
+
         android:label="AdminEvents"
         tools:layout="@layout/poster_admin"
         />
+
+    <fragment
+        android:id="@+id/navigation_admin"
+        android:name="com.example.haboob.AdminMainFragment"
+        android:label="AdminMain"
+        tools:layout="@layout/fragment_admin_main" />
 
 </navigation>

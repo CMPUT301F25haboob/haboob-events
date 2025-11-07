@@ -128,7 +128,9 @@
                 android:textStyle="bold"
                 android:textSize="12sp"
                 android:textColor="@android:color/darker_gray"
-                android:layout_marginBottom="4dp"/>
+                android:layout_marginBottom="4dp"
+                android:onClick="goToAdmin"
+                />
 
             <TextView
                 android:id="@+id/accountTypeTextView"
