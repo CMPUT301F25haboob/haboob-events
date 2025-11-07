@@ -21,23 +21,35 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * {@code OrganizerMainActivity} is the entry point for organizer workflows.
+ * <p>
+ * Responsibilities include:
+ * <ul>
+ *   <li>Navigating to organizer options (create/view events, manage lists, edit posters)</li>
+ *   <li>Initializing Firestore and the current {@link Organizer}</li>
+ *   <li>Hosting organizer-related fragments within {@code R.id.organizer_fragment_container}</li>
+ * </ul>
+ */
 public class OrganizerMainActivity extends AppCompatActivity {
-    /* This class will be in charge of all of the goings-on for Organizers including:
-     * -> Creating events
-     * -> Viewing all events they created
-     * -> View all different lists (EntrantsList, WaitingList, InviteList, CancelledList, EnrolledList)
-     * -> Send notifications to different lists
-     * -> See where people register from
-     * -> Update poster image of events
-     */
-    // Get ID from database
-    // Set to current user
-    // Continue
+    /** Firestore database handle for organizer data operations. */
     private FirebaseFirestore db;
+
+    /** The currently authenticated/active organizer user. */
     private Organizer currentOrganizer;
+
+    /** Button reference for potential top-level create-event actions (if needed in this activity). */
     private Button createEventButton;
 
-
+    /**
+     * Initializes the activity UI, Firestore, and a placeholder {@link Organizer}.
+     * <p>
+     * If {@code savedInstanceState} is null, loads {@link OrganizerOptionsFragment} into
+     * {@code R.id.organizer_fragment_container}.
+     *
+     * @param savedInstanceState previously saved state, or {@code null} on first creation
+     */
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_organizer_activity);
@@ -71,10 +83,13 @@ public class OrganizerMainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Returns the active {@link Organizer} instance for use by hosted fragments.
+     *
+     * @return the current organizer
+     */
     // Getter function so that later fragments can still access the app through logged-in user
     public Organizer getCurrentOrganizer() {
         return currentOrganizer;
     }
 }
-
-
