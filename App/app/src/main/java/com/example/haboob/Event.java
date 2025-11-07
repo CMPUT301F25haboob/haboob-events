@@ -207,7 +207,165 @@ public class Event implements Serializable {
                 });
     }
 
-    // TODO: MAKE DELETE FROM LIST BUTTONS
+    // Remove user from lists:
+    public void removeEntrantFromWaitingEntrants(String userID) {
+
+        // Remove locally
+        if (this.waitingEntrants != null) {
+            this.waitingEntrants.remove(userID);
+        }
+
+        // Safety check — can't query without eventID
+        if (this.eventID == null || this.eventID.isEmpty()) {
+            Log.w("Event", "removeEntrantFromWaitingEntrants: eventID is null or empty");
+            return;
+        }
+
+        // Find the document where eventID == this.eventID
+        db.collection("events")
+                .whereEqualTo("eventID", this.eventID)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+
+                    if (querySnapshot.isEmpty()) {
+                        Log.w("Event", "No event document found matching eventID=" + this.eventID);
+                        return;
+                    }
+
+                    // We expect exactly 1 document
+                    String docId = querySnapshot.getDocuments().get(0).getId();
+
+                    // Step 2: Remove the user from waitingEntrants using arrayRemove
+                    db.collection("events")
+                            .document(docId)
+                            .update("waitingEntrants", FieldValue.arrayRemove(userID))
+                            .addOnSuccessListener(aVoid ->
+                                    Log.d("Event", "Successfully removed " + userID + " from waitingEntrants in Firebase")
+                            )
+                            .addOnFailureListener(e ->
+                                    Log.e("Event", "Error updating waitingEntrants", e)
+                            );
+
+                })
+                .addOnFailureListener(e ->
+
+                    Log.e("Event", "Failed to query event document by eventID", e)
+                );
+    }
+
+    public void removeEntrantFromInvitedEntrants(String userID) {
+
+            // Remove locally
+            if (this.invitedEntrants != null) {
+                this.invitedEntrants.remove(userID);
+            }
+
+            // Safety check — can't query without eventID
+            if (this.eventID == null || this.eventID.isEmpty()) {
+                Log.w("Event", "removeEntrantFromInvitedEntrants: eventID is null or empty");
+                return;
+            }
+
+            // Find the document where eventID == this.eventID
+            db.collection("events")
+                    .whereEqualTo("eventID", this.eventID)
+                    .get()
+                    .addOnSuccessListener(querySnapshot -> {
+
+                        if (querySnapshot.isEmpty()) {
+                            Log.w("Event", "No event document found matching eventID=" + this.eventID);
+                            return;
+                        }
+
+                        // We expect exactly 1 document
+                        String docId = querySnapshot.getDocuments().get(0).getId();
+
+                        // Step 2: Remove the user from waitingEntrants using arrayRemove
+                        db.collection("events")
+                                .document(docId)
+                                .update("invitedEntrants", FieldValue.arrayRemove(userID))
+                                .addOnSuccessListener(aVoid ->
+                                        Log.d("Event", "Successfully removed " + userID + " from invitedEntrants in Firebase")
+                                )
+                                .addOnFailureListener(e ->
+                                        Log.e("Event", "Error updating invitedEntrants", e)
+                                );
+
+                    })
+                    .addOnFailureListener(e ->
+                            Log.e("Event", "Failed to query event document by eventID", e)
+                    );
+    }
+    public void removeEntrantFromEnrolledEntrants(String userID) {
+        // Remove locally
+        if (this.enrolledEntrants != null) {
+            this.enrolledEntrants.remove(userID);
+        }
+
+        // Safety check — can't query without eventID
+        if (this.eventID == null || this.eventID.isEmpty()) {
+            Log.w("Event", "removeEntrantFromEnrolledEntrants: eventID is null or empty");
+            return;
+        }
+
+        // Find the document where eventID == this.eventID
+        db.collection("events")
+                .whereEqualTo("eventID", this.eventID)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+
+                    if (querySnapshot.isEmpty()) {
+                        Log.w("Event", "No event document found matching eventID=" + this.eventID);
+                        return;
+                    }
+
+                    // We expect exactly 1 document
+                    String docId = querySnapshot.getDocuments().get(0).getId();
+
+                    // Step 2: Remove the user from waitingEntrants using arrayRemove
+                    db.collection("events")
+                            .document(docId)
+                            .update("enrolledEntrants", FieldValue.arrayRemove(userID))
+                            .addOnSuccessListener(aVoid ->
+                                    Log.d("Event", "Successfully removed " + userID + " from enrolledEntrants in Firebase")
+                            )
+                            .addOnFailureListener(e ->
+                                    Log.e("Event", "Error updating enrolledEntrants", e)
+                            );
+
+                })
+                .addOnFailureListener(e ->
+                        Log.e("Event", "Failed to query event document by eventID", e)
+                );
+    }
+    public void removeEntrantFromCancelledEntrants(String userID) {
+        this.cancelledEntrants.add(userID);
+        db.collection("events")
+                .whereEqualTo("eventID", eventID)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        // Get the actual document ID from the query result
+                        String documentId = queryDocumentSnapshots.getDocuments().get(0).getId();
+
+                        // Update the document using its ID
+                        db.collection("events")
+                                .document(documentId)
+                                .update("cancelledEntrants", FieldValue.arrayUnion(userID))
+                                .addOnSuccessListener(aVoid -> {
+                                    Log.d("Event", "Successfully added user to cancelledEntrants");
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e("Event", "Error updating cancelledEntrants", e);
+                                });
+                    } else {
+                        Log.e("Event", "No event found with eventID: " + eventID);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("Event", "Error querying event", e);
+                });
+    }
 
 
     public void logEventLists() {

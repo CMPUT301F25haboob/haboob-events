@@ -147,7 +147,7 @@ public class OrganizerNewEventFragment extends Fragment {
             Event newEvent = new Event(currentOrganizer.getOrganizerID(), signupStart, signupEnd, eventTitle, eventDetails, geoData, capacity, limit, qrCode, poster, tags);
 
             // Add Event to organizer's eventList
-            newEvent.setEventID(currentOrganizer.getEventList().addEvent(newEvent));
+            currentOrganizer.getEventList().addEvent(newEvent);
 
 
             getParentFragmentManager().popBackStack();
