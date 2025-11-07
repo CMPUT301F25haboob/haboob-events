@@ -3,10 +3,12 @@ package com.example.haboob;
 import android.util.Log;
 
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Date;
 /*
@@ -98,30 +100,19 @@ public class EventsList  {
     public String addEvent(Event e, OnEventsLoadedListener listener) {
         eventsListRef.add(e)
                 .addOnSuccessListener(docRef -> {
-                    String id = docRef.getId();
-                    e.setEventID(id);
-
-                    db.collection("events").document(id).set(e)
-                            .addOnSuccessListener(aVoid -> {
-                                eventsList.add(e);
-                                Log.d("EventsList", "Added event with ID: " + id);
-                                if (listener != null) {
-                                    listener.onEventsLoaded();
-                                }
-                            })
-                            .addOnFailureListener(ex -> {
-                                Log.e("EventsList", "Failed to update event with ID", ex);
-                                if (listener != null) {
-                                    listener.onError(ex);
-                                }
-                            });
+                    eventsList.add(e);
+                    Log.d("EventsList", "Added event with ID: " + e.getEventID());
+                    if (listener != null) {
+                        listener.onEventsLoaded();
+                    }
                 })
                 .addOnFailureListener(ex -> {
-                    Log.e("EventsList", "Failed to add event", ex);
+                    Log.e("EventsList", "Failed to update event with ID", ex);
                     if (listener != null) {
                         listener.onError(ex);
                     }
                 });
+
         return e.getEventID();
     }
 
@@ -132,44 +123,41 @@ public class EventsList  {
 
     // Delete event from db using its unique Firestore ID
     public void deleteEvent(Event e, OnEventsLoadedListener listener) {
-        // Check for empty list
+
         if (eventsList == null || eventsList.isEmpty()) {
             throw new IllegalStateException("Cannot delete from an empty events list");
         }
 
-        // Check for null Firestore reference FOR TESTING
-        if (eventsListRef == null) {
-            eventsList.remove(e);
-            Log.d("EventsList", "Deleted event locally (no Firestore)");
-            if (listener != null) {
-                listener.onEventsLoaded();
-            }
-            return;
-        }
-
         if (e.getEventID() == null || e.getEventID().isEmpty()) {
-            Log.w("EventsList", "Cannot delete event: missing ID");
             if (listener != null) {
                 listener.onError(new IllegalArgumentException("Event ID is missing"));
             }
             return;
         }
 
-        eventsListRef.document(e.getEventID()).delete()
-                .addOnSuccessListener(aVoid -> {
+        // Delete the Firestore document using its ID
+        db.collection("events")
+                .whereEqualTo("eventID", e.getEventID())
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+
+                    // Remove from local list only after Firestore success
                     eventsList.remove(e);
-                    Log.d("EventsList", "Deleted event with ID: " + e.getEventID());
-                    if (listener != null) {
-                        listener.onEventsLoaded();
-                    }
+
+                    // Delete the firestore document
+                    String docId = querySnapshot.getDocuments().get(0).getId();
+                    db.collection("events").document(docId).delete();
+
+                    Log.d("EventsList", "Event deleted from Firestore and local list");
+
+                    if (listener != null) listener.onEventsLoaded();
                 })
-                .addOnFailureListener(ex -> {
-                    Log.e("EventsList", "Failed to delete event", ex);
-                    if (listener != null) {
-                        listener.onError(ex);
-                    }
+                .addOnFailureListener(e2 -> {
+                    Log.e("EventsList", "Failed to delete event", e2);
+                    if (listener != null) listener.onError(e2);
                 });
     }
+
 
     // Backward compatible version
     public void deleteEvent(Event e) {

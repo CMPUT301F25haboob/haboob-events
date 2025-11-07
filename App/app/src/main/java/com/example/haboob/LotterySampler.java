@@ -39,8 +39,9 @@ public class LotterySampler {
 
         // Add selected entrants to invitedEntrants
         for (String entrantId : selectedEntrants) {
-            // TODO: Remove the entrant form the waiting list
+            // Move from waiting to invited
             event.addEntrantToInvitedEntrants(entrantId);
+            event.removeEntrantFromWaitingEntrants(entrantId);
             // TODO: Send a notification saying they were picked
         }
 
@@ -96,7 +97,7 @@ public class LotterySampler {
 
             // Move from waiting to invited
             event.addEntrantToInvitedEntrants(selectedEntrantId);
-            // TODO: Remove from waiting list - need to add removeEntrantFromWaitingEntrants() method to Event class
+            event.removeEntrantFromWaitingEntrants(selectedEntrantId);
             // TODO: Send notification to the newly selected entrant
 
             return selectedEntrantId;

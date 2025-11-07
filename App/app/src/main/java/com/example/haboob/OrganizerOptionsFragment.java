@@ -132,6 +132,8 @@ public class OrganizerOptionsFragment extends Fragment {
         // Logic for drawing an event's lottery on button click
         drawLotteryButton.setOnClickListener(v -> {
             // TODO: Just calls a function (Dan made?)
+            LotterySampler sampler  = new LotterySampler();
+            sampler.performLottery(clickedEvent);
         });
 
         // Load events from Firestore
