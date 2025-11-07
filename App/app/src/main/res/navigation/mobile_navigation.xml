@@ -57,4 +57,18 @@
         android:label="Profile"
         tools:layout="@layout/fragment_profile" />
 
+    <!-- Admin Poster Fragment -->
+    <!-- android:name="com.example.haboob.ui" -->
+    <fragment
+        android:id="@+id/navigation_admin_posters"
+        android:label="AdminPosters"
+        tools:layout="@layout/poster_admin"
+        />
+
+    <fragment
+        android:id="@+id/navigation_admin_events"
+        android:label="AdminEvents"
+        tools:layout="@layout/poster_admin"
+        />
+
 </navigation>
