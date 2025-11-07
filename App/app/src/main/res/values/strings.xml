@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Haboob</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="waitlist_status_registered">You are currently in the waitlist for this event. You will be notified if someone drops out of the event.</string>
+    <string name="enrolledInEvent">You are currently enrolled in this event!</string>
+</resources>

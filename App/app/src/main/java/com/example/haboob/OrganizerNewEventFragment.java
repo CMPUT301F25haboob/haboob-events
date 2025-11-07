@@ -1,0 +1,207 @@
+package com.example.haboob;
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CalendarView;
+import android.widget.EditText;
+import android.widget.Switch;
+import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+
+/**
+ * {@code OrganizerNewEventFragment} is responsible for creating a new {@link Event}
+ * in the organizer’s account. It handles user input for event title, description,
+ * capacity, registration limits, tags, and registration dates.
+ *
+ * <p>The fragment validates all inputs (dates, numeric fields, and required text)
+ * before creating an {@link Event} object and adding it to the current organizer’s
+ * {@link EventsList}. The user can specify optional geolocation requirements
+ * using a {@link Switch} and tag the event for later filtering.</p>
+ *
+ * <p>Once an event is successfully created, it is added to Firestore via
+ * {@link EventsList#addEvent(Event)} and the fragment returns to the previous
+ * screen in the navigation stack.</p>
+ */
+public class OrganizerNewEventFragment extends Fragment {
+
+    /**
+     * Inflates the layout for creating a new event and handles all form submission logic.
+     *
+     * @param inflater  LayoutInflater used to inflate the fragment layout
+     * @param container Parent ViewGroup container
+     * @param savedInstanceState Previously saved instance state, if available
+     * @return The inflated View for this fragment
+     */
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.organizer_new_event_fragment, container, false);
+
+        // Get which user (Organizer) is creating the event
+        OrganizerMainActivity parent = (OrganizerMainActivity) getActivity();
+        Organizer currentOrganizer = parent.getCurrentOrganizer();
+
+        // Set up checks for date selected
+        final boolean[] startDateSelected = {false};
+        final boolean[] endDateSelected = {false};
+        final Date[] startDate = {null};
+        final Date[] endDate = {null};
+
+        // Get all input fields
+        EditText etTitle = view.findViewById(R.id.event_title);
+        EditText etDescription = view.findViewById(R.id.event_details);
+        EditText etCapacity = view.findViewById(R.id.num_selected);
+        EditText etSignupLimit = view.findViewById(R.id.num_allowed_signup);
+        EditText etTags = view.findViewById(R.id.tags);
+        CalendarView signupStartView = view.findViewById(R.id.start_date);
+        CalendarView signupEndView = view.findViewById(R.id.end_date);
+        Switch geoSwitch = view.findViewById(R.id.geo_data_required);
+
+        // Set up listeners
+        signupStartView.setOnDateChangeListener((startCalendar, year, month, dayOfMonth) -> {
+            startDateSelected[0] = true;
+            Calendar start = Calendar.getInstance();
+            start.set(year, month, dayOfMonth, 0, 0, 0);
+            startDate[0] = start.getTime();
+        });
+
+        signupEndView.setOnDateChangeListener((endCalendar, year, month, dayOfMonth) -> {
+            endDateSelected[0] = true;
+            Calendar end = Calendar.getInstance();
+            end.set(year, month, dayOfMonth, 0, 0, 0);
+            endDate[0] = end.getTime();
+        });
+
+        // TODO: Still need to implement poster, QRcode, tags, and geo data
+
+        Button confirmEventbutton = view.findViewById(R.id.confirm_event);
+        confirmEventbutton.setOnClickListener(v1 -> {
+
+            // Get user-inputted data
+            String eventTitle = etTitle.getText().toString();
+            String eventDetails = etDescription.getText().toString();
+            String eventTags = etTags.getText().toString();
+
+            // Seperate and create new tags list here
+            ArrayList<String> tags = createTagsList(eventTags);
+
+            String eventCapacity = etCapacity.getText().toString();
+            int capacity = 0;
+            String signupLimit = etSignupLimit.getText().toString();
+            int limit;
+            Date signupStart = startDate[0];
+            Date signupEnd = endDate[0];
+            boolean geoData = geoSwitch.isChecked();
+
+            // Check that fields are filled
+            if (eventTitle.isEmpty() || eventDetails.isEmpty() || eventCapacity.isEmpty() || signupStart == null || signupEnd == null) {
+                Toast.makeText(requireContext(), "Please fill in all required fields and select valid dates", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Then try to parse integer
+            try {
+                capacity = Integer.parseInt(eventCapacity);
+                if (signupLimit.isEmpty()) {
+                    limit = -1;
+                } else {
+
+                    // Try to parse limit for number
+                    try {
+                        limit = Integer.parseInt(signupLimit);
+                    } catch (NumberFormatException e) {
+                        Toast.makeText(requireContext(), "Please enter in an integer number > capacity for limit or leave blank otherwise", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                }
+
+                if (capacity < 0 || ((limit != -1) && (limit < capacity))) {
+                    Toast.makeText(requireContext(), "Limit must be no less than capacity and capacity must be greater than 0", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+            } catch (NumberFormatException e) {
+                Toast.makeText(requireContext(), "Please enter in an integer number for capacity and/or limit", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Check that dates are selected
+            if (!startDateSelected[0] || !endDateSelected[0]) {
+                Toast.makeText(requireContext(), "Please select valid dates", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Check that dates are valid
+            if (signupEnd.before(signupStart)) {
+                Toast.makeText(requireContext(), "End date must be after start date", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Set the current date in here since the user could press the button before/after midnight
+            Calendar today = Calendar.getInstance();
+            today.set(Calendar.HOUR_OF_DAY, 0);
+            today.set(Calendar.MINUTE, 0);
+            today.set(Calendar.SECOND, 0);
+            today.set(Calendar.MILLISECOND, 0);
+
+            // Ensure can't select a period before today
+            if (startDate[0].before(today.getTime()) || endDate[0].before(today.getTime())) {
+                Toast.makeText(requireContext(), "Dates cannot be before today", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Create new Event object (pass in dummy data for now)
+            QRCode qrCode = new QRCode("test");
+            Poster poster = new Poster("test");
+            Event newEvent = new Event(currentOrganizer.getOrganizerID(), signupStart, signupEnd, eventTitle, eventDetails, geoData, capacity, limit, qrCode, poster, tags);
+
+            // Add Event to organizer's eventList
+            currentOrganizer.getEventList().addEvent(newEvent);
+
+            // Navigate back to previous fragment
+            getParentFragmentManager().popBackStack();
+        });
+
+        return view;
+    }
+
+    /**
+     * Separates the user-inputted tags string by commas and returns a cleaned list of tags.
+     * <p>
+     * Each tag is trimmed of whitespace and converted to lowercase. Empty entries
+     * (such as multiple commas with no text) are ignored.
+     *
+     * @param tagString Comma-separated list of tags entered by the user
+     * @return ArrayList of cleaned, lowercase tags; empty list if none are valid
+     */
+    public ArrayList<String> createTagsList(String tagString) {
+
+        // Ensure input isn't null or empty space
+        if (tagString == null || tagString.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        String[] tags = tagString.split(",");
+        ArrayList<String> tagList = new ArrayList<>();
+
+        for (String tag : tags) {
+            String cleanTag = tag.trim().toLowerCase();
+
+            // Ensure that we don't have tags of just space ", , "
+            if (!cleanTag.isEmpty()) {
+                tagList.add(cleanTag);
+            }
+        }
+
+        return tagList;
+    }
+}

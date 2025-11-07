@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context=".AdminMainFragment"> <!-- Set the context to the new fragment class -->
+
+    <ImageButton
+        android:id="@+id/btn_admin_back"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_arrow_back_24"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Back button"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:padding="4dp"
+        android:scaleType="fitCenter" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_centerInParent="true"
+        android:gravity="center_horizontal">
+
+        <TextView
+            android:id="@+id/admin_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Admin Panel"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="32dp"/>
+
+        <Button
+            android:id="@+id/admin_view_posters_button"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:text="View Posters"
+            android:layout_marginBottom="16dp"/>
+
+        <Button
+            android:id="@+id/admin_view_events_button"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:text="View Events"
+            android:layout_marginBottom="16dp"/>
+
+        <Button
+            android:id="@+id/admin_view_users_button"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:text="View Users"
+            android:layout_marginBottom="16dp"/>
+
+        <Button
+            android:id="@+id/admin_view_notifications_button"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:text="Send Notifications"/>
+
+    </LinearLayout>
+</RelativeLayout>
