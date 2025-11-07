@@ -70,7 +70,7 @@ public class Event implements Serializable {
     private ArrayList<String> cancelledEntrants;  // -> List of all entrants who cancelled their invite or were cancelled by the organizer
 
     // to store the entrants that are in the lottery
-    private ArrayList<String> entrant_ids_for_lottery;
+//    private ArrayList<String> entrant_ids_for_lottery; deprecated by david
     private String event_image;
 
     /**
@@ -514,7 +514,7 @@ public class Event implements Serializable {
         this.qrCode = qrCode;
         this.poster = poster;
         this.tags = tags;
-        this.entrant_ids_for_lottery = entrant_ids_for_lottery;
+//        this.entrant_ids_for_lottery = entrant_ids_for_lottery;
     }
 
     // -------------------- GETTERS --------------------

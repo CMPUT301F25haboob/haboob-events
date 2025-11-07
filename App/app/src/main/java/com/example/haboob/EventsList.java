@@ -295,7 +295,27 @@ public class EventsList {
         }
         return out;
     }
+    
+    /**
+     * Return a list of events that the given entrant is waitlisted for
+     *
+     * @return List of currently enrolled events
+     */
+    public ArrayList<Event> getEntrantEnrolledEvents(String entrantID) {
+        ArrayList<Event> EnrolledEventList = new ArrayList<>();
 
+        for (Event e: eventsList) {
+            if (e.getEnrolledEntrants() == null) continue; // David: if the list is null, there's no event ids in it, so continue
+            // If given entrants
+            if (e.getEnrolledEntrants().contains(entrantID)) {
+                EnrolledEventList.add(e);
+            }
+        }
+
+        return EnrolledEventList;
+    }
+
+    // Return a list of events that aren't past their registration end date
     /**
      * Returns all “live” events — events that either have no registration end date
      * or whose registration end date is after the current date.
