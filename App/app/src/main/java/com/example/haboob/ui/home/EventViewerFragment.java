@@ -278,7 +278,7 @@ public class EventViewerFragment extends Fragment {
                     });
         });
 
-        // set an onClicklistener for leaving the waitlist
+        // Leave waitlist OnclickListener
         assert leaveWaitlistButton != null;
         leaveWaitlistButton.setOnClickListener(v -> {
             Toast.makeText(v.getContext(), "Left waitlist! ", Toast.LENGTH_SHORT).show();
@@ -288,8 +288,8 @@ public class EventViewerFragment extends Fragment {
                     .collection("events")
                     .document(eventId);
 
-            // add the device ID to the  Event entrant_ids_for_lottery list in the database:
-            ref.update("entrant_ids_for_lottery", FieldValue.arrayRemove(deviceId))
+            // Leave Waitlist OnclickListener: remove the device ID from the waitingEntrantsList in the lottery
+            ref.update("waitingEntrants", FieldValue.arrayRemove(deviceId))
                     .addOnSuccessListener(unused -> {
                         // NOTE: It's okay if it the deviceID is not in the list, firebase wont error, but the toast still runs
                         Toast.makeText(v.getContext(), "Left waitlist!", Toast.LENGTH_SHORT).show();
