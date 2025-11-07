@@ -14,6 +14,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 public class OrganizerOptionsFragment extends Fragment {
@@ -61,6 +62,26 @@ public class OrganizerOptionsFragment extends Fragment {
         // Set up ListView -> attach ArrayAdapter to the ListView
         organizerEventsView = view.findViewById(R.id.organizer_events);
         organizerEventsView.setAdapter(organizerEventsAdapter);
+
+
+        organizerEventsView.setOnItemClickListener((parent1, view1, position, id) -> {
+
+            // Logic for seeing different lists for each event on click
+            Event clickedEvent = organizerEvents.get(position);
+
+            // Create fragment and pass the event through
+            OrganizerAllListsFragment allListsFragment = new OrganizerAllListsFragment();
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("event", clickedEvent);
+            allListsFragment.setArguments(bundle);
+
+            // Navigate to fragment with event data loaded
+            getParentFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.organizer_fragment_container, allListsFragment)
+                    .addToBackStack(null)
+                    .commit();
+        });
 
         // Logic for creating an event on button click
         Button createEventButton = view.findViewById(R.id.create_event);
