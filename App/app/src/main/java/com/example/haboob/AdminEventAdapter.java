@@ -19,7 +19,7 @@ import java.util.List;
  * <p>This adapter is specifically designed for admin functionality where events
  * need to be displayed with their titles, IDs, and poster images in a grid or list format.</p>
  *
- * @author Haboob Team
+ * @author Jeff
  * @version 1.0
  * @see Event
  * @see RecyclerView.Adapter
