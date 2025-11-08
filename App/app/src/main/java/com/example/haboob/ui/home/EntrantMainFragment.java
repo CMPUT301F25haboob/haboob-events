@@ -150,28 +150,10 @@ public class EntrantMainFragment extends Fragment {
             public void onEventsLoaded() { // the callback function calls this when eventsList3 are loaded
 
                 waitListEvents = eventsList3.getEventsList();
-
                 waitListEvents = eventsList3.getEntrantWaitlistEvents(deviceId);
                 enrolledEventsList = eventsList3.getEntrantEnrolledEvents(deviceId);
 
-
-                // add to list
-//                for (Event event: waitListEvents){
-//                    if ((event.getEntrant_ids_for_lottery() != null) && (!event.getEntrant_ids_for_lottery().isEmpty()) && (event != null)) {
-//                        if (event.getEnrolledEntrants() != null) {
-//                            if (event.getEnrolledEntrants().contains(deviceId)) {
-//                                enrolledEventsList.add(event);
-//                            }
-//                        } else {
-//                            Log.d("TAG", "event.getEnrolledEntrants IS NULL, device id: "+ deviceId);
-//                        }
-//                    }
-//                }
-
-//                for (Event event: enrolledEventsList){
-//                   Log.d("TAG", "Device ID: "+  event.getEntrant_ids_for_lottery().toString());
-//                }
-                Log.d("TAG", "FILTERED EVENTSLIST SIZE: " + enrolledEventsList.size());
+                Log.d("TAG", "Enrolled EVENTSLIST SIZE: " + enrolledEventsList.size());
 
                 // runs AFTER the database is done querying:
 //                Log.d("TAG", "EVENTSLIST 4 SIZE: " + listOfEvents.size());
@@ -258,7 +240,6 @@ public class EntrantMainFragment extends Fragment {
         // Find RecyclerView by ID
         RecyclerView recyclerView = view.findViewById(R.id.entrant_rv_upcoming);
         // Prepare a list of example images from drawable
-//        List<Integer> images = Arrays.asList(R.drawable.hockey_ex, R.drawable.bob_ross, R.drawable.clash_royale, R.drawable.swimming_lessons);
 
         // Set up LayoutManager for horizontal scrolling, tells the RecyclerView how to position items, essential for actual rendering
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
@@ -272,13 +253,11 @@ public class EntrantMainFragment extends Fragment {
             Log.d("TAG", "The callback worked, event ID = " + eventId);
 //            Log.d("TAG", "ListOf events size: " + listOfEvents.size());
 
-//            EventsList eventsList = new EventsList(dummyString);
             // find the event clicked(the new events list should be updated with the database data):
             for (Event event : enrolledEventsList) {
                 if (event.getEventID().equals(eventId)) {
 
-                    Log.d("TAG", "GOT PAST IF ");
-                    Log.d("TAG", "Event clicked: " + event.getEventTitle());
+                    Log.d("TAG", "Event clicked equalled event ID, Event clicked: " + event.getEventTitle());
 
                     // Create a Bundle to pass data to the EventViewerFragment
                     Bundle args = new Bundle();
@@ -298,24 +277,16 @@ public class EntrantMainFragment extends Fragment {
         RecyclerView rvWaitlists = view.findViewById(R.id.entrant_rv_waitlists);
         rvWaitlists.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         rvWaitlists.setNestedScrollingEnabled(false);
-        List<Integer> waitlistImages = Arrays.asList(
-                R.drawable.clash_royale, R.drawable.clash_royale, R.drawable.clash_royale
-        );
         rvWaitlists.setAdapter(waitListsAdapter);
-//
-//        // set the onClickListener for the second carousel:
+
+        // set the onClickListener for the second carousel:
         waitListsAdapter.setOnItemClick(eventId -> {
 
-            Log.d("TAG", "The callback worked, event ID = " + eventId + "Event title: " + eventsList3.getEventByID(eventId).getEventTitle());
-//            Log.d("TAG", "ListOf events size: " + listOfEvents.size());
-
-//            EventsList eventsList = new EventsList(dummyString);
             // find the event clicked(the new events list should be updated with the database data):
             for (Event event : waitListEvents) {
                 if (event.getEventID().equals(eventId)) {
 
-                    Log.d("TAG", "GOT PAST IF ");
-                    Log.d("TAG", "Event clicked: " + event.getEventTitle());
+                    Log.d("TAG", "Callback for open waitlists carousel worked:  " + eventId + "Event title: " + eventsList3.getEventByID(eventId).getEventTitle());
 
                     // Create a Bundle to pass data to the EventViewerFragment
                     Bundle args = new Bundle();
@@ -333,8 +304,8 @@ public class EntrantMainFragment extends Fragment {
                 }
             }
         });
-//
-//        // Return the inflated view
+
+//     // Return the inflated view
         return view;
     }
 
