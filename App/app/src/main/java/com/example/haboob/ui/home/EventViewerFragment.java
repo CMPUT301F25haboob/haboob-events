@@ -318,7 +318,6 @@ public class EventViewerFragment extends Fragment {
         leaveWaitlistButton.setOnClickListener(v -> {
 //            Toast.makeText(v.getContext(), "Left waitlist! ", Toast.LENGTH_SHORT).show();
 
-
             eventToDisplay.removeEntrantFromWaitingEntrants(deviceId); // remove the device ID from the waitingEntrantsList for the lottery
             leaveWaitlistButton.setText("Left Waitlist!");
             leaveWaitlistButton.setBackgroundColor(getResources().getColor(R.color.black));
@@ -335,7 +334,6 @@ public class EventViewerFragment extends Fragment {
         leaveEventButton.setOnClickListener(v -> {
 //            Toast.makeText(v.getContext(), "Left waitlist! ", Toast.LENGTH_SHORT).show();
 
-
             eventToDisplay.removeEntrantFromEnrolledEntrants(deviceId); // remove the device ID from the waitingEntrantsList for the lottery
             leaveEventButton.setText("Left event!");
             userWaitListStatus.setVisibility(View.INVISIBLE);
@@ -344,7 +342,7 @@ public class EventViewerFragment extends Fragment {
 //             notify EntrantMainFragment to update carousels, as the user left the list
             getParentFragmentManager().setFragmentResult("USER_LEFT_EVENT", new Bundle());
 
-            NavHostFragment.findNavController(this).navigateUp();
+//            NavHostFragment.findNavController(this).navigateUp();
 //            NavHostFragment.findNavController(this)
 //                    .navigate(R.id.navigation_home);
 

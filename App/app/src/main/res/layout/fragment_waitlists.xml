@@ -5,16 +5,37 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Search -->
-    <SearchView
-        android:id="@+id/searchView"
-        android:iconifiedByDefault="false"
-        android:queryHint="Search waitlists"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="12dp"/>
 
     <!-- Results -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">\
+
+
+        <!-- Search -->
+
+        <SearchView
+            android:id="@+id/searchView"
+            android:layout_width="261dp"
+            android:layout_height="wrap_content"
+            android:iconifiedByDefault="false"
+            android:paddingTop="12dp"
+            android:queryHint="Search waitlists" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/back_button"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginStart="12dp"
+            android:minWidth="0dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:text="Back" />
+
+
+    </LinearLayout>
+
     <ListView
         android:id="@+id/waitlistsListView"
         android:layout_width="match_parent"
@@ -23,4 +44,6 @@
         android:divider="?android:attr/listDivider"
         android:dividerHeight="1dp"
         android:fastScrollEnabled="true" />
+
+
 </LinearLayout>

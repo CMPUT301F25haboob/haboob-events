@@ -5,11 +5,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.haboob.Event;
@@ -18,6 +22,7 @@ import com.example.haboob.R;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 public class WaitlistsFragment extends Fragment {
@@ -42,6 +47,13 @@ public class WaitlistsFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_waitlists, container, false);
         ListView list = v.findViewById(R.id.waitlistsListView);
         SearchView search = v.findViewById(R.id.searchView);
+        Button backButton = v.findViewById(R.id.back_button);
+
+        backButton.setOnClickListener(v1 -> {
+            Navigation.findNavController(v).navigateUp();
+        });
+
+
 
         entrantWaitList = eventsList.getEntrantWaitlistEvents(deviceId);
 

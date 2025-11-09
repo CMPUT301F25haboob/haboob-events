@@ -20,26 +20,6 @@
         app:elevation="0dp">
 
         <!-- Search bar (M3) -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/search_input_layout"
-            style="@style/Widget.Material3.TextInputLayout.FilledBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="8dp"
-            app:boxBackgroundMode="filled"
-            app:startIconDrawable="@drawable/ic_search_24"
-            app:startIconTint="?attr/colorOnSurfaceVariant"
-            app:layout_scrollFlags="scroll|enterAlways">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/search_edit_text"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:hint="Search events"
-                android:inputType="text"
-                android:textColor="?attr/colorOnSurface"/>
-        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Segmented controls (M3 buttons already) -->
         <com.google.android.material.button.MaterialButtonToggleGroup
