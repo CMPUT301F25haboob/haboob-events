@@ -303,7 +303,7 @@ public class EventViewerFragment extends Fragment {
             acceptInvitationButton.setText("Joined!");
             acceptInvitationButton.setBackgroundColor(getResources().getColor(R.color.accept_green));
             leaveWaitlistButton.setVisibility(View.VISIBLE);
-            leaveWaitlistButton.setText("Leave waitlist");
+            leaveWaitlistButton.setText("Leave Waitlist");
             leaveWaitlistButton.setBackgroundColor(getResources().getColor(R.color.leaving_red));
             userWaitListStatus.setVisibility(View.VISIBLE);
             userWaitListStatus.setText(R.string.waitlist_status_registered);
