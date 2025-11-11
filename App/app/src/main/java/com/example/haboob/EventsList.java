@@ -304,6 +304,8 @@ public class EventsList {
     public ArrayList<Event> getEntrantEnrolledEvents(String entrantID) {
         ArrayList<Event> EnrolledEventList = new ArrayList<>();
 
+        Log.d("TAG", "EntrantID: " + entrantID);
+
         for (Event e: eventsList) {
             if (e.getEnrolledEntrants() == null) continue; // David: if the list is null, there's no event ids in it, so continue
             // If given entrants

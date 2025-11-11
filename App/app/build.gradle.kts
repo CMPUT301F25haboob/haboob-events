@@ -71,5 +71,8 @@ dependencies {
     //androidTestImplementation("androidx.test.ext:junit:1.1.5")
     //androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     // JavaDocs
-    // implementation(files("/home/user/Android/Sdk/platforms/android-36/android.jar"))
+    // implementation(files("home/user/Android/Sdk/platforms/android-36/android.jar"))
+
+    // flexbox for event filters:
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
 }

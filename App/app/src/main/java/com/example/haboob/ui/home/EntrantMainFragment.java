@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -26,16 +27,23 @@ import com.example.haboob.QRCode;
 import com.example.haboob.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.button.MaterialButton;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.Source;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 // Author: David T, created on Sunday, oct 26 2025
@@ -84,6 +92,7 @@ public class EntrantMainFragment extends Fragment {
     }
 
     private EventsList eventsList3; // declare the eventsList object
+    private Button myWaitlists;
 
     public EntrantMainFragment() {
         // Required empty public constructor
@@ -147,28 +156,10 @@ public class EntrantMainFragment extends Fragment {
             public void onEventsLoaded() { // the callback function calls this when eventsList3 are loaded
 
                 waitListEvents = eventsList3.getEventsList();
-
                 waitListEvents = eventsList3.getEntrantWaitlistEvents(deviceId);
                 enrolledEventsList = eventsList3.getEntrantEnrolledEvents(deviceId);
 
-
-                // add to list
-//                for (Event event: waitListEvents){
-//                    if ((event.getEntrant_ids_for_lottery() != null) && (!event.getEntrant_ids_for_lottery().isEmpty()) && (event != null)) {
-//                        if (event.getEnrolledEntrants() != null) {
-//                            if (event.getEnrolledEntrants().contains(deviceId)) {
-//                                enrolledEventsList.add(event);
-//                            }
-//                        } else {
-//                            Log.d("TAG", "event.getEnrolledEntrants IS NULL, device id: "+ deviceId);
-//                        }
-//                    }
-//                }
-
-//                for (Event event: enrolledEventsList){
-//                   Log.d("TAG", "Device ID: "+  event.getEntrant_ids_for_lottery().toString());
-//                }
-                Log.d("TAG", "FILTERED EVENTSLIST SIZE: " + enrolledEventsList.size());
+                Log.d("TAG", "Enrolled EVENTSLIST SIZE: " + enrolledEventsList.size());
 
                 // runs AFTER the database is done querying:
 //                Log.d("TAG", "EVENTSLIST 4 SIZE: " + listOfEvents.size());
@@ -255,7 +246,6 @@ public class EntrantMainFragment extends Fragment {
         // Find RecyclerView by ID
         RecyclerView recyclerView = view.findViewById(R.id.entrant_rv_upcoming);
         // Prepare a list of example images from drawable
-//        List<Integer> images = Arrays.asList(R.drawable.hockey_ex, R.drawable.bob_ross, R.drawable.clash_royale, R.drawable.swimming_lessons);
 
         // Set up LayoutManager for horizontal scrolling, tells the RecyclerView how to position items, essential for actual rendering
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
@@ -269,13 +259,11 @@ public class EntrantMainFragment extends Fragment {
             Log.d("TAG", "The callback worked, event ID = " + eventId);
 //            Log.d("TAG", "ListOf events size: " + listOfEvents.size());
 
-//            EventsList eventsList = new EventsList(dummyString);
             // find the event clicked(the new events list should be updated with the database data):
             for (Event event : enrolledEventsList) {
                 if (event.getEventID().equals(eventId)) {
 
-                    Log.d("TAG", "GOT PAST IF ");
-                    Log.d("TAG", "Event clicked: " + event.getEventTitle());
+                    Log.d("TAG", "Event clicked equalled event ID, Event clicked: " + event.getEventTitle());
 
                     // Create a Bundle to pass data to the EventViewerFragment
                     Bundle args = new Bundle();
@@ -295,24 +283,16 @@ public class EntrantMainFragment extends Fragment {
         RecyclerView rvWaitlists = view.findViewById(R.id.entrant_rv_waitlists);
         rvWaitlists.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         rvWaitlists.setNestedScrollingEnabled(false);
-        List<Integer> waitlistImages = Arrays.asList(
-                R.drawable.clash_royale, R.drawable.clash_royale, R.drawable.clash_royale
-        );
         rvWaitlists.setAdapter(waitListsAdapter);
-//
-//        // set the onClickListener for the second carousel:
+
+        // set the onClickListener for the second carousel:
         waitListsAdapter.setOnItemClick(eventId -> {
 
-            Log.d("TAG", "The callback worked, event ID = " + eventId + "Event title: " + eventsList3.getEventByID(eventId).getEventTitle());
-//            Log.d("TAG", "ListOf events size: " + listOfEvents.size());
-
-//            EventsList eventsList = new EventsList(dummyString);
             // find the event clicked(the new events list should be updated with the database data):
             for (Event event : waitListEvents) {
                 if (event.getEventID().equals(eventId)) {
 
-                    Log.d("TAG", "GOT PAST IF ");
-                    Log.d("TAG", "Event clicked: " + event.getEventTitle());
+                    Log.d("TAG", "Callback for open waitlists carousel worked:  " + eventId + "Event title: " + eventsList3.getEventByID(eventId).getEventTitle());
 
                     // Create a Bundle to pass data to the EventViewerFragment
                     Bundle args = new Bundle();
@@ -330,8 +310,8 @@ public class EntrantMainFragment extends Fragment {
                 }
             }
         });
-//
-//        // Return the inflated view
+
+//     // Return the inflated view
         return view;
     }
 
@@ -362,6 +342,15 @@ public class EntrantMainFragment extends Fragment {
                 "USER_LEFT_EVENT", this, (reqKey, bundle) -> loadEventsForUser(userID)
         );
 
+        // set a listener that listens for myWaitlists button click, on navigate, it navigates there
+        myWaitlists = view.findViewById(R.id.btn_my_waitlists);
+        Bundle args = new Bundle();
+        args.putString("device_id", deviceId); // args <- deviceID
+
+        myWaitlists.setOnClickListener(v ->
+                NavHostFragment.findNavController(this)
+                        .navigate(R.id.waitlists_view_fragment, args)
+        );
 
     }
 
@@ -373,8 +362,10 @@ public class EntrantMainFragment extends Fragment {
      */
     public void createDummyEvent() {
         // *********** create a new dummy event: ********************************************************************
-        MainActivity mainAct = (MainActivity) getActivity(); // find the instance of mainActivity thats currently running
-        EventsList eventsList = mainAct.getEventsList();
+//        MainActivity mainAct = (MainActivity) getActivity(); // find the instance of mainActivity thats currently running
+//        EventsList eventsList = mainAct.getEventsList();
+
+        EventsList eventsList = new EventsList();
         if (eventsList == null) {
             Log.w("EntrantMainFragment", "eventsList was null");
             return;
@@ -384,26 +375,18 @@ public class EntrantMainFragment extends Fragment {
         Date regStart = new GregorianCalendar(2025, Calendar.NOVEMBER, 1).getTime();
         Date regEnd   = new GregorianCalendar(2025, Calendar.NOVEMBER, 15).getTime();
 
+        String url = "https://www.rollingstone.com/wp-content/uploads/2025/02/GettyImages-1448238032-2.jpg?w=1581&h=1054&crop=1";
+
         // Create supporting objects
         QRCode qrCode = new QRCode("idk lol");
-        Poster poster = new Poster("https://www.seriouseats.com/thmb/LoXQL7Yp_uXxtipH8cCp_LGVg5E=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/__opt__aboutcom__coeus__resources__content_migration__serious_eats__seriouseats.com__recipes__images__2014__08__20140810-workhorse-bread-vicky-wasik-3-3a86ee51da2e4a7b8239ceb62d8d8d17.jpg");
+        Poster poster = new Poster(url);
 
-        // Create a list of tags for this event
-        List<String> tagStrings = new ArrayList<>();
-        tagStrings.add("festival");
-        tagStrings.add("outdoor");
-        tagStrings.add("family");
-//        EventTagList tags = new EventTagList(tagStrings);
 
+        // create list of tags
         ArrayList<String> tagslist2 = new ArrayList<>();
-        tagslist2.add("Spongebob");
-        tagslist2.add("lol");
-        tagslist2.add("Guy");
-
-        // create a list of dummy entrant Ids for this event:
-        ArrayList<String> event_entrant_ids = new ArrayList<>();
-
-        event_entrant_ids.add(deviceId);
+        tagslist2.add("drake");
+        tagslist2.add("rap");
+        tagslist2.add("3+ hours");
 
 
         // Finally, create your dummy Event using your constructor
@@ -411,8 +394,8 @@ public class EntrantMainFragment extends Fragment {
                 "org12345",                                  // organizer
                 regStart,                                    // registrationStartDate
                 regEnd,                                      // registrationEndDate
-                "bread making",                          // eventTitle
-                "dough",             // eventDescription
+                "Drake Concert",                          // eventTitle
+                "drake the kinda fella to ",             // eventDescription
                 true,                                        // geoLocationRequired
                 100,                                         // lotterySampleSize
                 200,                                            // optionalWaitingListSize
@@ -420,6 +403,23 @@ public class EntrantMainFragment extends Fragment {
                 poster,                                      // Poster object
                 tagslist2                // tagsList<String
         );
+
+        dummyEvent.addEntrantToWaitingEntrants(deviceId);
+        eventsList.loadEventsList();
+
+        // update carousels
+        loadEventsForUser(deviceId);
+
+        eventsList3 = new EventsList(new EventsList.OnEventsLoadedListener() {
+            @Override
+            public void onEventsLoaded() { // the callback function calls this when eventsList3 are loaded
+                eventsList3.addEvent(dummyEvent);
+            }
+            @Override
+            public void onError(Exception err) {
+                Log.e("TAG", "Failed loading events", err);
+            }
+        });
 
 //         public Event( QRCode qrCode, Poster poster, ArrayList<String> tags) {
 //            this.db = FirebaseFirestore.getInstance();
@@ -437,15 +437,15 @@ public class EntrantMainFragment extends Fragment {
 //            this.initLists();
 //        }
 
-//        Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, QRCode qrCode, Poster poster, ArrayList<String> tags, ArrayList<String> entrant_ids_for_lottery) {
-
-        if (eventsList != null){
-            eventsList.addEvent(dummyEvent);
-            Log.d("TAG", "eventsList is not null");
-        }
-        else{
-            Log.d("TAG", "eventsList is null");
-        }
+//        if (eventsList != null){
+//            eventsList.addEvent(dummyEvent);
+//            eventsList.loadEventsList();
+//            boolean isLoaded = eventsList.isLoaded();
+//            Log.d("TAG", "eventsList is not null, isLoaded is: " + isLoaded);
+//        }
+//        else{
+//            Log.d("TAG", "eventsList is null");
+//        }
 
     }
 

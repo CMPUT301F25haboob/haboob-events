@@ -39,29 +39,33 @@
             android:paddingTop="24dp">
 
             <!-- Hero image -->
+
+            <!-- Date + Time -->
+
             <ImageView
                 android:id="@+id/heroImage"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:scaleType="centerCrop"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintDimensionRatio="16:9"
+                android:layout_marginTop="16dp"
                 android:contentDescription="@string/title_home"
-                android:src="@drawable/bob_ross" />
+                android:scaleType="centerCrop"
+                android:src="@drawable/bob_ross"
+                app:layout_constraintDimensionRatio="16:9"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Date + Time -->
             <TextView
                 android:id="@+id/registrationStart"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="28dp"
+                android:layout_marginTop="8dp"
                 android:text="Registration Start:"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toStartOf="@id/valueDateTime"
-                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/heroImage"
                 app:layout_goneMarginEnd="8dp" />
@@ -118,12 +122,12 @@
                 android:id="@+id/registrationEnd"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="52dp"
+                android:layout_marginTop="32dp"
                 android:text="Registration End:"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toStartOf="@id/valueDateTime"
-                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/heroImage"
                 app:layout_goneMarginEnd="8dp" />
@@ -133,7 +137,7 @@
                 style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
-                android:layout_marginTop="56dp"
+                android:layout_marginTop="4dp"
                 android:text="Accept Invitation"
                 android:textAllCaps="false"
                 android:textStyle="bold"
@@ -142,14 +146,14 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/labelAmount"
+                app:layout_constraintTop_toBottomOf="@id/userWaitListStatus"
                 tools:backgroundTint="#35C759" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnLeaveWaitlist"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="4dp"
                 android:text="Leave Waitlist"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"
@@ -158,7 +162,24 @@
                 app:cornerRadius="16dp"
                 app:iconTint="@android:color/white"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnLeaveEvent" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnLeaveEvent"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="4dp"
+                android:text="Leave Event"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                app:backgroundTint="#BF1D2A"
+                app:cornerRadius="16dp"
+                app:iconTint="@android:color/white"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/btnAccept" />
 
@@ -198,8 +219,8 @@
 
             <TextView
                 android:id="@+id/userWaitListStatus"
-                android:layout_width="388dp"
-                android:layout_height="54dp"
+                android:layout_width="387dp"
+                android:layout_height="40dp"
                 android:layout_marginTop="16dp"
                 android:text="Waitlist Status"
                 android:textSize="14sp"
@@ -228,12 +249,12 @@
                 android:id="@+id/eventDate"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="80dp"
+                android:layout_marginTop="56dp"
                 android:text="Event Date:"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toStartOf="@id/valueDateTime"
-                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/heroImage"
                 app:layout_goneMarginEnd="8dp" />

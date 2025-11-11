@@ -184,7 +184,9 @@ public class Event implements Serializable {
      * @param userID user ID to add
      */
     public void addEntrantToWaitingEntrants(String userID) {
-        this.invitedEntrants.add(userID);
+//        this.invitedEntrants.add(userID);
+        this.waitingEntrants.add(userID);  // david's change, not sure why it was invitedEntrants before
+
 
         db.collection("events")
                 .whereEqualTo("eventID", eventID)
@@ -525,7 +527,7 @@ public class Event implements Serializable {
     public String getOrganizer() {
         return this.organizerID;
     }
-    
+
 
     /**
      * @return event UUID stored in the document field

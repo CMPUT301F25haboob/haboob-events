@@ -158,7 +158,7 @@ public class EventTest {
                 tags, lottery
         );
 
-        assertEquals(lottery, e2.getEntrant_ids_for_lottery());
+        assertEquals(lottery, e2.getWaitingEntrants());
         assertEquals("ORG_X", e2.getOrganizer());
         assertEquals("Title", e2.getEventTitle());
     }
