@@ -19,6 +19,7 @@ public class LotterySampler {
      * @throws IllegalArgumentException if event is null or has no entrants
      */
     public void performLottery(Event event) {
+
         if (event == null) {
             throw new IllegalArgumentException("Event cannot be null");
         }
@@ -29,7 +30,7 @@ public class LotterySampler {
         }
 
         // Get the event capacity which is the number of entrants to sample
-        int sampleSize = event.getLotterySampleSize();
+        int sampleSize = event.getLotterySampleSize() - (event.getInvitedEntrants().size() + event.getEnrolledEntrants().size());
         if (sampleSize <= 0) {
             throw new IllegalArgumentException("Lottery sample size must be greater than 0");
         }

@@ -51,11 +51,10 @@
                 android:scaleType="centerCrop"
                 android:src="@drawable/bob_ross"
                 app:layout_constraintDimensionRatio="16:9"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:contentDescription="@string/title_home"
+                android:src="@drawable/bob_ross" />
 
+            <!-- Date + Time -->
             <TextView
                 android:id="@+id/registrationStart"
                 android:layout_width="0dp"
@@ -219,8 +218,8 @@
 
             <TextView
                 android:id="@+id/userWaitListStatus"
-                android:layout_width="387dp"
-                android:layout_height="40dp"
+                android:layout_width="388dp"
+                android:layout_height="54dp"
                 android:layout_marginTop="16dp"
                 android:text="Waitlist Status"
                 android:textSize="14sp"

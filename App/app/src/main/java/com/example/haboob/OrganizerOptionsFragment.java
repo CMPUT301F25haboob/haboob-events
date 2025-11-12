@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * {@code OrganizerOptionsFragment} is the main fragment displayed for organizers
@@ -57,7 +58,8 @@ public class OrganizerOptionsFragment extends Fragment {
 
     /** The event currently selected by the user in the ListView. */
     private Event clickedEvent;
-
+    private Date date;
+    // NOTE: Can check LogCat to help debug processes
 
     /**
      * Inflates the organizer options UI, initializes components, and sets up event button logic.
@@ -158,8 +160,17 @@ public class OrganizerOptionsFragment extends Fragment {
         // Draw lottery for selected event
         drawLotteryButton.setOnClickListener(v -> {
             // TODO: Just calls a function (Dan made?)
+            date = new Date();
+            if (clickedEvent.getRegistrationEndDate().after(date)) {
+                Toast.makeText(getContext(), "Cannot draw yet, registration has not closed", Toast.LENGTH_LONG).show();
+                return;
+            }
             LotterySampler sampler  = new LotterySampler();
-            sampler.performLottery(clickedEvent);
+            try {
+                sampler.performLottery(clickedEvent);
+            } catch (IllegalArgumentException e) {
+                Toast.makeText(parent, e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
 
         // Load events for the organizer
