@@ -4,6 +4,9 @@ import java.util.UUID;
 
 public class Notification {
     public static final String DEFAULT_MESSAGE = "Empty Notification";
+    public static final String DEFAULT_RECIPIENT_ID = "NONE";
+    public static final String DEFAULT_EVENT_ID = "NONE";
+
 
     private String notificationId;
     private String eventId;
@@ -16,10 +19,12 @@ public class Notification {
 
     // Empty constructor
     public Notification() {
-        this.message = DEFAULT_MESSAGE;
         this.read = false;
         this.timeCreated = new Date();
         this.notificationId = UUID.randomUUID().toString();
+        this.message = DEFAULT_MESSAGE;
+        this.recipientId = DEFAULT_RECIPIENT_ID;
+        this.eventId = DEFAULT_EVENT_ID;
     }
 
     public Notification(String eventId, String organizerId, String recipientId, String message) {
