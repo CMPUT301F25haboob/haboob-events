@@ -97,6 +97,8 @@ public class EventViewerFragment extends Fragment {
         leaveWaitlistButton = view.findViewById(R.id.btnLeaveWaitlist);
         userWaitListStatus = view.findViewById(R.id.userWaitListStatus);
 
+
+
         assert getArguments() != null;
         Bundle args = getArguments();
 
@@ -120,6 +122,13 @@ public class EventViewerFragment extends Fragment {
         } else {
             Log.d("EventViewerFragment", "Event found in list, displaying: " + eventId);
             displayEvent(eventToDisplay, view, eventId);
+        }
+
+        TextView limitText = view.findViewById(R.id.textNewInfo);
+        if (eventToDisplay.getOptionalWaitingListSize() == 0) {
+            limitText.setText("Uncapped");
+        } else {
+            limitText.setText(eventToDisplay.getOptionalWaitingListSize());
         }
 
         return view;
