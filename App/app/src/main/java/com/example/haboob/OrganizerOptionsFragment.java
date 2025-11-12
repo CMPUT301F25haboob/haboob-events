@@ -139,7 +139,11 @@ public class OrganizerOptionsFragment extends Fragment {
                 return;
             }
             LotterySampler sampler  = new LotterySampler();
-            sampler.performLottery(clickedEvent);
+            try {
+                sampler.performLottery(clickedEvent);
+            } catch (IllegalArgumentException e) {
+                Toast.makeText(parent, e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
 
         // Load events from Firestore
