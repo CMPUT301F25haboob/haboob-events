@@ -36,6 +36,11 @@ android {
 }
 
 dependencies {
+    // Testing
+    // For FragmentScenario
+    androidTestImplementation("androidx.fragment:fragment-testing:1.7.1")
+    // For TestNavHostController (using the same version as your other navigation libraries)
+    androidTestImplementation("androidx.navigation:navigation-testing:2.9.4")
 
     implementation(libs.appcompat)
     implementation(libs.material)
@@ -46,6 +51,8 @@ dependencies {
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
     implementation(libs.firebase.firestore)
+    implementation(libs.navigation.testing)
+    implementation(libs.fragment.testing)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -60,8 +67,12 @@ dependencies {
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 
     // JUnit 4 for local unit tests
-    testImplementation("junit:junit:4.13.2")
-
+    //testImplementation("junit:junit:4.13.2")
+    //androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    //androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     // JavaDocs
     // implementation(files("home/user/Android/Sdk/platforms/android-36/android.jar"))
+
+    // flexbox for event filters:
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
 }

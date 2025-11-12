@@ -3,55 +3,93 @@ package com.example.haboob;
 import android.util.Log;
 
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Date;
-/*
- * This class holds a list of all events and manages the events database on Firestore
- * getEventsList() Return a list of all events objects
- * loadEventsList() Loads events collection of events from Firestore into eventsList
- * addEvent(Event e) add an event object to Firestore and assign unique Firestore ID to the event
- * deleteEvent(Event e) delete and event from Firestore
- * getEventByID(String eventID)
- * filterEvents(ArrayList<String> tags) return a list of filtered events based of a list of tags
- * getOrganizerEvents(Organizer o) // Returns a list of events had by a specific Organizer ID
+import java.util.List;
+
+/**
+ * {@code EventsList} manages all {@link Event} objects in the Firestore "events" collection.
+ * <p>
+ * It provides methods to:
+ * <ul>
+ *     <li>Load events from Firestore into memory</li>
+ *     <li>Add and delete events from Firestore</li>
+ *     <li>Filter or query locally loaded events by various attributes</li>
+ * </ul>
+ * <p>
+ * This class can be instantiated in two ways:
+ * <ul>
+ *     <li>Connected to Firestore (default constructor)</li>
+ *     <li>In-memory only (for unit tests)</li>
+ * </ul>
+ * It also supports optional callbacks via {@link OnEventsLoadedListener} for asynchronous operations.
  */
-public class EventsList  {
+public class EventsList {
+
+    /** List containing all events currently loaded in memory. */
     private ArrayList<Event> eventsList;
+
+    /** Reference to Firestore database. */
     private FirebaseFirestore db;
+
+    /** Reference to the Firestore "events" collection. */
     private CollectionReference eventsListRef;
+
+    /** Flag indicating whether the events list has finished loading from Firestore. */
     private boolean isLoaded = false;
 
-    // Callback interface for async operations
+    /**
+     * Callback interface for asynchronous Firestore operations.
+     */
     public interface OnEventsLoadedListener {
+        /**
+         * Called when the requested Firestore operation completes successfully.
+         */
         void onEventsLoaded();
+
+        /**
+         * Called when the requested Firestore operation fails.
+         *
+         * @param e Exception thrown by Firestore
+         */
         void onError(Exception e);
     }
 
-    // Constructor - automatically loads events on creation
+    /**
+     * Default constructor.
+     * <p>
+     * Initializes Firestore and automatically loads all events
+     * from the "events" collection into {@link #eventsList}.
+     */
     public EventsList() {
         eventsList = new ArrayList<>();
         db = FirebaseFirestore.getInstance();
         eventsListRef = db.collection("events");
-
-        // Automatically load events when EventsList is created
-        this.loadEventsList();
+        loadEventsList();
     }
 
-    // Optional: Constructor with callback for when you need to know when loading completes
+    /**
+     * Constructor that also accepts a listener for completion notifications.
+     *
+     * @param listener Listener called after Firestore load completes or fails
+     */
     public EventsList(OnEventsLoadedListener listener) {
         eventsList = new ArrayList<>();
         db = FirebaseFirestore.getInstance();
         eventsListRef = db.collection("events");
-        this.loadEventsList(listener);
+        loadEventsList(listener);
     }
 
-    // Constructor used for testers so tests don't interact with firestore
+    /**
+     * Constructor used for unit testing.
+     * <p>
+     * When {@code inMemoryOnly} is true, this instance operates without touching Firestore.
+     *
+     * @param inMemoryOnly true for local-only mode, false for Firestore-connected mode
+     */
     public EventsList(boolean inMemoryOnly) {
         eventsList = new ArrayList<>();
         if (!inMemoryOnly) {
@@ -60,97 +98,116 @@ public class EventsList  {
         }
     }
 
-    // Return a list of all events
+    /**
+     * Returns the current in-memory list of all events.
+     *
+     * @return ArrayList of {@link Event} objects
+     */
     public ArrayList<Event> getEventsList() {
         return eventsList;
     }
 
+    /**
+     * Indicates whether the list of events has finished loading from Firestore.
+     *
+     * @return true if loaded, false otherwise
+     */
     public boolean isLoaded() {
         return isLoaded;
     }
 
-    // Updated loadEventsList with callback
+    /**
+     * Loads all events from the Firestore "events" collection into memory.
+     * <p>
+     * This operation is asynchronous; use {@link OnEventsLoadedListener} to be notified when complete.
+     *
+     * @param listener Optional callback to handle success or failure
+     */
     public void loadEventsList(OnEventsLoadedListener listener) {
         eventsListRef.get()
                 .addOnSuccessListener(snapshots -> {
                     eventsList.clear();
                     for (QueryDocumentSnapshot doc : snapshots) {
-                        Event e = doc.toObject(Event.class); // Turn data back into object
+                        Event e = doc.toObject(Event.class);
                         eventsList.add(e);
                     }
                     isLoaded = true;
-                    if (listener != null) {
-                        listener.onEventsLoaded();
-                    }
+                    if (listener != null) listener.onEventsLoaded();
                     Log.d("EventsList", "Successfully loaded " + eventsList.size() + " events");
                 })
                 .addOnFailureListener(e -> {
                     Log.e("EventsList", "Failed to load events", e);
-                    if (listener != null) {
-                        listener.onError(e);
-                    }
+                    if (listener != null) listener.onError(e);
                 });
     }
 
-    // Overloaded version without callback for backward compatibility
+    /**
+     * Loads all events from Firestore without using a callback listener.
+     */
     public void loadEventsList() {
         loadEventsList(null);
     }
 
-    // Add event to db and set events unique Firestore ID
+    /**
+     * Adds a new {@link Event} to Firestore and appends it to the local list upon success.
+     * <p>
+     * Firestore automatically generates a unique document ID, while the {@code eventID}
+     * is managed internally by the {@link Event} class.
+     *
+     * @param e        The {@link Event} to add
+     * @param listener Optional listener for asynchronous completion
+     * @return The event's internal {@code eventID}
+     */
     public String addEvent(Event e, OnEventsLoadedListener listener) {
         eventsListRef.add(e)
                 .addOnSuccessListener(docRef -> {
                     eventsList.add(e);
                     Log.d("EventsList", "Added event with ID: " + e.getEventID());
-                    if (listener != null) {
-                        listener.onEventsLoaded();
-                    }
+                    if (listener != null) listener.onEventsLoaded();
                 })
                 .addOnFailureListener(ex -> {
                     Log.e("EventsList", "Failed to update event with ID", ex);
-                    if (listener != null) {
-                        listener.onError(ex);
-                    }
+                    if (listener != null) listener.onError(ex);
                 });
-
         return e.getEventID();
     }
 
-    // Backward compatible version
+    /**
+     * Adds a new event without specifying a listener.
+     *
+     * @param e The event to add
+     * @return The event's internal {@code eventID}
+     */
     public String addEvent(Event e) {
         return addEvent(e, null);
     }
 
-    // Delete event from db using its unique Firestore ID
+    /**
+     * Deletes the specified event from Firestore and removes it from the local list.
+     * <p>
+     * The event is matched in Firestore by its {@code eventID} field.
+     *
+     * @param e        The {@link Event} to delete
+     * @param listener Optional callback for completion
+     * @throws IllegalStateException if {@link #eventsList} is empty
+     */
     public void deleteEvent(Event e, OnEventsLoadedListener listener) {
-
         if (eventsList == null || eventsList.isEmpty()) {
             throw new IllegalStateException("Cannot delete from an empty events list");
         }
-
         if (e.getEventID() == null || e.getEventID().isEmpty()) {
-            if (listener != null) {
-                listener.onError(new IllegalArgumentException("Event ID is missing"));
-            }
+            if (listener != null) listener.onError(new IllegalArgumentException("Event ID is missing"));
             return;
         }
 
-        // Delete the Firestore document using its ID
         db.collection("events")
                 .whereEqualTo("eventID", e.getEventID())
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
-
-                    // Remove from local list only after Firestore success
                     eventsList.remove(e);
-
-                    // Delete the firestore document
                     String docId = querySnapshot.getDocuments().get(0).getId();
                     db.collection("events").document(docId).delete();
-
                     Log.d("EventsList", "Event deleted from Firestore and local list");
-
                     if (listener != null) listener.onEventsLoaded();
                 })
                 .addOnFailureListener(e2 -> {
@@ -159,13 +216,21 @@ public class EventsList  {
                 });
     }
 
-
-    // Backward compatible version
+    /**
+     * Deletes an event from Firestore without specifying a listener.
+     *
+     * @param e The event to delete
+     */
     public void deleteEvent(Event e) {
         deleteEvent(e, null);
     }
 
-    // Find event by ID and return it
+    /**
+     * Retrieves an {@link Event} from the in-memory list by its eventID.
+     *
+     * @param eventID Unique event identifier
+     * @return Matching {@link Event}, or {@code null} if not found
+     */
     public Event getEventByID(String eventID) {
         if (eventID == null) return null;
         for (Event e : eventsList) {
@@ -174,7 +239,15 @@ public class EventsList  {
         return null;
     }
 
-    // Return list of all events that have the same tag(s) as the input given
+    /**
+     * Filters events by a list of tag strings.
+     * <p>
+     * Matching is case-insensitive, and all provided tags must be present
+     * in the event’s tag list.
+     *
+     * @param tags List of tags to match; if null or empty, returns all events
+     * @return Filtered list of {@link Event} objects
+     */
     public ArrayList<Event> filterEvents(List<String> tags) {
         if (tags == null || tags.isEmpty()) return new ArrayList<>(eventsList);
         ArrayList<String> lowerTags = new ArrayList<>(tags.size());
@@ -192,7 +265,12 @@ public class EventsList  {
         return filtered;
     }
 
-    // Returns a list of events had by a specific Organizer ID
+    /**
+     * Returns all events created by a specific organizer.
+     *
+     * @param organizerID The organizer’s unique ID
+     * @return List of events associated with that organizer
+     */
     public ArrayList<Event> getOrganizerEvents(String organizerID) {
         ArrayList<Event> out = new ArrayList<>();
         if (organizerID == null || organizerID.isEmpty()) return out;
@@ -202,7 +280,12 @@ public class EventsList  {
         return out;
     }
 
-    // Return all events the given entrant is waitlisted for
+    /**
+     * Returns all events where a given entrant is currently on the waiting list.
+     *
+     * @param entrantID The entrant’s unique user ID
+     * @return List of events for which this entrant is waitlisted
+     */
     public ArrayList<Event> getEntrantWaitlistEvents(String entrantID) {
         ArrayList<Event> out = new ArrayList<>();
         if (entrantID == null) return out;
@@ -212,8 +295,35 @@ public class EventsList  {
         }
         return out;
     }
+    
+    /**
+     * Return a list of events that the given entrant is waitlisted for
+     *
+     * @return List of currently enrolled events
+     */
+    public ArrayList<Event> getEntrantEnrolledEvents(String entrantID) {
+        ArrayList<Event> EnrolledEventList = new ArrayList<>();
+
+        Log.d("TAG", "EntrantID: " + entrantID);
+
+        for (Event e: eventsList) {
+            if (e.getEnrolledEntrants() == null) continue; // David: if the list is null, there's no event ids in it, so continue
+            // If given entrants
+            if (e.getEnrolledEntrants().contains(entrantID)) {
+                EnrolledEventList.add(e);
+            }
+        }
+
+        return EnrolledEventList;
+    }
 
     // Return a list of events that aren't past their registration end date
+    /**
+     * Returns all “live” events — events that either have no registration end date
+     * or whose registration end date is after the current date.
+     *
+     * @return List of currently active events
+     */
     public ArrayList<Event> getLiveEvents() {
         ArrayList<Event> live = new ArrayList<>();
         Date now = new Date();
@@ -224,5 +334,4 @@ public class EventsList  {
         }
         return live;
     }
-
 }

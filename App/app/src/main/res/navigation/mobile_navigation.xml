@@ -28,6 +28,16 @@
             app:destination="@id/event_qr_code_fragment" />
     </fragment>
 
+    <!-- WaitLists View Fragment -->
+    <fragment android:id="@+id/waitlists_view_fragment"
+        android:name="com.example.haboob.ui.home.WaitlistsFragment"
+        android:label="Entrant Waitlist Viewer"
+        tools:layout="@layout/fragment_waitlists">
+        <action
+            android:id="@+id/action_eventViewer_to_waitLists"
+            app:destination="@id/entrant_event_view" />
+    </fragment>
+
     <!-- Event QR Code Fragment -->
     <fragment android:id="@+id/event_qr_code_fragment"
         android:name="com.example.haboob.EventQRCodeFragment"

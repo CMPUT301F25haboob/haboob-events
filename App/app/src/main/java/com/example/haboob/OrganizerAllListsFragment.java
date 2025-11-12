@@ -157,8 +157,6 @@ public class OrganizerAllListsFragment extends Fragment {
             if (uri != null) {
                 // 3. Launch sharing dialog
                 shareCsv(getContext(), uri);
-
-                // Disable button so we can't sample again until resampling
             } else {
                 Toast.makeText(getContext(), "Failed to create CSV file", Toast.LENGTH_SHORT).show();
             }
