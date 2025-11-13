@@ -8,6 +8,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.haboob.Event;
+import com.example.haboob.EventsList;
 import com.example.haboob.Notification;
 import com.example.haboob.R;
 
@@ -21,12 +23,14 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
 
     private final ArrayList<Notification> data = new ArrayList<>();
     private final OnNotificationClickListener listener;
+    private final EventsList eventsList;
 
     public interface OnNotificationClickListener {
-        void onNotificationClick(Notification notification);
+        void onNotificationClick(com.example.haboob.Notification notification);
     }
 
-    public NotificationsAdapter(OnNotificationClickListener listener) {
+    public NotificationsAdapter(EventsList eventsList, OnNotificationClickListener listener) {
+        this.eventsList = eventsList;
         this.listener = listener;
     }
 
@@ -47,12 +51,22 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
         Notification n = data.get(position);
-        holder.tvMessage.setText(n.getMessage() == null ? "(Empty Notification)" : n.getMessage());
+        holder.tvMessage.setText(n.getMessage() == null ? "Empty Notification" : n.getMessage());
 
         Date time = n.getTimeCreated();
         String formatted = time == null ? "" :
                 DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT, Locale.getDefault()).format(time);
         holder.tvTime.setText(formatted);
+
+        // event title via in-memory list
+        String title = "—";
+        if (eventsList != null && n.getEventId() != null) {
+            Event e = eventsList.getEventByID(n.getEventId());
+            if (e != null && e.getEventTitle() != null && !e.getEventTitle().trim().isEmpty()) {
+                title = e.getEventTitle();
+            }
+        }
+        holder.tvEvent.setText("Event: " + title);
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onNotificationClick(n);
@@ -65,11 +79,12 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
     }
 
     static class VH extends RecyclerView.ViewHolder {
-        TextView tvMessage, tvTime;
+        TextView tvMessage, tvTime, tvEvent;
 
         VH(@NonNull View itemView) {
             super(itemView);
             tvMessage = itemView.findViewById(R.id.tv_message);
+            tvEvent = itemView.findViewById(R.id.tv_event);
             tvTime = itemView.findViewById(R.id.tv_time);
         }
     }

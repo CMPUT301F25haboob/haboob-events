@@ -13,7 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
+import com.example.haboob.EventsList;
 import com.example.haboob.Notification;
 import com.example.haboob.NotificationManager;
 import com.example.haboob.R;
@@ -46,14 +46,28 @@ public class NotificationsFragment extends Fragment {
                 Settings.Secure.ANDROID_ID
         );
 
+        // Event data is now in memory; refresh rows to show titles
+        EventsList eventsList = new EventsList(new EventsList.OnEventsLoadedListener() {
+            @Override
+            public void onEventsLoaded() {
+                // Event data is now in memory; refresh rows to show titles
+                if (adapter != null) adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onError(Exception e) { /* log */ }
+        });
+
+
         recyclerView = view.findViewById(R.id.notifications_recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        adapter = new NotificationsAdapter(notification -> {
-            // On item click
-            Toast.makeText(requireContext(),
+        adapter = new NotificationsAdapter(eventsList, (com.example.haboob.Notification notification) -> {
+            Toast.makeText(
+                    requireContext(),
                     "Clicked: " + notification.getMessage(),
-                    Toast.LENGTH_SHORT).show();
+                    Toast.LENGTH_SHORT
+            ).show();
 
             // TODO: Later -> navigate to NotificationDetailFragment
             // Bundle args = new Bundle();
@@ -71,7 +85,7 @@ public class NotificationsFragment extends Fragment {
         /* TEST NOTIFICATION
         // Build a notification
         Notification n = new Notification(
-                "DEMO_EVENT_ID",
+                "123a124d-2216-4654-9a77-f15acb28ce5e", // Bread making
                 "DEMO_ORG_ID",
                 userId,
                 "Welcome! This is a test notification."
@@ -80,7 +94,7 @@ public class NotificationsFragment extends Fragment {
 
         NotificationManager nm = new NotificationManager();
         nm.sendToUser(n);  // write to: users/{deviceId}/notifications/{notificationId}
-         */
+        */
 
         loadNotifications();
     }
