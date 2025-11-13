@@ -2,12 +2,15 @@ package com.example.haboob;
 
 import android.util.Log;
 
-import com.google.firebase.firestore.CollectionReference;
+import androidx.annotation.NonNull;
+
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class NotificationManager {
 
@@ -15,6 +18,11 @@ public class NotificationManager {
 
     public NotificationManager() {
         db = FirebaseFirestore.getInstance();
+    }
+
+    public interface NotificationsCallback {
+        void onSuccess(ArrayList<Notification> notifications);
+        void onError(Exception e);
     }
 
     // Send notification to a single user by adding it to that user's notifications sub collection
@@ -88,13 +96,28 @@ public class NotificationManager {
                         Log.e("NotificationManager", "Failed to log organizer notification.", e));
     }
 
-    /*
-    // Get user's notifications for display
-    public Query getUserNotifications(String recipientId) {
-        // TODO
-        return Query;
+    // fetch a user's notifications, newest first to display
+    public void getUserNotifications(@NonNull String userId, @NonNull NotificationsCallback callback) {
+        if (userId.trim().isEmpty()) {
+            callback.onError(new IllegalArgumentException("userId is empty"));
+            return;
+        }
+
+        db.collection("users")
+                .document(userId)
+                .collection("notifications")
+                .orderBy("timeCreated", Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener((QuerySnapshot qs) -> {
+                    ArrayList<Notification> list = new ArrayList<>();
+                    for (DocumentSnapshot doc : qs.getDocuments()) {
+                        Notification n = doc.toObject(Notification.class);
+                        if (n != null) { list.add(n); }
+                    }
+                    callback.onSuccess(list);
+                })
+                .addOnFailureListener(callback::onError);
     }
-    */
 
     // Mark a users notification as read
     public void markAsRead(String recipientId, String notificationId) {
