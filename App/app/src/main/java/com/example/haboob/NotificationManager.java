@@ -26,6 +26,7 @@ public class NotificationManager {
     }
 
     // Send notification to a single user by adding it to that user's notifications sub collection
+    // NOTIFICATION OBJECT PASSED TO THIS METHOD MUST HAVE A SET RECIPIENT ID
     public void sendToUser(Notification notification) {
         if (notification == null) {
             Log.w("NotificationManager", "Cannot send notification: notification is null.");

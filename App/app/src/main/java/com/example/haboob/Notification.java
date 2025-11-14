@@ -27,6 +27,13 @@ public class Notification {
         this.eventId = DEFAULT_EVENT_ID;
     }
 
+    public Notification(String eventId, String organizerId, String message) {
+        this();
+        this.eventId = eventId;
+        this.organizerId = organizerId;
+        setMessage(message);
+    }
+
     public Notification(String eventId, String organizerId, String recipientId, String message) {
         this();
         this.eventId = eventId;
