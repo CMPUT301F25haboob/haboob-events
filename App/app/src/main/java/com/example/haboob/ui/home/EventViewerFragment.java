@@ -15,6 +15,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.example.haboob.Notification;
+import com.example.haboob.NotificationManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -81,6 +83,7 @@ public class EventViewerFragment extends Fragment {
     private String deviceId;
     MaterialButton acceptInvitationButton, leaveWaitlistButton, leaveEventButton;
     TextView userWaitListStatus;
+    private NotificationManager notificationManager;
 
     Event eventToDisplay;
     private String currentWaitListStatus;
@@ -132,6 +135,8 @@ public class EventViewerFragment extends Fragment {
         leaveWaitlistButton = view.findViewById(R.id.btnLeaveWaitlist);
         userWaitListStatus = view.findViewById(R.id.userWaitListStatus);
         leaveEventButton = view.findViewById(R.id.btnLeaveEvent);
+        db = FirebaseFirestore.getInstance();
+        notificationManager = new NotificationManager();
 
 
 
@@ -337,6 +342,14 @@ public class EventViewerFragment extends Fragment {
             eventToDisplay.addEntrantToWaitingEntrants(deviceId); // add the device ID to the waitingEntrantsList for the lottery
             getParentFragmentManager().setFragmentResult("USER_JOINED_WAITLIST", new Bundle());
 
+            Notification notification = new Notification(
+                    eventToDisplay.getEventID(),
+                    eventToDisplay.getOrganizer(),
+                    deviceId,
+                    "You joined the waitlist for: " + eventToDisplay.getEventTitle()
+            );
+
+            notificationManager.sendToUser(notification);
         });
 
         // Leave WAITLIST OnclickListener
@@ -353,6 +366,14 @@ public class EventViewerFragment extends Fragment {
 //             notify EntrantMainFragment to update carousels, as the user left the list
             getParentFragmentManager().setFragmentResult("USER_LEFT_WAITLIST", new Bundle());
 
+            Notification notification = new Notification(
+                    eventToDisplay.getEventID(),
+                    eventToDisplay.getOrganizer(),
+                    deviceId,
+                    "You left the waitlist for: " + eventToDisplay.getEventTitle()
+            );
+
+            notificationManager.sendToUser(notification);
         });
 
         // Leave EVENT OnclickListener
@@ -372,6 +393,14 @@ public class EventViewerFragment extends Fragment {
 //            NavHostFragment.findNavController(this)
 //                    .navigate(R.id.navigation_home);
 
+            Notification notification = new Notification(
+                    eventToDisplay.getEventID(),
+                    eventToDisplay.getOrganizer(),
+                    deviceId,
+                    "You left the event: " + eventToDisplay.getEventTitle()
+            );
+
+            notificationManager.sendToUser(notification);
         });
     }
 
