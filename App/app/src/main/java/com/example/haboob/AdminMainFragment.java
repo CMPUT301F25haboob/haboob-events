@@ -98,6 +98,17 @@ public class AdminMainFragment extends Fragment {
                 Toast.makeText(getContext(), "View Events (Not Implemented)", Toast.LENGTH_SHORT).show();
             }
         });
+
+        // Set click listener for View Users
+        viewUsersButton.setOnClickListener(v -> {
+            try {
+                NavHostFragment.findNavController(AdminMainFragment.this)
+                        .navigate(R.id.navigation_admin_users);
+            } catch (Exception e) {
+                Log.e("AdminMainFragment", "Navigation to events failed. Is the action ID set?", e);
+                Toast.makeText(getContext(), "View Events (Not Implemented)", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**
