@@ -47,12 +47,20 @@ public class LotterySampler {
 
         // Author: Owen - Send notification to all entrants who were selected by the lottery
 
-        // Create notification object
+        // Create lottery winner notification object
         Notification winnerNotification = new Notification(
                 event.getEventID(),
                 event.getOrganizer(),
-                String.format("You've been invited to join the event: %s\n" +
+                String.format("You've been invited to join the event: %s\n\n" +
                         "Navigate to the event to accept/decline your invitation.", event.getEventTitle())
+        );
+
+        // Create loser winner notification object
+        Notification loserNotification = new Notification(
+                event.getEventID(),
+                event.getOrganizer(),
+                String.format("You were not selected to be invited to join the event: %s\n\n" +
+                        "You’ll remain on the waitlist and may be selected if another user declines their invitation.", event.getEventTitle())
         );
 
         // Create new NotificationManager object
@@ -60,6 +68,9 @@ public class LotterySampler {
 
         // Use NotificationManager to send winnerNotification to all users in the invited entrants list
         nm.sendToList(event.getInvitedEntrants(), event.getOrganizer(), winnerNotification);
+
+        // Use NotificationManager to send loserNotification to all users in the invited entrants list
+        nm.sendToList(event.getWaitingEntrants(), event.getOrganizer(), loserNotification);
     }
 
     /**
