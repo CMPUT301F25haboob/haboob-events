@@ -160,12 +160,29 @@ public class EventViewerFragment extends Fragment {
             displayEvent(eventToDisplay, view, eventId);
         }
 
+        // ---- DISPLAY EVENT DETAILS DYNAMICALLY HERE ----
+        TextView regStartText = view.findViewById(R.id.valueRegistrationStart);
+        regStartText.setText(eventToDisplay.getRegistrationStartDate().toString());
+
+        TextView regEndText = view.findViewById(R.id.valueRegistrationEnd);
+        regEndText.setText(eventToDisplay.getRegistrationEndDate().toString());
+
+        TextView detailsText = view.findViewById(R.id.valueEventDetails);
+        detailsText.setText(eventToDisplay.getEventDescription());
+
         TextView limitText = view.findViewById(R.id.textNewInfo);
-        if (eventToDisplay.getOptionalWaitingListSize() == 0) {
+        if (eventToDisplay.getOptionalWaitingListSize() < 0) {
             limitText.setText("Uncapped");
         } else {
-            limitText.setText(eventToDisplay.getOptionalWaitingListSize());
+            limitText.setText(String.valueOf(eventToDisplay.getOptionalWaitingListSize()));
         }
+
+        TextView lotteryAmountText = view.findViewById(R.id.valueAmount);
+        lotteryAmountText.setText(String.valueOf(eventToDisplay.getWaitingEntrants().size()));
+
+
+
+
 
         return view;
     }
@@ -299,6 +316,13 @@ public class EventViewerFragment extends Fragment {
         // set an onClicklistener for accepting joining the waitlist
         assert acceptInvitationButton != null;
         acceptInvitationButton.setOnClickListener(v -> {
+
+            // First check that the user is allowed to join the waitlist
+            if (eventToDisplay.getWaitingEntrants().size() == eventToDisplay.getOptionalWaitingListSize()) {
+                Toast.makeText(v.getContext(), "Waitlist is full! ", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             Toast.makeText(v.getContext(), "Accepted invitation! ", Toast.LENGTH_SHORT).show();
             Toast.makeText(v.getContext(), "Joined waitlist! ", Toast.LENGTH_SHORT).show();
 
