@@ -47,12 +47,13 @@ public class SplashActivity extends AppCompatActivity {
 
                         Intent intent;
                         if ("Organizer".equals(accountType)) {
-                            // Route organizers to OrganizerMainActivity
+                            // Route organizers to OrganizerMainActivity -> pass in the reference to current organizer
                             intent = new Intent(SplashActivity.this, OrganizerMainActivity.class);
                         } else {
                             // Route entrants (and others) to MainActivity
                             intent = new Intent(SplashActivity.this, MainActivity.class);
                         }
+                        intent.putExtra("device_id", deviceId);
                         startActivity(intent);
                         finish();
                     } else {
