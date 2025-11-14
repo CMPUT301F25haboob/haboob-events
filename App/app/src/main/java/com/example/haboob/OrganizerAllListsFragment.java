@@ -4,6 +4,7 @@ import static android.view.View.INVISIBLE;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -51,7 +52,7 @@ public class OrganizerAllListsFragment extends Fragment {
     private ExpandableListView expandableListView;
 
     /** Adapter to bind titles and children to the {@link ExpandableListView}. */
-    private ExpandableListAdapter expandableListAdapter;
+    private OrganizerExpandableListsAdapter expandableListAdapter;
 
     /** Group titles for the expandable list (e.g., "Invited", "Waiting"). */
     private ArrayList<String> expandableListTitle;
@@ -80,7 +81,6 @@ public class OrganizerAllListsFragment extends Fragment {
         // Unpack the bundle to get the event
         if (getArguments() != null) {
             selectedEvent = (Event) getArguments().getSerializable("event");
-
             if (selectedEvent != null) {
 
                 // Everything working as intended, set up view
@@ -109,33 +109,34 @@ public class OrganizerAllListsFragment extends Fragment {
      */
     public void displayLists(View view) {
 
-        // Display the lists for <event_name>
+        // Display the event name at the top
         TextView eventTitle = view.findViewById(R.id.event_title);
         if (eventTitle != null) {
             eventTitle.setText(selectedEvent.getEventTitle());
         }
-
-        // TESTING -> ADDING TO LISTS TO SEE IF THEY DISPLAY
-//        String eventID = selectedEvent.getEventID();
-//
-//        if (eventID != null) {
-//            selectedEvent.addEntrantToWaitingEntrants("TEST_USER_ID1");
-//            selectedEvent.addEntrantToWaitingEntrants("TEST_USER_ID2");
-//        } else {
-//            Log.d("OrganizerAllListsFragment", "Event ID is null");
-//        }
 
         // Expandable list display to screen
         expandableListView = view.findViewById(R.id.expandable_list_view);
         expandableListDetail = OrganizerExpandableListsData.getListsToDisplay(selectedEvent);
         expandableListTitle = new ArrayList<>(expandableListDetail.keySet());
         expandableListAdapter = new OrganizerExpandableListsAdapter(this.getContext(), expandableListTitle, expandableListDetail);
+
+        // Child click listener
+        expandableListAdapter.setOnChildItemClickListener(new OrganizerExpandableListsAdapter.OnChildItemClickListener() {
+            @Override
+            public void onChildItemClick(int groupPosition, int childPosition, String entrantID) {
+                Log.d("OrganizerAllListsFragment", "Callback triggered! Group: " + groupPosition);
+                if (groupPosition == 2) {
+                    showCancellationDialog(entrantID);
+                }
+            }
+        });
         expandableListView.setAdapter(expandableListAdapter);
+
 
         // Button functionality, cancel entrant should be hidden until user in list is selected
         Button backButton = view.findViewById(R.id.back_button);
         Button csvDataButton = view.findViewById(R.id.csv_data_button);
-        Button cancelEntrantButton = view.findViewById(R.id.cancel_entrant_button);
         Button sendMsgButton = view.findViewById(R.id.send_message_button);
 
         // Author: Owen - Dialogue for sending a notification to a selected list of entrants
@@ -155,7 +156,7 @@ public class OrganizerAllListsFragment extends Fragment {
             );
             spList.setAdapter(spinnerAdapter);
 
-            // Build and show dialog
+            // Build and show dialog to cancel the entrant
             new AlertDialog.Builder(requireContext())
                     .setTitle("Send Notification")
                     .setView(dialogView)
@@ -193,11 +194,6 @@ public class OrganizerAllListsFragment extends Fragment {
                     })
                     .show();
         });
-        // Dialogue ends here ^
-
-
-        // TODO: Functionality of this when we click an element in the certain lists
-        cancelEntrantButton.setVisibility(INVISIBLE);
 
         // Create onClick listeners for all buttons:
         backButton.setOnClickListener(v ->  {
@@ -223,15 +219,6 @@ public class OrganizerAllListsFragment extends Fragment {
                 Toast.makeText(getContext(), "Failed to create CSV file", Toast.LENGTH_SHORT).show();
             }
         });
-
-        cancelEntrantButton.setOnClickListener(v -> {
-
-            // TODO: need to get the entrant from in the list to remove from that list
-            Toast.makeText(this.getContext(), "Cancel entrant not implemented yet sorry", Toast.LENGTH_SHORT).show();
-        });
-
-        // TODO: Functionality of this when we click an element in the certain lists
-        cancelEntrantButton.setVisibility(INVISIBLE);
     }
 
     // CSV-related functions
@@ -248,6 +235,69 @@ public class OrganizerAllListsFragment extends Fragment {
 
         return sb.toString();
     }
+
+
+    /**
+     * Shows a confirmation dialog to cancel an entrant from the invite list
+     * @param entrantID the ID of the entrant to cancel
+     */
+    private void showCancellationDialog(String entrantID) {
+        // Show new alert
+        new AlertDialog.Builder(getContext())
+                .setTitle("Cancel User")
+                .setMessage("Are you sure you want to cancel entrant with ID: '" + entrantID + "'?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Perform the cancel action here
+                        cancelUser(entrantID);
+                        Toast.makeText(getContext(), entrantID + " has been cancelled", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // User clicked No, just dismiss the dialog
+                        dialog.dismiss();
+                    }
+                })
+                .show();
+    }
+
+
+    private void cancelUser(String entrantID) {
+        // Remove user from invitedList, add to cancelledList
+        selectedEvent.removeEntrantFromInvitedEntrants(entrantID);
+        selectedEvent.addEntrantToCancelledEntrants(entrantID);
+
+        // Refresh the expandable list data
+        expandableListDetail = OrganizerExpandableListsData.getListsToDisplay(selectedEvent);
+        expandableListTitle = new ArrayList<>(expandableListDetail.keySet());
+
+        // Update the adapter with new data
+        expandableListAdapter = new OrganizerExpandableListsAdapter(getContext(), expandableListTitle, expandableListDetail);
+
+        // Reset the click listener for next time
+        expandableListAdapter.setOnChildItemClickListener(new OrganizerExpandableListsAdapter.OnChildItemClickListener() {
+            @Override
+            public void onChildItemClick(int groupPosition, int childPosition, String entrantID) {
+                Log.d("OrganizerAllListsFragment", "Callback triggered! Group: " + groupPosition);
+                if (groupPosition == 2) {
+                    showCancellationDialog(entrantID);
+                }
+            }
+        });
+
+        // Set the new adapter
+        expandableListView.setAdapter(expandableListAdapter);
+
+        // Send out a notification to the user that they've been cancelled from the event
+        Notification cancelNotif = new Notification(selectedEvent.getEventID(), selectedEvent.getOrganizer(), entrantID, "You have been cancelled from: " + selectedEvent.getEventTitle() + "");
+        NotificationManager nm = new NotificationManager();
+
+        nm.sendToUser(cancelNotif);
+    }
+
 
     private Uri saveCsvToFile(Context context, String csvText, String fileName) {
         try {
@@ -269,6 +319,7 @@ public class OrganizerAllListsFragment extends Fragment {
             return null;
         }
     }
+
 
     private void shareCsv(Context context, Uri fileUri) {
         Intent intent = new Intent(Intent.ACTION_SEND);
