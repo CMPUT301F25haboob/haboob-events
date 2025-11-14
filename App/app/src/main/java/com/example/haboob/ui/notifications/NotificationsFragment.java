@@ -1,5 +1,7 @@
 package com.example.haboob.ui.notifications;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -17,6 +19,8 @@ import com.example.haboob.EventsList;
 import com.example.haboob.Notification;
 import com.example.haboob.NotificationManager;
 import com.example.haboob.R;
+import android.widget.Switch;
+
 
 import java.util.ArrayList;
 
@@ -26,6 +30,12 @@ public class NotificationsFragment extends Fragment {
     private NotificationsAdapter adapter;
     private NotificationManager notificationManager;
     private String userId;
+
+    // Mute toggle + prefs
+    private Switch muteSwitch;
+    private SharedPreferences prefs;
+    private static final String PREFS_NAME = "notifications_prefs";
+    private static final String KEY_MUTED = "notifications_muted";
 
     public NotificationsFragment() {
         // Required empty public constructor
@@ -45,6 +55,28 @@ public class NotificationsFragment extends Fragment {
                 requireContext().getContentResolver(),
                 Settings.Secure.ANDROID_ID
         );
+
+        // SharedPreferences for mute state
+        prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+
+        // Mute toggle setup
+        muteSwitch = view.findViewById(R.id.switch_mute_notifications);
+        boolean isMuted = prefs.getBoolean(KEY_MUTED, false);
+        muteSwitch.setChecked(isMuted);
+
+        muteSwitch.setOnCheckedChangeListener((buttonView, checked) -> {
+            prefs.edit().putBoolean(KEY_MUTED, checked).apply();
+
+            if (checked) {
+                // Mute ON -> fill display with empty list
+                adapter.setData(new ArrayList<>());
+                Toast.makeText(requireContext(), "Notifications muted", Toast.LENGTH_SHORT).show();
+            } else {
+                // Mute OFF -> load notifications from firestore
+                loadNotifications();
+                Toast.makeText(requireContext(), "Notifications unmuted", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         // Event data is now in memory; refresh rows to show titles
         EventsList eventsList = new EventsList(new EventsList.OnEventsLoadedListener() {
@@ -99,6 +131,14 @@ public class NotificationsFragment extends Fragment {
     }
 
     private void loadNotifications() {
+        boolean muted = prefs.getBoolean(KEY_MUTED, false);
+
+        if (muted) {
+            // If muted keep the list empty
+            adapter.setData(new ArrayList<>());
+            return;
+        }
+
         notificationManager.getUserNotifications(userId, new NotificationManager.NotificationsCallback() {
             @Override
             public void onSuccess(ArrayList<Notification> notifications) {
