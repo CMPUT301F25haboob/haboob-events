@@ -82,15 +82,14 @@ public class NotificationsFragment extends Fragment {
         recyclerView.setAdapter(adapter);
         notificationManager = new NotificationManager();
 
-        /* TEST NOTIFICATION
+        /* TEST NOTIFICATION (sends notification whenever user navigates to notification fragment)
         // Build a notification
         Notification n = new Notification(
-                "123a124d-2216-4654-9a77-f15acb28ce5e", // Bread making
+                "TEST_EVENT_NAME",
                 "DEMO_ORG_ID",
                 userId,
                 "Welcome! This is a test notification."
         );
-
 
         NotificationManager nm = new NotificationManager();
         nm.sendToUser(n);  // write to: users/{deviceId}/notifications/{notificationId}
