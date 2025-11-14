@@ -2,6 +2,7 @@ package com.example.haboob;
 
 import static android.view.View.INVISIBLE;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -10,9 +11,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -132,6 +136,64 @@ public class OrganizerAllListsFragment extends Fragment {
         Button backButton = view.findViewById(R.id.back_button);
         Button csvDataButton = view.findViewById(R.id.csv_data_button);
         Button cancelEntrantButton = view.findViewById(R.id.cancel_entrant_button);
+        Button sendMsgButton = view.findViewById(R.id.send_message_button);
+
+        // Author: Owen - Dialogue for sending a notification to a selected list of entrants
+        sendMsgButton.setOnClickListener(v -> {
+            // Inflate dialogue view
+            LayoutInflater inflater = LayoutInflater.from(requireContext());
+            View dialogView = inflater.inflate(R.layout.dialogue_send_notification, null, false);
+            EditText etMessage = dialogView.findViewById(R.id.et_message);
+            Spinner spList = dialogView.findViewById(R.id.sp_list);
+
+            // Dropdown options lists from OrganizerExpandableListsData class
+            String[] groups = new String[] { "Invite list", "Waiting list", "Enrolled list", "Cancelled list" };
+            ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
+                    requireContext(),
+                    android.R.layout.simple_spinner_dropdown_item,
+                    groups
+            );
+            spList.setAdapter(spinnerAdapter);
+
+            // Build and show dialog
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Send Notification")
+                    .setView(dialogView)
+                    .setNegativeButton("Cancel", (d, which) -> d.dismiss())
+                    .setPositiveButton("Send", (d, which) -> {
+                        String message = etMessage.getText() == null ? "" : etMessage.getText().toString().trim();
+                        if (message.isEmpty()) {
+                            Toast.makeText(requireContext(), "Message cannot be empty", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        String selectedGroup = (String) spList.getSelectedItem();
+
+                        // Get recipient IDs from your existing map (OrganizerExpandableListsData result)
+                        // Keys must match what you used to build expandableListDetail.
+                        ArrayList<String> recipientIds = expandableListDetail.get(selectedGroup);
+                        if (recipientIds == null || recipientIds.isEmpty()) {
+                            Toast.makeText(requireContext(), "No recipients in " + selectedGroup, Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        // Prepare notification (recipientId handled by sendToList)
+                        String organizerId = selectedEvent.getOrganizer();
+                        Notification notification = new Notification(
+                                selectedEvent.getEventID(),
+                                organizerId,
+                                message
+                        );
+
+                        // Send to list using NotificationManager
+                        NotificationManager nm = new NotificationManager();
+                        nm.sendToList(recipientIds, organizerId, notification);
+
+                        Toast.makeText(requireContext(), "Sending to " + selectedGroup + "…", Toast.LENGTH_SHORT).show();
+                    })
+                    .show();
+        });
+        // Dialogue ends here ^
 
 
         // TODO: Functionality of this when we click an element in the certain lists
