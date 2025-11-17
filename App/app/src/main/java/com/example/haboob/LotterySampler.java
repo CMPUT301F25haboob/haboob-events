@@ -19,6 +19,7 @@ public class LotterySampler {
      * @throws IllegalArgumentException if event is null or has no entrants
      */
     public void performLottery(Event event) {
+
         if (event == null) {
             throw new IllegalArgumentException("Event cannot be null");
         }
@@ -29,7 +30,7 @@ public class LotterySampler {
         }
 
         // Get the event capacity which is the number of entrants to sample
-        int sampleSize = event.getLotterySampleSize();
+        int sampleSize = event.getLotterySampleSize() - (event.getInvitedEntrants().size() + event.getEnrolledEntrants().size());
         if (sampleSize <= 0) {
             throw new IllegalArgumentException("Lottery sample size must be greater than 0");
         }
@@ -42,9 +43,34 @@ public class LotterySampler {
             // Move from waiting to invited
             event.addEntrantToInvitedEntrants(entrantId);
             event.removeEntrantFromWaitingEntrants(entrantId);
-            // TODO: Send a notification saying they were picked
         }
 
+        // Author: Owen - Send notification to all entrants who were selected by the lottery
+
+        // Create lottery winner notification object
+        Notification winnerNotification = new Notification(
+                event.getEventID(),
+                event.getOrganizer(),
+                String.format("You've been invited to join the event: %s\n\n" +
+                        "Navigate to the event to accept/decline your invitation.", event.getEventTitle())
+        );
+
+        // Create loser winner notification object
+        Notification loserNotification = new Notification(
+                event.getEventID(),
+                event.getOrganizer(),
+                String.format("You were not selected to be invited to join the event: %s\n\n" +
+                        "You’ll remain on the waitlist and may be selected if another user declines their invitation.", event.getEventTitle())
+        );
+
+        // Create new NotificationManager object
+        NotificationManager nm = new NotificationManager();
+
+        // Use NotificationManager to send winnerNotification to all users in the invited entrants list
+        nm.sendToList(event.getInvitedEntrants(), event.getOrganizer(), winnerNotification);
+
+        // Use NotificationManager to send loserNotification to all users in the invited entrants list
+        nm.sendToList(event.getWaitingEntrants(), event.getOrganizer(), loserNotification);
     }
 
     /**
@@ -98,7 +124,23 @@ public class LotterySampler {
             // Move from waiting to invited
             event.addEntrantToInvitedEntrants(selectedEntrantId);
             event.removeEntrantFromWaitingEntrants(selectedEntrantId);
-            // TODO: Send notification to the newly selected entrant
+
+            // Author: Owen - Send notification to the newly selected entrant
+
+            // Create notification object
+            Notification winnerNotification = new Notification(
+                    event.getEventID(),
+                    selectedEntrantId,
+                    event.getOrganizer(),
+                    String.format("You've been invited to join the event: %s\n" +
+                            "Navigate to the event to accept/decline your invitation.", event.getEventTitle())
+            );
+
+            // Create new NotificationManager object
+            NotificationManager nm = new NotificationManager();
+
+            // Use NotificationManager to send winnerNotification to all users in the invited entrants list
+            nm.sendToUser(winnerNotification);
 
             return selectedEntrantId;
         }

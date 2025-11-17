@@ -15,6 +15,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.example.haboob.Notification;
+import com.example.haboob.NotificationManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -81,6 +83,7 @@ public class EventViewerFragment extends Fragment {
     private String deviceId;
     MaterialButton acceptInvitationButton, leaveWaitlistButton, leaveEventButton;
     TextView userWaitListStatus;
+    private NotificationManager notificationManager;
 
     Event eventToDisplay;
     private String currentWaitListStatus;
@@ -132,6 +135,10 @@ public class EventViewerFragment extends Fragment {
         leaveWaitlistButton = view.findViewById(R.id.btnLeaveWaitlist);
         userWaitListStatus = view.findViewById(R.id.userWaitListStatus);
         leaveEventButton = view.findViewById(R.id.btnLeaveEvent);
+        db = FirebaseFirestore.getInstance();
+        notificationManager = new NotificationManager();
+
+
 
         assert getArguments() != null;
         Bundle args = getArguments();
@@ -158,12 +165,29 @@ public class EventViewerFragment extends Fragment {
             displayEvent(eventToDisplay, view, eventId);
         }
 
-//        TextView limitText = view.findViewById(R.id.textNewInfo);
-//        if (eventToDisplay.getOptionalWaitingListSize() == 0) {
-//            limitText.setText("Uncapped");
-//        } else {
-//            limitText.setText(eventToDisplay.getOptionalWaitingListSize());
-//        }
+        // ---- DISPLAY EVENT DETAILS DYNAMICALLY HERE ----
+        TextView regStartText = view.findViewById(R.id.valueRegistrationStart);
+        regStartText.setText(eventToDisplay.getRegistrationStartDate().toString());
+
+        TextView regEndText = view.findViewById(R.id.valueRegistrationEnd);
+        regEndText.setText(eventToDisplay.getRegistrationEndDate().toString());
+
+        TextView detailsText = view.findViewById(R.id.valueEventDetails);
+        detailsText.setText(eventToDisplay.getEventDescription());
+
+        TextView limitText = view.findViewById(R.id.textNewInfo);
+        if (eventToDisplay.getOptionalWaitingListSize() < 0) {
+            limitText.setText("Uncapped");
+        } else {
+            limitText.setText(String.valueOf(eventToDisplay.getOptionalWaitingListSize()));
+        }
+
+        TextView lotteryAmountText = view.findViewById(R.id.valueAmount);
+        lotteryAmountText.setText(String.valueOf(eventToDisplay.getWaitingEntrants().size()));
+
+
+
+
 
         return view;
     }
@@ -297,6 +321,13 @@ public class EventViewerFragment extends Fragment {
         // set an onClicklistener for accepting joining the waitlist
         assert acceptInvitationButton != null;
         acceptInvitationButton.setOnClickListener(v -> {
+
+            // First check that the user is allowed to join the waitlist
+            if (eventToDisplay.getWaitingEntrants().size() == eventToDisplay.getOptionalWaitingListSize()) {
+                Toast.makeText(v.getContext(), "Waitlist is full! ", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             Toast.makeText(v.getContext(), "Accepted invitation! ", Toast.LENGTH_SHORT).show();
             Toast.makeText(v.getContext(), "Joined waitlist! ", Toast.LENGTH_SHORT).show();
 
@@ -311,6 +342,14 @@ public class EventViewerFragment extends Fragment {
             eventToDisplay.addEntrantToWaitingEntrants(deviceId); // add the device ID to the waitingEntrantsList for the lottery
             getParentFragmentManager().setFragmentResult("USER_JOINED_WAITLIST", new Bundle());
 
+            Notification notification = new Notification(
+                    eventToDisplay.getEventID(),
+                    eventToDisplay.getOrganizer(),
+                    deviceId,
+                    "You joined the waitlist for: " + eventToDisplay.getEventTitle()
+            );
+
+            notificationManager.sendToUser(notification);
         });
 
         // Leave WAITLIST OnclickListener
@@ -327,6 +366,14 @@ public class EventViewerFragment extends Fragment {
 //             notify EntrantMainFragment to update carousels, as the user left the list
             getParentFragmentManager().setFragmentResult("USER_LEFT_WAITLIST", new Bundle());
 
+            Notification notification = new Notification(
+                    eventToDisplay.getEventID(),
+                    eventToDisplay.getOrganizer(),
+                    deviceId,
+                    "You left the waitlist for: " + eventToDisplay.getEventTitle()
+            );
+
+            notificationManager.sendToUser(notification);
         });
 
         // Leave EVENT OnclickListener
@@ -346,6 +393,14 @@ public class EventViewerFragment extends Fragment {
 //            NavHostFragment.findNavController(this)
 //                    .navigate(R.id.navigation_home);
 
+            Notification notification = new Notification(
+                    eventToDisplay.getEventID(),
+                    eventToDisplay.getOrganizer(),
+                    deviceId,
+                    "You left the event: " + eventToDisplay.getEventTitle()
+            );
+
+            notificationManager.sendToUser(notification);
         });
     }
 

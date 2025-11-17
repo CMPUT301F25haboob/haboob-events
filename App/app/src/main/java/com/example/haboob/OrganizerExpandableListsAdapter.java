@@ -2,6 +2,7 @@ package com.example.haboob;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,8 @@ import java.util.HashMap;
  */
 public class OrganizerExpandableListsAdapter extends BaseExpandableListAdapter {
 
+    private OnChildItemClickListener clickListener;
+
     /** Context from the parent fragment or activity. */
     private Context mContext;
 
@@ -30,6 +33,13 @@ public class OrganizerExpandableListsAdapter extends BaseExpandableListAdapter {
     /** Mapping of each group title to its child items (entrant IDs or names). */
     private HashMap<String, ArrayList<String>> expandableListDetail;
 
+    public interface OnChildItemClickListener {
+        void onChildItemClick(int groupPosition, int childPosition, String entrantID);
+    }
+
+    public void setOnChildItemClickListener(OnChildItemClickListener listener) {
+        this.clickListener = listener;
+    }
     /**
      * Constructs an adapter to bind expandable list data to a view.
      *
@@ -88,6 +98,15 @@ public class OrganizerExpandableListsAdapter extends BaseExpandableListAdapter {
 
         TextView expandedListTextView = convertView.findViewById(R.id.expandedListItem);
         expandedListTextView.setText(expandedListText);
+
+        // Make the children clickable
+        expandedListTextView.setOnClickListener(v -> {
+            Log.d("OrganizerExpandableListsAdapter", "TEXTVIEW CLICKED! Group: " + groupPosition + ", Child: " + childPosition);
+            if (clickListener != null) {
+                clickListener.onChildItemClick(groupPosition, childPosition, expandedListText);
+            }
+        });
+
         return convertView;
     }
 
@@ -176,6 +195,6 @@ public class OrganizerExpandableListsAdapter extends BaseExpandableListAdapter {
      */
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
-        return false;
+        return true;
     }
 }

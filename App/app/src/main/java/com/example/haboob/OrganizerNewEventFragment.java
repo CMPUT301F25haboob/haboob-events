@@ -124,7 +124,7 @@ public class OrganizerNewEventFragment extends Fragment {
                     }
                 }
 
-                if (capacity < 0 || ((limit != -1) && (limit < capacity))) {
+                if (capacity <= 0 || ((limit != -1) && (limit < capacity))) {
                     Toast.makeText(requireContext(), "Limit must be no less than capacity and capacity must be greater than 0", Toast.LENGTH_SHORT).show();
                     return;
                 }

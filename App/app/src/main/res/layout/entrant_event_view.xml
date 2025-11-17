@@ -46,16 +46,15 @@
                 android:id="@+id/heroImage"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:layout_marginTop="16dp"
                 android:contentDescription="@string/title_home"
                 android:scaleType="centerCrop"
                 android:src="@drawable/bob_ross"
                 app:layout_constraintDimensionRatio="16:9"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
+            <!-- Date + Time -->
             <TextView
                 android:id="@+id/registrationStart"
                 android:layout_width="0dp"
@@ -64,55 +63,46 @@
                 android:text="Registration Start:"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                app:layout_constraintEnd_toStartOf="@id/valueDateTime"
+                app:layout_constraintEnd_toStartOf="@id/valueEventDetails"
                 app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/heroImage"
                 app:layout_goneMarginEnd="8dp" />
 
             <TextView
-                android:id="@+id/valueregistrationStart"
+                android:id="@+id/valueRegistrationStart"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Oct 29, 3:30—3:30PM"
+                android:text="Placeholder Start"
                 android:textSize="14sp"
                 app:layout_constraintBaseline_toBaselineOf="@id/registrationStart"
                 app:layout_constraintEnd_toEndOf="parent" />
 
             <TextView
-                android:id="@+id/valueregistrationEnd"
+                android:id="@+id/valueRegistrationEnd"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Oct 29, 3:30—3:30PM"
+                android:text="Placeholder End"
                 android:textSize="14sp"
                 app:layout_constraintBaseline_toBaselineOf="@id/registrationEnd"
                 app:layout_constraintEnd_toEndOf="parent" />
 
             <TextView
-                android:id="@+id/valueDateTime"
+                android:id="@+id/valueEventDetails"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Oct 29, 3:30—3:30PM"
+                android:text="Placeholder Details"
                 android:textSize="14sp"
-                app:layout_constraintBaseline_toBaselineOf="@id/eventDate"
+                app:layout_constraintBaseline_toBaselineOf="@id/eventDetails"
                 app:layout_constraintEnd_toEndOf="parent" />
 
-            <!-- Lottery Draw Date -->
-            <TextView
-                android:id="@+id/valueDrawDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Oct 17, 3:30PM"
-                android:textSize="14sp"
-                app:layout_constraintBaseline_toBaselineOf="@id/labelDrawDate"
-                app:layout_constraintEnd_toEndOf="parent"/>
 
             <!-- Amount in Lottery -->
             <TextView
                 android:id="@+id/valueAmount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="23 currently in lottery"
+                android:text="Placeholder Lottery Amount"
                 android:textSize="14sp"
                 app:layout_constraintBaseline_toBaselineOf="@id/labelAmount"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -126,7 +116,7 @@
                 android:text="Registration End:"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                app:layout_constraintEnd_toStartOf="@id/valueDateTime"
+                app:layout_constraintEnd_toStartOf="@id/valueEventDetails"
                 app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/heroImage"
@@ -187,21 +177,19 @@
                 android:id="@+id/labelAmount"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
                 android:text="Amount in Lottery:"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toStartOf="@id/valueAmount"
                 app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/labelDrawDate" />
+                app:layout_constraintTop_toBottomOf="@+id/eventDetails" />
 
             <!-- NEW ROW INSERTED BETWEEN labelAmount AND userWaitListStatus -->
             <TextView
                 android:id="@+id/labelNewInfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
                 android:text="Registration Limit:"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
@@ -212,15 +200,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:text=""
+                android:text="Placeholder Limit"
                 app:layout_constraintStart_toEndOf="@id/labelNewInfo"
                 app:layout_constraintBaseline_toBaselineOf="@id/labelNewInfo" />
             <!-- END OF NEW ROW -->
 
             <TextView
                 android:id="@+id/userWaitListStatus"
-                android:layout_width="387dp"
-                android:layout_height="40dp"
+                android:layout_width="388dp"
+                android:layout_height="54dp"
                 android:layout_marginTop="16dp"
                 android:text="Waitlist Status"
                 android:textSize="14sp"
@@ -246,31 +234,18 @@
                 android:textColor="@android:color/white"/>
 
             <TextView
-                android:id="@+id/eventDate"
+                android:id="@+id/eventDetails"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="56dp"
-                android:text="Event Date:"
+                android:text="Event Details:"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                app:layout_constraintEnd_toStartOf="@id/valueDateTime"
+                app:layout_constraintEnd_toStartOf="@id/valueEventDetails"
                 app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/heroImage"
                 app:layout_goneMarginEnd="8dp" />
-
-            <TextView
-                android:id="@+id/labelDrawDate"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Lottery Draw Date:"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toStartOf="@id/valueDrawDate"
-                app:layout_constraintHorizontal_bias="1.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/eventDate" />
 
             <Space
                 android:layout_width="0dp"
