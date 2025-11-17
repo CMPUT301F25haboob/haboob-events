@@ -31,13 +31,14 @@ public class WaitlistsFragment extends Fragment {
     private EventsList eventsList = new EventsList(); // declare the eventsList object
     private List<Event> entrantWaitList = new ArrayList<>();
     public static final String ARG_DEVICE_ID = "device_id";
+    public String deviceId;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         // unpack the bundle from entrantMainFragment(called on waitlist button click):
-        String deviceId = getArguments() != null
+        deviceId = getArguments() != null
                 ? getArguments().getString(ARG_DEVICE_ID)
                 : null;
 
@@ -96,7 +97,9 @@ public class WaitlistsFragment extends Fragment {
             @Override
             public void onEventsLoaded() { // the callback function calls this when events are loaded
 
-                entrantWaitList = eventsList.getEventsList();
+                if (ARG_DEVICE_ID == "device_id")
+                    Log.d("TAG", "In the waitlists fragment, device ID is the default, so device ID is not being fetched correctly.");
+                entrantWaitList = eventsList.getEntrantWaitlistEvents(ARG_DEVICE_ID);
                 Log.d("TAG", "waitList EVENTSLIST SIZE: " + entrantWaitList.size());
 
                 adapter.replaceAll(entrantWaitList);
