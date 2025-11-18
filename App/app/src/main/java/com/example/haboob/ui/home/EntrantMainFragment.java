@@ -341,6 +341,10 @@ public class EntrantMainFragment extends Fragment {
         getParentFragmentManager().setFragmentResultListener(
                 "USER_LEFT_EVENT", this, (reqKey, bundle) -> loadEventsForUser(userID)
         );
+        // set a listener that listens to EventViewerFragment, if a user ID got added to enrolledEvents, update image carousels
+        getParentFragmentManager().setFragmentResultListener(
+                "USER_JOINED_EVENT", this, (reqKey, bundle) -> loadEventsForUser(userID)
+        );
 
         // set a listener that listens for myWaitlists button click, on navigate, it navigates there
         myWaitlists = view.findViewById(R.id.btn_my_waitlists);

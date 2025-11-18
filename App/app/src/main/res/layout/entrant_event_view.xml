@@ -123,12 +123,12 @@
                 app:layout_goneMarginEnd="8dp" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnAccept"
+                android:id="@+id/btnAcceptEventInvite"
                 style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_marginTop="4dp"
-                android:text="Accept Invitation"
+                android:text="Accept Event Invitation"
                 android:textAllCaps="false"
                 android:textStyle="bold"
                 app:backgroundTint="@color/white"
@@ -137,6 +137,23 @@
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/userWaitListStatus"
+                tools:backgroundTint="#35C759" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAcceptWaitlistInvite"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="4dp"
+                android:text="Accept Waitlist Invitation"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                app:backgroundTint="@color/white"
+                app:cornerRadius="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnAcceptEventInvite"
                 tools:backgroundTint="#35C759" />
 
             <com.google.android.material.button.MaterialButton
@@ -171,7 +188,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/btnAccept" />
+                app:layout_constraintTop_toBottomOf="@id/btnAcceptWaitlistInvite" />
 
             <TextView
                 android:id="@+id/labelAmount"

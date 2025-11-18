@@ -6,9 +6,6 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -19,40 +16,18 @@ import com.example.haboob.Notification;
 import com.example.haboob.NotificationManager;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
-import androidx.core.view.MenuProvider;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Lifecycle;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.NavigationUI;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.haboob.Event;
 import com.example.haboob.EventQRCodeFragment;
 import com.example.haboob.EventsList;
 import com.example.haboob.MainActivity;
-import com.example.haboob.Poster;
 import com.example.haboob.R;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
 
 /**
  * Displays the details of a single event, including title, hero image, and actions
@@ -81,7 +56,7 @@ public class EventViewerFragment extends Fragment {
     private MaterialToolbar toolbar;
     private FirebaseFirestore db;
     private String deviceId;
-    MaterialButton acceptInvitationButton, leaveWaitlistButton, leaveEventButton;
+    MaterialButton acceptWaitListInvitationButton, leaveWaitlistButton, leaveEventButton, joinEventButton;
     TextView userWaitListStatus;
     private NotificationManager notificationManager;
 
@@ -131,14 +106,14 @@ public class EventViewerFragment extends Fragment {
         // Initialize views
         toolbar = view.findViewById(R.id.topAppBar);
         event_image = view.findViewById(R.id.heroImage);
-        acceptInvitationButton = view.findViewById(R.id.btnAccept);
+        acceptWaitListInvitationButton = view.findViewById(R.id.btnAcceptWaitlistInvite);
         leaveWaitlistButton = view.findViewById(R.id.btnLeaveWaitlist);
         userWaitListStatus = view.findViewById(R.id.userWaitListStatus);
         leaveEventButton = view.findViewById(R.id.btnLeaveEvent);
+        joinEventButton = view.findViewById(R.id.btnAcceptEventInvite);
+
         db = FirebaseFirestore.getInstance();
         notificationManager = new NotificationManager();
-
-
 
         assert getArguments() != null;
         Bundle args = getArguments();
@@ -214,32 +189,36 @@ public class EventViewerFragment extends Fragment {
 
         boolean currentlyInWaitlist = args.getBoolean("in_waitlist", false);
         boolean currentlyEnrolled = args.getBoolean("from_enrolledEvents", false);
+        boolean wonLottery = args.getBoolean("won_lottery", false);
 
+        // set the buttons based on the status of the user, as given to us by entrantMainFragment's bundle
         if (currentlyInWaitlist) {
             leaveWaitlistButton.setVisibility(View.VISIBLE); // set leavewaitlist to visible
-            acceptInvitationButton.setText("Joined!"); // set accept to joined
-            acceptInvitationButton.setBackgroundColor(getResources().getColor(R.color.accept_green));
+            acceptWaitListInvitationButton.setText("Joined!"); // set accept to joined
+            acceptWaitListInvitationButton.setBackgroundColor(getResources().getColor(R.color.accept_green));
             userWaitListStatus.setText(R.string.waitlist_status_registered);
             leaveEventButton.setVisibility(View.GONE);
+            joinEventButton.setVisibility(View.GONE);
         }
         else if (currentlyEnrolled){
-            acceptInvitationButton.setVisibility(View.GONE);
+            acceptWaitListInvitationButton.setVisibility(View.GONE);
             leaveWaitlistButton.setVisibility(View.INVISIBLE);
             userWaitListStatus.setText(R.string.enrolledInEvent);
+            joinEventButton.setVisibility(View.GONE);
+        }
+        else if (wonLottery){
+            // if the click came from the notifications fragment to accept invitation to enroll in EVENT (selected from lottery)
+            acceptWaitListInvitationButton.setVisibility(View.GONE);
+            leaveWaitlistButton.setVisibility(View.GONE);
+            leaveEventButton.setVisibility(View.GONE);
+
         }
         else{
             leaveWaitlistButton.setVisibility(View.INVISIBLE);
             userWaitListStatus.setVisibility(View.INVISIBLE);
+            leaveEventButton.setVisibility(View.GONE);
+            joinEventButton.setVisibility(View.GONE);
         }
-
-
-
-//        acceptInvitationButton.setVisibility(fromWaitListCarousel ? View.GONE : View.VISIBLE);
-//        boolean currentlyInWaitlist = args.getBoolean("in_waitlist", false);
-
-
-//        currentWaitListStatus = eventToDisplay.getWaitlist_status();
-
     }
 
     /**
@@ -318,9 +297,9 @@ public class EventViewerFragment extends Fragment {
                     .navigate(R.id.action_eventViewer_to_eventQRCode, args);
         });
 
-        // set an onClicklistener for accepting joining the waitlist
-        assert acceptInvitationButton != null;
-        acceptInvitationButton.setOnClickListener(v -> {
+        // Join WAITLIST OnclickListener
+        assert acceptWaitListInvitationButton != null;
+        acceptWaitListInvitationButton.setOnClickListener(v -> {
 
             // First check that the user is allowed to join the waitlist
             if (eventToDisplay.getWaitingEntrants().size() == eventToDisplay.getOptionalWaitingListSize()) {
@@ -331,8 +310,8 @@ public class EventViewerFragment extends Fragment {
             Toast.makeText(v.getContext(), "Accepted invitation! ", Toast.LENGTH_SHORT).show();
             Toast.makeText(v.getContext(), "Joined waitlist! ", Toast.LENGTH_SHORT).show();
 
-            acceptInvitationButton.setText("Joined!");
-            acceptInvitationButton.setBackgroundColor(getResources().getColor(R.color.accept_green));
+            acceptWaitListInvitationButton.setText("Joined!");
+            acceptWaitListInvitationButton.setBackgroundColor(getResources().getColor(R.color.accept_green));
             leaveWaitlistButton.setVisibility(View.VISIBLE);
             leaveWaitlistButton.setText("Leave Waitlist");
             leaveWaitlistButton.setBackgroundColor(getResources().getColor(R.color.leaving_red));
@@ -361,7 +340,7 @@ public class EventViewerFragment extends Fragment {
             leaveWaitlistButton.setText("Left Waitlist!");
             leaveWaitlistButton.setBackgroundColor(getResources().getColor(R.color.black));
             userWaitListStatus.setVisibility(View.INVISIBLE);
-            acceptInvitationButton.setText("Join Waitlist");
+            acceptWaitListInvitationButton.setText("Join Waitlist");
 
 //             notify EntrantMainFragment to update carousels, as the user left the list
             getParentFragmentManager().setFragmentResult("USER_LEFT_WAITLIST", new Bundle());
@@ -376,6 +355,38 @@ public class EventViewerFragment extends Fragment {
             notificationManager.sendToUser(notification);
         });
 
+        // join EVENT OnclickListener
+        assert joinEventButton != null;
+        joinEventButton.setOnClickListener(v -> {
+
+            // First check that the user is allowed to join the event
+            // TODO: change this check from waitlist to event capacity checker
+//            if (eventToDisplay.getWaitingEntrants().size() == eventToDisplay.getOptionalWaitingListSize()) {
+//                Toast.makeText(v.getContext(), "Waitlist is full! ", Toast.LENGTH_SHORT).show();
+//                return;
+//            }
+            
+            Toast.makeText(v.getContext(), "Joined Event! ", Toast.LENGTH_SHORT).show();
+
+            joinEventButton.setText("Joined!");
+            joinEventButton.setBackgroundColor(getResources().getColor(R.color.accept_green));
+            leaveEventButton.setVisibility(View.VISIBLE);
+            leaveWaitlistButton.setBackgroundColor(getResources().getColor(R.color.leaving_red));
+
+            eventToDisplay.addEntrantToEnrolledEntrants(deviceId); // add the device ID to the EnrolledEntrantsList
+            eventToDisplay.removeEntrantFromWaitingEntrants(deviceId); // remove the device ID from the waitingEntrantsList
+
+            getParentFragmentManager().setFragmentResult("USER_JOINED_EVENT", new Bundle());
+
+            Notification notification = new Notification(
+                    eventToDisplay.getEventID(),
+                    eventToDisplay.getOrganizer(),
+                    deviceId,
+                    "You joined the event: " + eventToDisplay.getEventTitle()
+            );
+
+            notificationManager.sendToUser(notification);
+        });
         // Leave EVENT OnclickListener
         assert leaveEventButton != null;
         leaveEventButton.setOnClickListener(v -> {
@@ -384,7 +395,7 @@ public class EventViewerFragment extends Fragment {
             eventToDisplay.removeEntrantFromEnrolledEntrants(deviceId); // remove the device ID from the waitingEntrantsList for the lottery
             leaveEventButton.setText("Left event!");
             userWaitListStatus.setVisibility(View.INVISIBLE);
-            acceptInvitationButton.setVisibility(View.INVISIBLE);
+            acceptWaitListInvitationButton.setVisibility(View.INVISIBLE);
 
 //             notify EntrantMainFragment to update carousels, as the user left the list
             getParentFragmentManager().setFragmentResult("USER_LEFT_EVENT", new Bundle());
@@ -393,6 +404,8 @@ public class EventViewerFragment extends Fragment {
 //            NavHostFragment.findNavController(this)
 //                    .navigate(R.id.navigation_home);
 
+
+            // Owen Notification stuff
             Notification notification = new Notification(
                     eventToDisplay.getEventID(),
                     eventToDisplay.getOrganizer(),
