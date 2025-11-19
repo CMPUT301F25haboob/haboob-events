@@ -399,7 +399,6 @@ public class EntrantMainFragment extends Fragment {
                 true,                                        // geoLocationRequired
                 100,                                         // lotterySampleSize
                 200,                                            // optionalWaitingListSize
-                qrCode,                                      // QRCode object
                 poster,                                      // Poster object
                 tagslist2                // tagsList<String
         );

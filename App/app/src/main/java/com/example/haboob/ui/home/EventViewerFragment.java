@@ -210,7 +210,7 @@ public class EventViewerFragment extends Fragment {
         String eventId = args.getString(ARG_EVENT_ID);
 
         EventsList eventsList = new EventsList();
-        Event eventToDisplay = eventsList.getEventByID(eventId);
+        eventToDisplay = eventsList.getEventByID(eventId);
 
         boolean currentlyInWaitlist = args.getBoolean("in_waitlist", false);
         boolean currentlyEnrolled = args.getBoolean("from_enrolledEvents", false);
