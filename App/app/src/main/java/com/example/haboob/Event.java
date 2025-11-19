@@ -108,11 +108,10 @@ public class Event implements Serializable {
      * @param geoLocationRequired whether geolocation is required
      * @param lotterySampleSize size of lottery sample (invites)
      * @param optionalWaitingListSize optional waiting list size; use -1 if unlimited/not set
-     * @param qrCode event QR code object
      * @param poster event poster object
      * @param tags tag list for filtering/search
      */
-    public Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, int optionalWaitingListSize, QRCode qrCode, Poster poster, ArrayList<String> tags) {
+    public Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, int optionalWaitingListSize, Poster poster, ArrayList<String> tags) {
         this.eventID = UUID.randomUUID().toString();
         this.db = FirebaseFirestore.getInstance();
         this.organizerID = organizer;
@@ -123,7 +122,7 @@ public class Event implements Serializable {
         this.geoLocationRequired = geoLocationRequired;
         this.lotterySampleSize = lotterySampleSize;
         this.optionalWaitingListSize = optionalWaitingListSize;
-        this.qrCode = qrCode;
+        this.qrCode = new QRCode(this.eventID);
         this.poster = poster;
         this.tags = tags;
         this.initLists();
