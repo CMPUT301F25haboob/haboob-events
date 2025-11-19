@@ -291,10 +291,15 @@ public class OrganizerAllListsFragment extends Fragment {
         // Set the new adapter
         expandableListView.setAdapter(expandableListAdapter);
 
+        // Draw replacement
+        LotterySampler lotterySampler = new LotterySampler();
+        String newWinner = lotterySampler.fillVacancyFromWaitlist(selectedEvent);
+        Log.d("OrganizerAllListsFragment", "New winner: " + newWinner);
+
+
         // Send out a notification to the user that they've been cancelled from the event
         Notification cancelNotif = new Notification(selectedEvent.getEventID(), selectedEvent.getOrganizer(), entrantID, "You have been cancelled from: " + selectedEvent.getEventTitle() + "");
         NotificationManager nm = new NotificationManager();
-
         nm.sendToUser(cancelNotif);
     }
 
