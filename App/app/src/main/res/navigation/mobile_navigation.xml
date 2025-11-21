@@ -68,6 +68,13 @@
         android:label="Profile"
         tools:layout="@layout/fragment_profile" />
 
+    <!-- History Fragment -->
+    <fragment
+        android:id="@+id/navigation_history"
+        android:name="com.example.haboob.HistoryFragment"
+        android:label="Event History"
+        tools:layout="@layout/fragment_history" />
+
     <!-- Admin Navigation Fragments -->
     <fragment
         android:id="@+id/navigation_admin_posters"
