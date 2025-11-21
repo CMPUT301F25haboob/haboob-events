@@ -23,6 +23,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,6 +50,7 @@ public class ProfileFragment extends Fragment {
     private TextView accountTypeTextView;
     private MaterialButton saveButton;
     private MaterialButton deleteButton;
+    private MaterialButton historyButton;
     private MaterialToolbar toolbar;
     private TextView accountTextTextView;
 
@@ -80,6 +82,7 @@ public class ProfileFragment extends Fragment {
         accountTypeTextView = view.findViewById(R.id.accountTypeTextView);
         saveButton = view.findViewById(R.id.btnSaveProfile);
         deleteButton = view.findViewById(R.id.btnDeleteProfile);
+        historyButton = view.findViewById(R.id.btnHistory);
         toolbar = view.findViewById(R.id.topAppBar);
         accountTextTextView = view.findViewById(R.id.SCIbutton);
 
@@ -89,6 +92,7 @@ public class ProfileFragment extends Fragment {
         // Set up button listeners
         saveButton.setOnClickListener(v -> saveProfileChanges());
         deleteButton.setOnClickListener(v -> confirmDeleteProfile());
+        historyButton.setOnClickListener(v -> goToHistory());
 
         // Set up admin textview button listener
         accountTextTextView.setOnClickListener(v -> goToAdmin());
@@ -241,9 +245,23 @@ public class ProfileFragment extends Fragment {
             return false;
         }
 
+        // Validate that first name doesn't contain numbers
+        if (firstName.matches(".*\\d.*")) {
+            firstNameEditText.setError("First name cannot contain numbers");
+            firstNameEditText.requestFocus();
+            return false;
+        }
+
         // Validate last name
         if (lastName.isEmpty()) {
             lastNameEditText.setError("Last name is required");
+            lastNameEditText.requestFocus();
+            return false;
+        }
+
+        // Validate that last name doesn't contain numbers
+        if (lastName.matches(".*\\d.*")) {
+            lastNameEditText.setError("Last name cannot contain numbers");
             lastNameEditText.requestFocus();
             return false;
         }
@@ -255,8 +273,9 @@ public class ProfileFragment extends Fragment {
             return false;
         }
 
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            emailEditText.setError("Please enter a valid email");
+        // Validate email format (must contain @ and .com)
+        if (!email.contains("@") || !email.contains(".com")) {
+            emailEditText.setError("Enter a valid email");
             emailEditText.requestFocus();
             return false;
         }
@@ -279,12 +298,67 @@ public class ProfileFragment extends Fragment {
 
     /**
      * Deletes the user's profile from Firebase
-     * TODO: We need this to delete the users from all events, waitlists, etc.
      */
     private void deleteProfile() {
         deleteButton.setEnabled(false);
         deleteButton.setText("Deleting...");
 
+        // Before deleting the user from users, delete them from all events
+        final EventsList[] eventsListWrapper = new EventsList[1];
+        eventsListWrapper[0] = new EventsList(new EventsList.OnEventsLoadedListener() {
+            @Override
+            public void onEventsLoaded() {
+                // Get all events
+                ArrayList<Event> allEvents = eventsListWrapper[0].getEventsList();
+
+                // Remove this user from all event lists (waiting, enrolled, invited, cancelled)
+                for (Event event : allEvents) {
+                    if (event == null) continue;
+
+                    // Check and remove from waiting list
+                    if (event.getWaitingEntrants() != null && event.getWaitingEntrants().contains(deviceId)) {
+                        event.removeEntrantFromWaitingEntrants(deviceId);
+                        Log.d(TAG, "Removed user from waiting list of event: " + event.getEventID());
+                    }
+
+                    // Check and remove from enrolled list
+                    if (event.getEnrolledEntrants() != null && event.getEnrolledEntrants().contains(deviceId)) {
+                        event.removeEntrantFromEnrolledEntrants(deviceId);
+                        Log.d(TAG, "Removed user from enrolled list of event: " + event.getEventID());
+                    }
+
+                    // Check and remove from invited list
+                    if (event.getInvitedEntrants() != null && event.getInvitedEntrants().contains(deviceId)) {
+                        event.removeEntrantFromInvitedEntrants(deviceId);
+                        Log.d(TAG, "Removed user from invited list of event: " + event.getEventID());
+                    }
+
+                    // Check and remove from cancelled list
+                    if (event.getCancelledEntrants() != null && event.getCancelledEntrants().contains(deviceId)) {
+                        event.removeEntrantFromCancelledEntrants(deviceId);
+                        Log.d(TAG, "Removed user from cancelled list of event: " + event.getEventID());
+                    }
+                }
+
+                // After removing from all events, proceed with deleting the user
+                deleteUserFromFirestore();
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.e(TAG, "Error loading events for deletion", e);
+                Toast.makeText(getContext(), "Failed to load events: " + e.getMessage(),
+                        Toast.LENGTH_LONG).show();
+                deleteButton.setEnabled(true);
+                deleteButton.setText("Delete Profile");
+            }
+        });
+    }
+
+    /**
+     * Deletes the user from Firestore collections
+     */
+    private void deleteUserFromFirestore() {
         // Delete from users collection
         db.collection("users").document(deviceId)
                 .delete()
@@ -335,7 +409,9 @@ public class ProfileFragment extends Fragment {
                 .navigate(R.id.navigation_admin);
     }
 
-
-
+    private void goToHistory(){
+        NavHostFragment.findNavController(this)
+                .navigate(R.id.navigation_history);
+    }
 
 }
