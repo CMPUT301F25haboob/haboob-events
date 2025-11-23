@@ -103,7 +103,7 @@ public class OrganizerNewEventFragment extends Fragment {
             boolean geoData = geoSwitch.isChecked();
 
             // Check that fields are filled
-            if (eventTitle.isEmpty() || eventDetails.isEmpty() || eventCapacity.isEmpty() || signupStart == null || signupEnd == null) {
+            if (eventTitle.isEmpty() || eventDetails.isEmpty() || eventCapacity.isEmpty() || eventTags.isEmpty() || signupStart == null || signupEnd == null) {
                 Toast.makeText(requireContext(), "Please fill in all required fields and select valid dates", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -160,9 +160,8 @@ public class OrganizerNewEventFragment extends Fragment {
             }
 
             // Create new Event object (pass in dummy data for now)
-            QRCode qrCode = new QRCode("test");
-            Poster poster = new Poster("test");
-            Event newEvent = new Event(currentOrganizer.getOrganizerID(), signupStart, signupEnd, eventTitle, eventDetails, geoData, capacity, limit, qrCode, poster, tags);
+            Poster poster = new Poster();
+            Event newEvent = new Event(currentOrganizer.getOrganizerID(), signupStart, signupEnd, eventTitle, eventDetails, geoData, capacity, limit, poster, tags);
 
             // Add Event to organizer's eventList
             currentOrganizer.getEventList().addEvent(newEvent);

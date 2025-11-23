@@ -131,6 +131,12 @@ public class RegisterActivity extends AppCompatActivity {
                 return;
             }
 
+            // Validate email format (must contain @ and .com)
+            if (!email.contains("@") || !email.contains(".com")) {
+                Toast.makeText(this, "Enter a valid email", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             // Create a new Entrant or Organizer object based on which account type was selected
             // TODO: Where are we storing these objects? Do we even need them if we are storing user info in the db?
 

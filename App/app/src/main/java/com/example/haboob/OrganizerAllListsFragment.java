@@ -28,6 +28,7 @@ import androidx.fragment.app.Fragment;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 /**
@@ -120,6 +121,25 @@ public class OrganizerAllListsFragment extends Fragment {
         expandableListDetail = OrganizerExpandableListsData.getListsToDisplay(selectedEvent);
         expandableListTitle = new ArrayList<>(expandableListDetail.keySet());
         expandableListAdapter = new OrganizerExpandableListsAdapter(this.getContext(), expandableListTitle, expandableListDetail);
+
+        // Parent group click listener
+        expandableListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+            @Override
+            public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
+                // Check if the group has no children
+                ArrayList<String> children = expandableListDetail.get(expandableListTitle.get(groupPosition));
+                if (children == null || children.isEmpty()) {
+                    Date today = new Date();
+                    new AlertDialog.Builder(requireContext())
+                            .setTitle("No Data")
+                            .setMessage(today.before(selectedEvent.getRegistrationEndDate()) ? "Lottery has not occurred yet" : "No entrants in list")
+                            .setPositiveButton("OK", null)
+                            .show();
+                    return true; // Consume the click, prevent expansion
+                }
+                return false; // Allow normal expand/collapse behavior
+            }
+        });
 
         // Child click listener
         expandableListAdapter.setOnChildItemClickListener(new OrganizerExpandableListsAdapter.OnChildItemClickListener() {
@@ -291,10 +311,15 @@ public class OrganizerAllListsFragment extends Fragment {
         // Set the new adapter
         expandableListView.setAdapter(expandableListAdapter);
 
+        // Draw replacement
+        LotterySampler lotterySampler = new LotterySampler();
+        String newWinner = lotterySampler.fillVacancyFromWaitlist(selectedEvent);
+        Log.d("OrganizerAllListsFragment", "New winner: " + newWinner);
+
+
         // Send out a notification to the user that they've been cancelled from the event
         Notification cancelNotif = new Notification(selectedEvent.getEventID(), selectedEvent.getOrganizer(), entrantID, "You have been cancelled from: " + selectedEvent.getEventTitle() + "");
         NotificationManager nm = new NotificationManager();
-
         nm.sendToUser(cancelNotif);
     }
 

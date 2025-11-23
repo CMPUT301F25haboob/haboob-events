@@ -12,6 +12,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.haboob.LotterySampler;
 import com.example.haboob.Notification;
 import com.example.haboob.NotificationManager;
 
@@ -184,6 +186,8 @@ public class EventViewerFragment extends Fragment {
 //        String eventId = args.getString(ARG_EVENT_ID);
 
         assert ARG_EVENT_ID != null;
+        EventsList eventsList = new EventsList();
+        eventToDisplay = eventsList.getEventByID(eventId);
 
         List<Event> list = eventsList.getEventsList();
         // list should be populated by the time setButtons() has been called
@@ -459,6 +463,7 @@ public class EventViewerFragment extends Fragment {
             Toast.makeText(v.getContext(), "Left Event! ", Toast.LENGTH_SHORT).show();
 
             eventToDisplay.removeEntrantFromEnrolledEntrants(deviceId); // remove the device ID from the waitingEntrantsList for the lottery
+            eventToDisplay.addEntrantToCancelledEntrants(deviceId); // add the device ID to the cancelledEntrants
             leaveEventButton.setText("Left event!");
             userWaitListStatus.setVisibility(View.INVISIBLE);
             acceptWaitListInvitationButton.setVisibility(View.INVISIBLE);
@@ -479,6 +484,10 @@ public class EventViewerFragment extends Fragment {
                     "You left the event: " + eventToDisplay.getEventTitle()
             );
             notificationManager.sendToUser(notification);
+
+            // Redraw new user from waitlist
+            LotterySampler sampler = new LotterySampler();
+            sampler.fillVacancyFromWaitlist(eventToDisplay);
         });
     }
 
