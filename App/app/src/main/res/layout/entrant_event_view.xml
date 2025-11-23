@@ -140,6 +140,24 @@
                 tools:backgroundTint="#35C759" />
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDeclineEventInvite"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="4dp"
+                android:text="Decline Invitation"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@color/leaving_red"
+                app:cornerRadius="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnAcceptEventInvite"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnAcceptWaitlistInvite"
                 style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="0dp"
@@ -153,7 +171,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/btnAcceptEventInvite"
+                app:layout_constraintTop_toBottomOf="@id/btnDeclineEventInvite"
                 tools:backgroundTint="#35C759" />
 
             <com.google.android.material.button.MaterialButton

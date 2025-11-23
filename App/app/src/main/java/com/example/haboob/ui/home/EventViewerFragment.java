@@ -63,7 +63,8 @@ public class EventViewerFragment extends Fragment {
     private MaterialToolbar toolbar;
     private FirebaseFirestore db;
     private String deviceId;
-    MaterialButton acceptWaitListInvitationButton, leaveWaitlistButton, leaveEventButton, joinEventButton;
+    MaterialButton acceptWaitListInvitationButton, leaveWaitlistButton, leaveEventButton, joinEventButton,
+    declineInvitationButton;
     TextView userWaitListStatus;
     private NotificationManager notificationManager;
     EventsList eventsList;
@@ -117,6 +118,7 @@ public class EventViewerFragment extends Fragment {
         userWaitListStatus = view.findViewById(R.id.userWaitListStatus);
         leaveEventButton = view.findViewById(R.id.btnLeaveEvent);
         joinEventButton = view.findViewById(R.id.btnAcceptEventInvite);
+        declineInvitationButton = view.findViewById(R.id.btnDeclineEventInvite);
 
         db = FirebaseFirestore.getInstance();
         notificationManager = new NotificationManager();
@@ -220,10 +222,12 @@ public class EventViewerFragment extends Fragment {
             if (isInvited) {
                 acceptWaitListInvitationButton.setVisibility(View.GONE);
                 joinEventButton.setVisibility(View.VISIBLE); // Show accept invitation button
+                declineInvitationButton.setVisibility(View.VISIBLE); // Show decline invitation button
             } else {
                 acceptWaitListInvitationButton.setText("Joined!"); // set accept to joined
                 acceptWaitListInvitationButton.setBackgroundColor(getResources().getColor(R.color.accept_green));
                 joinEventButton.setVisibility(View.GONE);
+                declineInvitationButton.setVisibility(View.GONE);
             }
 
             userWaitListStatus.setText(R.string.waitlist_status_registered);

@@ -189,6 +189,10 @@ public class Event implements Serializable {
 //        this.invitedEntrants.add(userID);
         this.waitingEntrants.add(userID);  // david's change, not sure why it was invitedEntrants before
 
+        // Remove from cancelled list if present (user is rejoining after leaving)
+        if (this.cancelledEntrants != null) {
+            this.cancelledEntrants.remove(userID);
+        }
 
         db.collection("events")
                 .whereEqualTo("eventID", eventID)
@@ -198,12 +202,16 @@ public class Event implements Serializable {
                         // Get the actual document ID from the query result
                         String documentId = queryDocumentSnapshots.getDocuments().get(0).getId();
 
-                        // Update the document using its ID
+                        // Update the document using its ID - add to waiting, remove from cancelled
+                        Map<String, Object> updates = new HashMap<>();
+                        updates.put("waitingEntrants", FieldValue.arrayUnion(userID));
+                        updates.put("cancelledEntrants", FieldValue.arrayRemove(userID));
+
                         db.collection("events")
                                 .document(documentId)
-                                .update("waitingEntrants", FieldValue.arrayUnion(userID))
+                                .update(updates)
                                 .addOnSuccessListener(aVoid -> {
-                                    Log.d("Event", "Successfully added user to waitingEntrants");
+                                    Log.d("Event", "Successfully added user to waitingEntrants and removed from cancelled");
 
                                     // Also add this event to the user's event history
                                     // Using set with merge to create the field if it doesn't exist
