@@ -459,6 +459,68 @@ public class Event implements Serializable {
     }
 
     /**
+     * Moves a user from invitedEntrants to enrolledEntrants when they accept their invitation.
+     * Does NOT trigger vacancy filling from the waiting list (unlike removeEntrantFromInvitedEntrants).
+     * Also removes the user from waitingEntrants if present.
+     *
+     * @param userID user ID to move
+     */
+    public void moveEntrantFromInvitedToEnrolled(String userID) {
+        // Remove from invited list locally
+        if (this.invitedEntrants != null) {
+            this.invitedEntrants.remove(userID);
+        }
+
+        // Add to enrolled list locally
+        if (this.enrolledEntrants != null && !this.enrolledEntrants.contains(userID)) {
+            this.enrolledEntrants.add(userID);
+        }
+
+        // Remove from waiting list locally (if present)
+        if (this.waitingEntrants != null) {
+            this.waitingEntrants.remove(userID);
+        }
+
+        // Safety check
+        if (this.eventID == null || this.eventID.isEmpty()) {
+            Log.w("Event", "moveEntrantFromInvitedToEnrolled: eventID is null or empty");
+            return;
+        }
+
+        // Update in Firestore
+        db.collection("events")
+                .whereEqualTo("eventID", this.eventID)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (querySnapshot.isEmpty()) {
+                        Log.w("Event", "No event document found matching eventID=" + this.eventID);
+                        return;
+                    }
+
+                    String docId = querySnapshot.getDocuments().get(0).getId();
+
+                    // Update all three lists in Firestore
+                    Map<String, Object> updates = new HashMap<>();
+                    updates.put("invitedEntrants", FieldValue.arrayRemove(userID));
+                    updates.put("enrolledEntrants", FieldValue.arrayUnion(userID));
+                    updates.put("waitingEntrants", FieldValue.arrayRemove(userID));
+
+                    db.collection("events")
+                            .document(docId)
+                            .update(updates)
+                            .addOnSuccessListener(aVoid ->
+                                    Log.d("Event", "Successfully moved user from invited to enrolled")
+                            )
+                            .addOnFailureListener(e ->
+                                    Log.e("Event", "Error moving user from invited to enrolled", e)
+                            );
+                })
+                .addOnFailureListener(e ->
+                        Log.e("Event", "Failed to query event document", e)
+                );
+    }
+
+    /**
      * Adds a user ID to {@code cancelledEntrants} in Firestore (arrayUnion) and locally.
      * (Method name suggests removal; current implementation adds. Keep as-is if intentional.)
      *

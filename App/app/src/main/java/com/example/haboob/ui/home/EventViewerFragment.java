@@ -212,11 +212,22 @@ public class EventViewerFragment extends Fragment {
         if (Objects.equals(userStatus, "in_waitlist")) {
             Log.d("TAG", "user is in the WAITLIST for: " + eventToDisplay.getEventTitle());
             leaveWaitlistButton.setVisibility(View.VISIBLE); // set leavewaitlist to visible
-            acceptWaitListInvitationButton.setText("Joined!"); // set accept to joined
-            acceptWaitListInvitationButton.setBackgroundColor(getResources().getColor(R.color.accept_green));
+
+            // If user is also invited, hide the "Joined!" button and show the accept invitation button
+            boolean isInvited = eventToDisplay.getInvitedEntrants() != null &&
+                               eventToDisplay.getInvitedEntrants().contains(deviceId);
+
+            if (isInvited) {
+                acceptWaitListInvitationButton.setVisibility(View.GONE);
+                joinEventButton.setVisibility(View.VISIBLE); // Show accept invitation button
+            } else {
+                acceptWaitListInvitationButton.setText("Joined!"); // set accept to joined
+                acceptWaitListInvitationButton.setBackgroundColor(getResources().getColor(R.color.accept_green));
+                joinEventButton.setVisibility(View.GONE);
+            }
+
             userWaitListStatus.setText(R.string.waitlist_status_registered);
             leaveEventButton.setVisibility(View.GONE);
-            joinEventButton.setVisibility(View.GONE);
         }
         else if (Objects.equals(userStatus, "enrolled_in_event")){
             Log.d("TAG", "user is enrolled in the EVENT for: " + eventToDisplay.getEventTitle());
@@ -409,6 +420,7 @@ public class EventViewerFragment extends Fragment {
             leaveWaitlistButton.setBackgroundColor(getResources().getColor(R.color.black));
             userWaitListStatus.setVisibility(View.INVISIBLE);
             acceptWaitListInvitationButton.setText("Join Waitlist");
+            acceptWaitListInvitationButton.setBackgroundColor(getResources().getColor(android.R.color.white));
 
 //             notify EntrantMainFragment to update carousels, as the user left the list
             getParentFragmentManager().setFragmentResult("USER_LEFT_WAITLIST", new Bundle());
@@ -440,11 +452,10 @@ public class EventViewerFragment extends Fragment {
             joinEventButton.setText("Joined!");
             joinEventButton.setBackgroundColor(getResources().getColor(R.color.accept_green));
             leaveEventButton.setVisibility(View.VISIBLE);
-            leaveWaitlistButton.setBackgroundColor(getResources().getColor(R.color.leaving_red));
+            leaveWaitlistButton.setVisibility(View.GONE); // Hide leave waitlist button after accepting
 
-            eventToDisplay.removeEntrantFromInvitedEntrants(deviceId); // remove entrant from invitedEntrants list
-            eventToDisplay.addEntrantToEnrolledEntrants(deviceId); // add the device ID to the EnrolledEntrantsList
-            eventToDisplay.removeEntrantFromWaitingEntrants(deviceId); // remove the device ID from the waitingEntrantsList
+            // Move user from invited to enrolled (does NOT trigger vacancy filling)
+            eventToDisplay.moveEntrantFromInvitedToEnrolled(deviceId);
 
             getParentFragmentManager().setFragmentResult("USER_JOINED_EVENT", new Bundle());
 

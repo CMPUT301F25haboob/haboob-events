@@ -150,6 +150,16 @@ public class EntrantMainFragment extends Fragment {
                 waitListEvents = eventsList3.getEntrantWaitlistEvents(deviceId);
                 enrolledEventsList = eventsList3.getEntrantEnrolledEvents(deviceId);
 
+                // Sort waitListEvents: events where user is invited appear first
+                waitListEvents.sort((e1, e2) -> {
+                    boolean e1HasInvite = e1.getInvitedEntrants() != null && e1.getInvitedEntrants().contains(deviceId);
+                    boolean e2HasInvite = e2.getInvitedEntrants() != null && e2.getInvitedEntrants().contains(deviceId);
+
+                    if (e1HasInvite && !e2HasInvite) return -1;  // e1 first
+                    if (!e1HasInvite && e2HasInvite) return 1;   // e2 first
+                    return 0;  // maintain order
+                });
+
                 Log.d("TAG", "Enrolled EVENTSLIST SIZE: " + enrolledEventsList.size());
 
                 // runs AFTER the database is done querying:
@@ -171,10 +181,21 @@ public class EntrantMainFragment extends Fragment {
                 // to see ALL events for testing:
                 addEventImagesLocally(waitListEvents, imageURLs); // imageURLS <- list of imageURLs from query
                 addEventIDsLocally(waitListEvents, eventIDs); // eventIDs <- list of eventIDs from query
+
+                // Track which events should show red dot (user is invited)
+                List<String> invitedEventIDs = new ArrayList<>();
+                for (Event event : waitListEvents) {
+                    if (event.getInvitedEntrants() != null && event.getInvitedEntrants().contains(deviceId)) {
+                        invitedEventIDs.add(event.getEventID());
+                    }
+                }
+
                 // replace the placeholder images
                 waitListsAdapter.replaceItems(imageURLs);
                 // input the IDs of the same images into the imageAdapter
                 waitListsAdapter.inputIDs(eventIDs);
+                // Set which events should show the red dot indicator
+                waitListsAdapter.setInvitedEventIDs(invitedEventIDs);
                 Log.d("TAG", "ImageAdapter images Replaced");
 
             }
