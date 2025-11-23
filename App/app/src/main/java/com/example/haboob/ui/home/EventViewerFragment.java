@@ -457,8 +457,7 @@ public class EventViewerFragment extends Fragment {
             joinEventButton.setBackgroundColor(getResources().getColor(R.color.accept_green));
             leaveEventButton.setVisibility(View.VISIBLE);
             leaveWaitlistButton.setVisibility(View.GONE); // Hide leave waitlist button after accepting
-            // TODO: THe below line currently causes the accept button to be covered by another button
-            //declineInvitationButton.setVisibility(View.GONE);
+            declineInvitationButton.setVisibility(View.GONE);
 
             // Move user from invited to enrolled (does NOT trigger vacancy filling)
             eventToDisplay.moveEntrantFromInvitedToEnrolled(deviceId);
