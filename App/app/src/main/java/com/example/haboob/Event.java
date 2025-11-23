@@ -6,13 +6,16 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import java.io.Serializable;
 import java.sql.Array;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -201,6 +204,21 @@ public class Event implements Serializable {
                                 .update("waitingEntrants", FieldValue.arrayUnion(userID))
                                 .addOnSuccessListener(aVoid -> {
                                     Log.d("Event", "Successfully added user to waitingEntrants");
+
+                                    // Also add this event to the user's event history
+                                    // Using set with merge to create the field if it doesn't exist
+                                    Map<String, Object> historyUpdate = new HashMap<>();
+                                    historyUpdate.put("event_history_list", FieldValue.arrayUnion(eventID));
+
+                                    db.collection("entrant")
+                                            .document(userID)
+                                            .set(historyUpdate, SetOptions.merge())
+                                            .addOnSuccessListener(aVoid2 -> {
+                                                Log.d("Event", "Successfully added event to user's history");
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                Log.e("Event", "Error updating user's event history", e);
+                                            });
                                 })
                                 .addOnFailureListener(e -> {
                                     Log.e("Event", "Error updating waitingEntrants", e);
@@ -347,6 +365,10 @@ public class Event implements Serializable {
             this.invitedEntrants.remove(userID);
         }
 
+        // Automatically fill vacancy from waiting list
+        LotterySampler sampler = new LotterySampler();
+        sampler.fillVacancyFromWaitlist(this);
+
         // Safety check — can't query without eventID
         if (this.eventID == null || this.eventID.isEmpty()) {
             Log.w("Event", "removeEntrantFromInvitedEntrants: eventID is null or empty");
@@ -394,6 +416,10 @@ public class Event implements Serializable {
         if (this.enrolledEntrants != null) {
             this.enrolledEntrants.remove(userID);
         }
+
+        // Automatically fill vacancy from waiting list
+        LotterySampler sampler = new LotterySampler();
+        sampler.fillVacancyFromWaitlist(this);
 
         // Safety check — can't query without eventID
         if (this.eventID == null || this.eventID.isEmpty()) {

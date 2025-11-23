@@ -8,12 +8,15 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import com.bumptech.glide.Glide;
 import com.example.haboob.Event;
+import com.example.haboob.Poster;
 import com.example.haboob.R;
 import com.google.android.flexbox.FlexboxLayout;
 
@@ -37,9 +40,34 @@ public class WaitlistAdapter extends ArrayAdapter<Event> implements Filterable {
             convertView = LayoutInflater.from(getContext())
                     .inflate(R.layout.item_waitlist, parent, false);
         }
-        TextView title = convertView.findViewById(R.id.title);
+
         Event e = getItem(position);
+
+
+        // =============== Updated by Dan ===============
+        // The events shown when searching now look more like the ones in the history view
+        // for consistency and visual purposes
+        // Set title
+        TextView title = convertView.findViewById(R.id.title);
         title.setText(e != null ? e.getEventTitle() : "");
+
+        // Load event image
+        ImageView eventImage = convertView.findViewById(R.id.eventImage);
+        if (e != null) {
+            Poster poster = e.getPoster();
+            if (poster != null && poster.getData() != null && !poster.getData().isEmpty()) {
+                Glide.with(getContext())
+                        .load(poster.getData())
+                        .placeholder(R.drawable.ic_search_24)
+                        .into(eventImage);
+            } else {
+                // Load placeholder
+                Glide.with(getContext())
+                        .load("https://media.tenor.com/hG6eR9HM_fkAAAAM/the-simpsons-homer-simpson.gif")
+                        .into(eventImage);
+            }
+        }
+        // ===============================================
 
         FlexboxLayout tagContainer = convertView.findViewById(R.id.tagContainer);
         tagContainer.removeAllViews(); // clear old tags

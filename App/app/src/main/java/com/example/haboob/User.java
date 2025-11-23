@@ -1,5 +1,7 @@
 package com.example.haboob;
 
+import java.util.List;
+
 public abstract class User {
 /* Users will have the following info inside Firebase:
  * Collection:
@@ -19,7 +21,8 @@ public abstract class User {
     private String lastName;
     private String email;
     private String phone; // Optional - constructor should reflect this
-    private String accountType; // TODO: may not need this later??
+    private String accountType;
+    private List<String> eventHistoryList; // TODO: Maybe unused
 
 
     public User()
@@ -63,6 +66,11 @@ public abstract class User {
 
     public void setAccountType(String accountType) {
         this.accountType = accountType;
+    }
+
+    public void addEventToHistory(String eventId)
+    {
+        eventHistoryList.add(eventId);
     }
 
     // Getter methods

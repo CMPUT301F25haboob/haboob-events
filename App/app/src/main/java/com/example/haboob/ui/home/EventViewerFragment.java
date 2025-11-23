@@ -187,7 +187,7 @@ public class EventViewerFragment extends Fragment {
 
         assert ARG_EVENT_ID != null;
         EventsList eventsList = new EventsList();
-        eventToDisplay = eventsList.getEventByID(eventId);
+        //eventToDisplay = eventsList.getEventByID(ARG_EVENT_ID);
 
         List<Event> list = eventsList.getEventsList();
         // list should be populated by the time setButtons() has been called
@@ -484,10 +484,6 @@ public class EventViewerFragment extends Fragment {
                     "You left the event: " + eventToDisplay.getEventTitle()
             );
             notificationManager.sendToUser(notification);
-
-            // Redraw new user from waitlist
-            LotterySampler sampler = new LotterySampler();
-            sampler.fillVacancyFromWaitlist(eventToDisplay);
         });
     }
 

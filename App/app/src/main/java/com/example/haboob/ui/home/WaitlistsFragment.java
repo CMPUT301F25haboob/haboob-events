@@ -76,12 +76,17 @@ public class WaitlistsFragment extends Fragment {
         // Click -> open EventViewerFragment with selected event
         list.setOnItemClickListener((parent, view1, position, id) -> {
             Event selected = adapter.getItem(position);
-            if (selected == null) return;
+            Log.d("WaitlistsFragment", "Item clicked at position: " + position);
+            if (selected == null)
+            {
+                Log.e("WaitlistsFragment", "Selected event is NULL at position: " + position);
+                return;
+            }
 
+            Log.d("WaitlistsFragment", "Navigating to event: " + selected.getEventID() + " - " + selected.getEventTitle());
             Bundle args = new Bundle();
-            args.putString("eventID", selected.getEventID()); // or parcelable Event if you prefer
-            NavHostFragment.findNavController(this)
-                    .navigate(R.id.entrant_event_view, args);
+            args.putString(EventViewerFragment.ARG_EVENT_ID, selected.getEventID());
+            Navigation.findNavController(v).navigate(R.id.entrant_event_view, args);
         });
 
         return v;
