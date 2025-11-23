@@ -29,6 +29,11 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 /**
  * Displays the details of a single event, including title, hero image, and actions
  * (join/leave waitlist, leave event, view QR code). Pulls data either from the in-memory
@@ -59,9 +64,8 @@ public class EventViewerFragment extends Fragment {
     MaterialButton acceptWaitListInvitationButton, leaveWaitlistButton, leaveEventButton, joinEventButton;
     TextView userWaitListStatus;
     private NotificationManager notificationManager;
-
+    EventsList eventsList;
     Event eventToDisplay;
-    private String currentWaitListStatus;
 
     public EventViewerFragment() {
         // Required empty public constructor
@@ -115,19 +119,14 @@ public class EventViewerFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
         notificationManager = new NotificationManager();
 
-        assert getArguments() != null;
-        Bundle args = getArguments();
-
-        setButtons(args); // sets buttons based on the current waitlist status
-
         // unpack the bundle:
         String eventId = requireArguments().getString(ARG_EVENT_ID);
 
         // grab the details of event:
-        EventsList eventsList = ((MainActivity) getActivity()).getEventsList();
-        eventToDisplay = eventsList.getEventByID(eventId);
-
+        assert getActivity() != null;
         assert eventId != null;
+        eventsList = ((MainActivity) getActivity()).getEventsList();
+        eventToDisplay = eventsList.getEventByID(eventId);
 
         // Dan
         // If event is not in EventsList yet, load from Firebase
@@ -139,6 +138,10 @@ public class EventViewerFragment extends Fragment {
             Log.d("EventViewerFragment", "Event found in list, displaying: " + eventId);
             displayEvent(eventToDisplay, view, eventId);
         }
+
+//        assert getArguments() != null;
+//        Bundle args = getArguments();
+//        setButtons(args); // sets fragment buttons based on the current waitlist status
 
         // ---- DISPLAY EVENT DETAILS DYNAMICALLY HERE ----
         TextView regStartText = view.findViewById(R.id.valueRegistrationStart);
@@ -160,10 +163,6 @@ public class EventViewerFragment extends Fragment {
         TextView lotteryAmountText = view.findViewById(R.id.valueAmount);
         lotteryAmountText.setText(String.valueOf(eventToDisplay.getWaitingEntrants().size()));
 
-
-
-
-
         return view;
     }
 
@@ -177,22 +176,37 @@ public class EventViewerFragment extends Fragment {
      *   <li>{@code from_enrolledEvents} – user is enrolled (came from enrolled carousel)</li>
      * </ul>
      *
-     * @param args the fragment arguments bundle (must include {@link #ARG_EVENT_ID})
+//     * @param args the fragment arguments bundle (must include {@link #ARG_EVENT_ID})
      */
-    public void setButtons(Bundle args){
+    public void setButtons(String ARG_EVENT_ID){
         //TODO: set the buttons based on the current waitlist status
-        assert args != null;
-        String eventId = args.getString(ARG_EVENT_ID);
+//        assert args != null;
+//        String eventId = args.getString(ARG_EVENT_ID);
 
-        EventsList eventsList = new EventsList();
-        Event eventToDisplay = eventsList.getEventByID(eventId);
+        assert ARG_EVENT_ID != null;
 
-        boolean currentlyInWaitlist = args.getBoolean("in_waitlist", false);
-        boolean currentlyEnrolled = args.getBoolean("from_enrolledEvents", false);
-        boolean wonLottery = args.getBoolean("won_lottery", false);
+        List<Event> list = eventsList.getEventsList();
+        // list should be populated by the time setButtons() has been called
+
+        for (Event event : list) {
+            Log.d("EventViewerFragment", "Event " + event.getEventTitle() + " " + event.getEventID());
+        }
+
+        assert eventToDisplay != null;
+
+
+//        boolean currentlyInWaitlist = args.getBoolean("in_waitlist", false);
+//        boolean currentlyEnrolled = args.getBoolean("from_enrolledEvents", false);
+//        boolean wonLottery = args.getBoolean("won_lottery", false);
+//        String type = args.getString("waitlist_notif");
+//        if (type == null)
+//            type = "no_type";
+
+        String userStatus = findUserStatus(deviceId, eventToDisplay); // returns "in_waitlist", "enrolled_in_event", "not_in_waitlist_or_event", or "won_lottery"
 
         // set the buttons based on the status of the user, as given to us by entrantMainFragment's bundle
-        if (currentlyInWaitlist) {
+        if (Objects.equals(userStatus, "in_waitlist")) {
+            Log.d("TAG", "user is in the WAITLIST for: " + eventToDisplay.getEventTitle());
             leaveWaitlistButton.setVisibility(View.VISIBLE); // set leavewaitlist to visible
             acceptWaitListInvitationButton.setText("Joined!"); // set accept to joined
             acceptWaitListInvitationButton.setBackgroundColor(getResources().getColor(R.color.accept_green));
@@ -200,19 +214,33 @@ public class EventViewerFragment extends Fragment {
             leaveEventButton.setVisibility(View.GONE);
             joinEventButton.setVisibility(View.GONE);
         }
-        else if (currentlyEnrolled){
+        else if (Objects.equals(userStatus, "enrolled_in_event")){
+            Log.d("TAG", "user is enrolled in the EVENT for: " + eventToDisplay.getEventTitle());
             acceptWaitListInvitationButton.setVisibility(View.GONE);
             leaveWaitlistButton.setVisibility(View.INVISIBLE);
             userWaitListStatus.setText(R.string.enrolledInEvent);
             joinEventButton.setVisibility(View.GONE);
         }
-        else if (wonLottery){
-            // if the click came from the notifications fragment to accept invitation to enroll in EVENT (selected from lottery)
+        else if (Objects.equals(userStatus, "won_lottery")){
+            Log.d("TAG", "user is invited by the LOTTERY to join the event for:  " + eventToDisplay.getEventTitle());
             acceptWaitListInvitationButton.setVisibility(View.GONE);
             leaveWaitlistButton.setVisibility(View.GONE);
             leaveEventButton.setVisibility(View.GONE);
 
         }
+//        else if (type.equals("waitlist_left")){
+//            // if the click came from the notifications fragment that deals with leaving the event waitlist
+//            joinEventButton.setVisibility(View.GONE);
+//            leaveEventButton.setVisibility(View.GONE);
+//            leaveWaitlistButton.setVisibility(View.GONE);
+//        }
+//        else if (type.equals("waitlist_joined")){
+//            // if the click came from the notifications fragment that deals with leaving the event waitlist
+//            joinEventButton.setVisibility(View.GONE);
+//            leaveEventButton.setVisibility(View.GONE);
+////            acceptWaitListInvitationButton.se
+////
+//        }
         else{
             leaveWaitlistButton.setVisibility(View.INVISIBLE);
             userWaitListStatus.setVisibility(View.INVISIBLE);
@@ -220,6 +248,37 @@ public class EventViewerFragment extends Fragment {
             joinEventButton.setVisibility(View.GONE);
         }
     }
+
+    /**
+     * (Author: <b>David Tyrrell</b> — Nov 20, 2025)
+     * Finds user status of the event, ex) currently in waitlist, enrolled in event, etc
+     * @param deviceId The device ID of the user
+     * @param eventToDisplay The event to display
+     * @return String: The user's status in the event
+     *
+     */
+    // TODO: I think we can get rid of the notification type attribute,
+    //  here is where I check what the user status is, and I setButtons based on this status, not the notif attribute
+    public String findUserStatus(String deviceId, Event eventToDisplay){
+        eventToDisplay = eventsList.getEventByID(eventToDisplay.getEventID()); // update eventToDisplay, it may not have been updated by this point?
+        assert (eventToDisplay != null);
+
+        if (eventToDisplay.getWaitingEntrants().contains(deviceId)) {
+            return "in_waitlist";
+        }
+        else if (eventToDisplay.getEnrolledEntrants().contains(deviceId)) {
+            return "enrolled_in_event";
+        }
+
+        else if (eventToDisplay.getInvitedEntrants().contains(deviceId)){
+            return "won_lottery";
+        }
+        // TODO: if past the registration date for joining an event, display no details, then the last if statement should be join waitlist
+        else {
+            return "not_in_waitlist_or_event";
+        }
+    }
+
 
     /**
      * Author: Dan
@@ -260,6 +319,9 @@ public class EventViewerFragment extends Fragment {
      * @param eventId The event ID
      */
     private void displayEvent(Event event, View view, String eventId) {
+
+        setButtons(eventId); // set the buttons based on the current status of the user
+
         // set title:
         toolbar.setTitle(event.getEventTitle());
 
@@ -280,8 +342,7 @@ public class EventViewerFragment extends Fragment {
             int id = item.getItemId();
 
             if (id == R.id.action_goBack) {
-                NavHostFragment.findNavController(this)
-                        .navigate(R.id.navigation_home);
+                NavHostFragment.findNavController(this).popBackStack();
                 return true;
             }
             return false;
@@ -325,8 +386,11 @@ public class EventViewerFragment extends Fragment {
                     eventToDisplay.getEventID(),
                     eventToDisplay.getOrganizer(),
                     deviceId,
-                    "You joined the waitlist for: " + eventToDisplay.getEventTitle()
+                    "You joined the waitlist for: " + eventToDisplay.getEventTitle(),
+                    "waitlist_joined"
             );
+
+            Log.d("EventViewerFragment", "ORG ID: " + eventToDisplay.getOrganizer());
 
             notificationManager.sendToUser(notification);
         });
@@ -349,7 +413,8 @@ public class EventViewerFragment extends Fragment {
                     eventToDisplay.getEventID(),
                     eventToDisplay.getOrganizer(),
                     deviceId,
-                    "You left the waitlist for: " + eventToDisplay.getEventTitle()
+                    "You left the waitlist for: " + eventToDisplay.getEventTitle(),
+                    "waitlist_left"
             );
 
             notificationManager.sendToUser(notification);
@@ -373,6 +438,7 @@ public class EventViewerFragment extends Fragment {
             leaveEventButton.setVisibility(View.VISIBLE);
             leaveWaitlistButton.setBackgroundColor(getResources().getColor(R.color.leaving_red));
 
+            eventToDisplay.removeEntrantFromInvitedEntrants(deviceId); // remove entrant from invitedEntrants list
             eventToDisplay.addEntrantToEnrolledEntrants(deviceId); // add the device ID to the EnrolledEntrantsList
             eventToDisplay.removeEntrantFromWaitingEntrants(deviceId); // remove the device ID from the waitingEntrantsList
 
@@ -390,7 +456,7 @@ public class EventViewerFragment extends Fragment {
         // Leave EVENT OnclickListener
         assert leaveEventButton != null;
         leaveEventButton.setOnClickListener(v -> {
-//            Toast.makeText(v.getContext(), "Left waitlist! ", Toast.LENGTH_SHORT).show();
+            Toast.makeText(v.getContext(), "Left Event! ", Toast.LENGTH_SHORT).show();
 
             eventToDisplay.removeEntrantFromEnrolledEntrants(deviceId); // remove the device ID from the waitingEntrantsList for the lottery
             leaveEventButton.setText("Left event!");
@@ -398,9 +464,9 @@ public class EventViewerFragment extends Fragment {
             acceptWaitListInvitationButton.setVisibility(View.INVISIBLE);
 
 //             notify EntrantMainFragment to update carousels, as the user left the list
-            getParentFragmentManager().setFragmentResult("USER_LEFT_EVENT", new Bundle());
+//            getParentFragmentManager().setFragmentResult("USER_LEFT_EVENT", new Bundle());
 
-//            NavHostFragment.findNavController(this).navigateUp();
+            NavHostFragment.findNavController(this).navigateUp();
 //            NavHostFragment.findNavController(this)
 //                    .navigate(R.id.navigation_home);
 
@@ -412,7 +478,6 @@ public class EventViewerFragment extends Fragment {
                     deviceId,
                     "You left the event: " + eventToDisplay.getEventTitle()
             );
-
             notificationManager.sendToUser(notification);
         });
     }

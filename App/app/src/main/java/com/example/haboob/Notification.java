@@ -16,6 +16,9 @@ public class Notification {
     private String message;
     private boolean read;
     private Date timeCreated;
+    private String type; // POSSIBLE TYPES: waitlist_left, waitlist_joined, event_left, event_joined, won_lottery
+
+    // Constructor
 
     // Empty constructor
     public Notification() {
@@ -42,6 +45,16 @@ public class Notification {
         setMessage(message);
     }
 
+    // this constructor lets david differentiate between notification types
+    public Notification(String eventId, String organizerId, String recipientId, String message, String type) {
+        this();
+        this.eventId = eventId;
+        this.organizerId = organizerId;
+        this.recipientId = recipientId;
+        this.type = type;
+        setMessage(message);
+    }
+
     // GETTERS
     public String getNotificationId() {
         return notificationId;
@@ -61,6 +74,10 @@ public class Notification {
 
     public String getMessage() {
         return message;
+    }
+
+    public String getType() {
+        return type;
     }
 
     public boolean isRead() {

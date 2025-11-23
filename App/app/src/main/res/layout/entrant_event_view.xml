@@ -145,7 +145,7 @@
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_marginTop="4dp"
-                android:text="Accept Waitlist Invitation"
+                android:text="Join Waitlist"
                 android:textAllCaps="false"
                 android:textStyle="bold"
                 app:backgroundTint="@color/white"

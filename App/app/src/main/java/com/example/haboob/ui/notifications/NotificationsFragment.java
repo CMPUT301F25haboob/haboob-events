@@ -2,6 +2,7 @@ package com.example.haboob.ui.notifications;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -115,7 +116,6 @@ public class NotificationsFragment extends Fragment {
             String eventID = notification.getEventId(); // grab the eventID corresponding to the notification
             assert eventID != null;
             assert eventsList != null;
-
             assert userId != null;
 
             // search through the eventsList, find the event with the matching event that matches the notification
@@ -128,12 +128,18 @@ public class NotificationsFragment extends Fragment {
                     Bundle args = new Bundle();
                     args.putString(EventViewerFragment.ARG_EVENT_ID, eventID);
                     args.putString("device_id", userId);
-                    args.putBoolean("won_lottery", true); // sets JoinEvent button invisible
+
+//                    if (notification.getType().equals("waitlist_left")) {
+//                        args.putString("waitlist_notif", "waitlist_left"); // enables waitlist buttons for joining
+//                    }
+//                    else if (notification.getType().equals("waitlist_joined")){
+//                        args.putString("waitlist_notif", "waitlist_joined"); // enables waitlist buttons for leaving
+//                    }
+//                    args.putBoolean("won_lottery", true); // sets JoinEvent button invisible
 
                     // navigate to the EventViewerFragment using the NavController
                     NavHostFragment.findNavController(this)
                             .navigate(R.id.entrant_event_view, args);
-
                 }
             }
 
@@ -150,18 +156,18 @@ public class NotificationsFragment extends Fragment {
         recyclerView.setAdapter(adapter);
         notificationManager = new NotificationManager();
 
-        /* TEST NOTIFICATION (sends notification whenever user navigates to notification fragment)
-        // Build a notification
-        Notification n = new Notification(
-                "TEST_EVENT_NAME",
-                "DEMO_ORG_ID",
-                userId,
-                "Welcome! This is a test notification."
-        );
+//        TEST NOTIFICATION (sends notification whenever user navigates to notification fragment)
+//         Build a notification
+//        Notification n = new Notification(
+//                "9b776c05-910f-4102-8342-2a921bc42d04",
+//                "DEMO_ORG_ID",
+//                userId,
+//                "You're invited to join this event!"
+//        );
 
-        NotificationManager nm = new NotificationManager();
-        nm.sendToUser(n);  // write to: users/{deviceId}/notifications/{notificationId}
-        */
+//        NotificationManager nm = new NotificationManager();
+//        nm.sendToUser(n);  // write to: users/{deviceId}/notifications/{notificationId}
+
 
         loadNotifications();
     }

@@ -42,7 +42,7 @@ public class WaitlistsFragment extends Fragment {
                 ? getArguments().getString(ARG_DEVICE_ID)
                 : null;
 
-        loadEventsForUser("davids_id"); // load events for thw waitListAdapter, resets the adapter's list of events
+        loadEventsForUser(); // load events for the waitListAdapter, resets the adapter's list of events, replaces it with all events
 
         // Inflate the layout for this fragment (fragment_waitlists.xml)
         View v = inflater.inflate(R.layout.fragment_waitlists, container, false);
@@ -54,11 +54,8 @@ public class WaitlistsFragment extends Fragment {
             Navigation.findNavController(v).navigateUp();
         });
 
+//        entrantWaitList = eventsList.getEventsList(); // grab all events available for browsing
 
-
-        entrantWaitList = eventsList.getEntrantWaitlistEvents(deviceId);
-
-//        List<Event> listOfEvents = eventsList.getEventsList(); // making a List<Event> So I can iterate through the events, cant do that with an EventsList object
 
         adapter = new WaitlistAdapter(requireContext(), new ArrayList<>(entrantWaitList));
         list.setAdapter(adapter);
@@ -91,15 +88,15 @@ public class WaitlistsFragment extends Fragment {
     }
 
     // queries the dataBase, relies on a callback to adds events to local EventList Array, updates the imageAdapter with the new images from the database
-    private void loadEventsForUser(String userId) {
+    private void loadEventsForUser() {
+
 
         eventsList = new EventsList(new EventsList.OnEventsLoadedListener() {
             @Override
             public void onEventsLoaded() { // the callback function calls this when events are loaded
 
-                if (ARG_DEVICE_ID == "device_id")
-                    Log.d("TAG", "In the waitlists fragment, device ID is the default, so device ID is not being fetched correctly.");
-                entrantWaitList = eventsList.getEntrantWaitlistEvents(ARG_DEVICE_ID);
+//                entrantWaitList = eventsList.getEventsList();
+                entrantWaitList = eventsList.getLiveEvents();
                 Log.d("TAG", "waitList EVENTSLIST SIZE: " + entrantWaitList.size());
 
                 adapter.replaceAll(entrantWaitList);
