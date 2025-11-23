@@ -31,17 +31,18 @@ public class WaitlistsFragment extends Fragment {
     private EventsList eventsList = new EventsList(); // declare the eventsList object
     private List<Event> entrantWaitList = new ArrayList<>();
     public static final String ARG_DEVICE_ID = "device_id";
+    public String deviceId;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         // unpack the bundle from entrantMainFragment(called on waitlist button click):
-        String deviceId = getArguments() != null
+        deviceId = getArguments() != null
                 ? getArguments().getString(ARG_DEVICE_ID)
                 : null;
 
-        loadEventsForUser("davids_id"); // load events for thw waitListAdapter, resets the adapter's list of events
+        loadEventsForUser(); // load events for the waitListAdapter, resets the adapter's list of events, replaces it with all events
 
         // Inflate the layout for this fragment (fragment_waitlists.xml)
         View v = inflater.inflate(R.layout.fragment_waitlists, container, false);
@@ -53,11 +54,8 @@ public class WaitlistsFragment extends Fragment {
             Navigation.findNavController(v).navigateUp();
         });
 
+//        entrantWaitList = eventsList.getEventsList(); // grab all events available for browsing
 
-
-        entrantWaitList = eventsList.getEntrantWaitlistEvents(deviceId);
-
-//        List<Event> listOfEvents = eventsList.getEventsList(); // making a List<Event> So I can iterate through the events, cant do that with an EventsList object
 
         adapter = new WaitlistAdapter(requireContext(), new ArrayList<>(entrantWaitList));
         list.setAdapter(adapter);
@@ -90,13 +88,15 @@ public class WaitlistsFragment extends Fragment {
     }
 
     // queries the dataBase, relies on a callback to adds events to local EventList Array, updates the imageAdapter with the new images from the database
-    private void loadEventsForUser(String userId) {
+    private void loadEventsForUser() {
+
 
         eventsList = new EventsList(new EventsList.OnEventsLoadedListener() {
             @Override
             public void onEventsLoaded() { // the callback function calls this when events are loaded
 
-                entrantWaitList = eventsList.getEventsList();
+//                entrantWaitList = eventsList.getEventsList();
+                entrantWaitList = eventsList.getLiveEvents();
                 Log.d("TAG", "waitList EVENTSLIST SIZE: " + entrantWaitList.size());
 
                 adapter.replaceAll(entrantWaitList);

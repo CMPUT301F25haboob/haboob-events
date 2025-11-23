@@ -47,12 +47,12 @@
                 android:text="My Events" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_my_waitlists"
+                android:id="@+id/btn_browse_waitlists"
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="My Waitlists" />
+                android:layout_weight="1.2"
+                android:text="Open Waitlists" />
         </com.google.android.material.button.MaterialButtonToggleGroup>
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -106,7 +106,7 @@
                     android:layout_width="8dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Your Upcoming Events"
+                    android:text="My Events"
                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
                 <ImageButton
@@ -140,7 +140,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Open Wait-lists:"
+                    android:text="My Waitlists"
                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
                 <ImageButton

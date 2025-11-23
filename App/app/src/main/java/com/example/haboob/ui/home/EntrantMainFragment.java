@@ -7,7 +7,6 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -27,23 +26,15 @@ import com.example.haboob.QRCode;
 import com.example.haboob.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.button.MaterialButton;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.Source;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 // Author: David T, created on Sunday, oct 26 2025
@@ -327,23 +318,29 @@ public class EntrantMainFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
 
-        // set a listener that listens to EventViewerFragment, if a user ID got added to an event entrant_ids_for_lottery, update the image carousels
+        // I'm not sure all this is code is needed, I think that whenever we nav back to eventViewer fragment the arrayAdapters are updated
+//        // set a listener that listens to EventViewerFragment, if a user ID got added to an event entrant_ids_for_lottery, update the image carousels
+//        getParentFragmentManager().setFragmentResultListener(
+//                "USER_JOINED_WAITLIST", this, (reqKey, bundle) -> loadEventsForUser(userID)
+//        );
+//
+//        // set a listener that listens to EventViewerFragment, if a user ID got added to an event entrant_ids_for_lottery, update the image carousels
+//        getParentFragmentManager().setFragmentResultListener(
+//                "USER_LEFT_WAITLIST", this, (reqKey, bundle) -> loadEventsForUser(userID)
+//        );
+//
+//        // set a listener that listens to EventViewerFragment, if a user ID got deleted from enrolledEvents, update image carousels
+//        getParentFragmentManager().setFragmentResultListener(
+//                "USER_LEFT_EVENT", this, (reqKey, bundle) -> loadEventsForUser(userID)
+//        );
+//        // set a listener that listens to EventViewerFragment, if a user ID got added to enrolledEvents, update image carousels
         getParentFragmentManager().setFragmentResultListener(
-                "USER_JOINED_WAITLIST", this, (reqKey, bundle) -> loadEventsForUser(userID)
+                "USER_JOINED_EVENT", this, (reqKey, bundle) -> loadEventsForUser(userID)
         );
 
-        // set a listener that listens to EventViewerFragment, if a user ID got added to an event entrant_ids_for_lottery, update the image carousels
-        getParentFragmentManager().setFragmentResultListener(
-                "USER_LEFT_WAITLIST", this, (reqKey, bundle) -> loadEventsForUser(userID)
-        );
-
-        // set a listener that listens to EventViewerFragment, if a user ID got deleted from enrolledEvents, update image carousels
-        getParentFragmentManager().setFragmentResultListener(
-                "USER_LEFT_EVENT", this, (reqKey, bundle) -> loadEventsForUser(userID)
-        );
 
         // set a listener that listens for myWaitlists button click, on navigate, it navigates there
-        myWaitlists = view.findViewById(R.id.btn_my_waitlists);
+        myWaitlists = view.findViewById(R.id.btn_browse_waitlists);
         Bundle args = new Bundle();
         args.putString("device_id", deviceId); // args <- deviceID
 
@@ -375,7 +372,7 @@ public class EntrantMainFragment extends Fragment {
         Date regStart = new GregorianCalendar(2025, Calendar.NOVEMBER, 1).getTime();
         Date regEnd   = new GregorianCalendar(2025, Calendar.NOVEMBER, 15).getTime();
 
-        String url = "https://www.rollingstone.com/wp-content/uploads/2025/02/GettyImages-1448238032-2.jpg?w=1581&h=1054&crop=1";
+        String url = "https://play-lh.googleusercontent.com/gnSC6s8-6Tjc4uhvDW7nfrSJxpbhllzYhgX8y374N1LYvWBStn2YhozS9XXaz1T_Pi2q";
 
         // Create supporting objects
         QRCode qrCode = new QRCode("idk lol");
@@ -384,9 +381,9 @@ public class EntrantMainFragment extends Fragment {
 
         // create list of tags
         ArrayList<String> tagslist2 = new ArrayList<>();
-        tagslist2.add("drake");
-        tagslist2.add("rap");
-        tagslist2.add("3+ hours");
+        tagslist2.add("clash");
+        tagslist2.add("royale");
+        tagslist2.add("git gud");
 
 
         // Finally, create your dummy Event using your constructor
@@ -394,8 +391,8 @@ public class EntrantMainFragment extends Fragment {
                 "org12345",                                  // organizer
                 regStart,                                    // registrationStartDate
                 regEnd,                                      // registrationEndDate
-                "Drake Concert",                          // eventTitle
-                "drake the kinda fella to ",             // eventDescription
+                "Clash Royale Tournament",                          // eventTitle
+                "git gud scrub",             // eventDescription
                 true,                                        // geoLocationRequired
                 100,                                         // lotterySampleSize
                 200,                                            // optionalWaitingListSize
@@ -403,7 +400,7 @@ public class EntrantMainFragment extends Fragment {
                 tagslist2                // tagsList<String
         );
 
-        dummyEvent.addEntrantToWaitingEntrants(deviceId);
+//        dummyEvent.addEntrantToWaitingEntrants(deviceId);
         eventsList.loadEventsList();
 
         // update carousels
@@ -419,33 +416,6 @@ public class EntrantMainFragment extends Fragment {
                 Log.e("TAG", "Failed loading events", err);
             }
         });
-
-//         public Event( QRCode qrCode, Poster poster, ArrayList<String> tags) {
-//            this.db = FirebaseFirestore.getInstance();
-//            this.organizerID = organizer;
-//            this.registrationStartDate = registrationStartDate;
-//            this.registrationEndDate = registrationEndDate;
-//            this.eventTitle = eventTitle;
-//            this.eventDescription = eventDescription;
-//            this.geoLocationRequired = geoLocationRequired;
-//            this.lotterySampleSize = lotterySampleSize;
-//            this.optionalWaitingListSize = optionalWaitingListSize;
-//            this.qrCode = qrCode;
-//            this.poster = poster;
-//            this.tags = tags;
-//            this.initLists();
-//        }
-
-//        if (eventsList != null){
-//            eventsList.addEvent(dummyEvent);
-//            eventsList.loadEventsList();
-//            boolean isLoaded = eventsList.isLoaded();
-//            Log.d("TAG", "eventsList is not null, isLoaded is: " + isLoaded);
-//        }
-//        else{
-//            Log.d("TAG", "eventsList is null");
-//        }
-
     }
 
     /**
