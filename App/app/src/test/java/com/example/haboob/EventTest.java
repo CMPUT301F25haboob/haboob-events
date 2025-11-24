@@ -137,7 +137,8 @@ public class EventTest {
     /**
      * Verifies that the alternate constructor
      * {@link Event#Event(String, Date, Date, String, String, boolean, int, QRCode, Poster, ArrayList, ArrayList)}
-     * correctly sets the lottery IDs, tags, and organizer metadata.
+     * correctly sets tags and organizer metadata.
+     * Note: The entrant_ids_for_lottery parameter is deprecated and no longer stored.
      */
     @Test
     public void lotteryIds_setterViaConstructorAndGetter_roundTrip() {
@@ -158,9 +159,10 @@ public class EventTest {
                 tags, lottery
         );
 
-        assertEquals(lottery, e2.getWaitingEntrants());
+        // Note: lottery parameter (entrant_ids_for_lottery) is deprecated and not stored
         assertEquals("ORG_X", e2.getOrganizer());
         assertEquals("Title", e2.getEventTitle());
+        assertEquals(tags, e2.getTags());
     }
 
     /**

@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.haboob.ui.home.EventViewerFragment;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,56 +85,61 @@ public class HistoryFragment extends Fragment {
     }
 
     /**
-     * Loads all events the user has joined waitlists for
-     * TODO: Logic needs to be reworked. Instead, when a user joins an event, it should be added to the history
-     * TODO: This is handled elsewhere. We will also need a new field for the history which will store event ids
+     * Loads all events from the user's event_history_list
      */
     private void loadHistoryEvents() {
-        eventsList = new EventsList(new EventsList.OnEventsLoadedListener() {
-            @Override
-            public void onEventsLoaded() {
-                // Get all events where user has been in any list
-                ArrayList<Event> allEvents = eventsList.getEventsList();
-                historyEvents = new ArrayList<>();
+        historyEvents = new ArrayList<>();
 
-                for (Event event : allEvents) {
-                    if (event == null) continue;
+        // First, get the user's event_history_list from the entrant collection
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("entrant")
+                .document(deviceId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        List<String> eventHistoryList = (List<String>) documentSnapshot.get("event_history_list");
 
-                    // Check if user was ever in waiting list
-                    boolean inWaiting = event.getWaitingEntrants() != null &&
-                                       event.getWaitingEntrants().contains(deviceId);
+                        if (eventHistoryList == null || eventHistoryList.isEmpty()) {
+                            Log.d(TAG, "No events in history");
+                            updateAdapter();
+                            return;
+                        }
 
-                    // Check if user was ever enrolled
-                    boolean inEnrolled = event.getEnrolledEntrants() != null &&
-                                        event.getEnrolledEntrants().contains(deviceId);
+                        Log.d(TAG, "Found " + eventHistoryList.size() + " events in history list");
 
-                    // Check if user was ever invited
-                    boolean inInvited = event.getInvitedEntrants() != null &&
-                                       event.getInvitedEntrants().contains(deviceId);
+                        // Load EventsList to get event details
+                        eventsList = new EventsList(new EventsList.OnEventsLoadedListener() {
+                            @Override
+                            public void onEventsLoaded() {
+                                // Get events matching the IDs in the history list
+                                for (String eventId : eventHistoryList) {
+                                    Event event = eventsList.getEventByID(eventId);
+                                    if (event != null) {
+                                        historyEvents.add(event);
+                                    }
+                                }
 
-                    // Check if user was ever cancelled
-                    boolean inCancelled = event.getCancelledEntrants() != null &&
-                                         event.getCancelledEntrants().contains(deviceId);
+                                Log.d(TAG, "Loaded " + historyEvents.size() + " event details");
+                                updateAdapter();
+                            }
 
-                    // If user was in any list, add to history
-                    if (inWaiting || inEnrolled || inInvited || inCancelled) {
-                        historyEvents.add(event);
+                            @Override
+                            public void onError(Exception e) {
+                                Log.e(TAG, "Error loading events list", e);
+                                Toast.makeText(getContext(), "Failed to load event details: " + e.getMessage(),
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    } else {
+                        Log.d(TAG, "User document not found");
+                        updateAdapter();
                     }
-                }
-
-                Log.d(TAG, "Found " + historyEvents.size() + " events in history");
-
-                // Update adapter with history events
-                updateAdapter();
-            }
-
-            @Override
-            public void onError(Exception e) {
-                Log.e(TAG, "Error loading history events", e);
-                Toast.makeText(getContext(), "Failed to load history: " + e.getMessage(),
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error loading user history", e);
+                    Toast.makeText(getContext(), "Failed to load history: " + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                });
     }
 
     /**

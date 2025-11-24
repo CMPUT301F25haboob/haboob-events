@@ -44,6 +44,7 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
     public interface OnItemClick { void onClick(String eventId); }     // setting up the callback
     private final List<String> imageUrls = new ArrayList<>(); // always mutable
     private List<String> eventIDs = new ArrayList<>();
+    private List<String> invitedEventIDs = new ArrayList<>(); // IDs of events that should show red dot
     private OnItemClick onItemClick;
     public EventImageAdapter(OnItemClick onItemClick) {     // Primary actor: caller supplies the click callback
         this.onItemClick = onItemClick;
@@ -82,15 +83,17 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
     }
 
     /**
-     * ViewHolder holding the poster {@link ImageView}.
+     * ViewHolder holding the poster {@link ImageView} and red dot indicator.
      *
      * <p>Acts as a lightweight cache of child views to support smooth scrolling.</p>
      */
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView imageView;
+        View redDotIndicator;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.image_event);
+            redDotIndicator = itemView.findViewById(R.id.red_dot_indicator);
         }
 
     }
@@ -113,6 +116,19 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
         this.eventIDs.addAll(eventIDs);
         notifyDataSetChanged();
         Log.d("TAG", "InputIDs ran, size: " + eventIDs.size() + " EventIDs: " + eventIDs.toString());
+    }
+
+    /**
+     * Sets which event IDs should display a red dot indicator (user has been invited).
+     *
+     * @param invitedEventIDs list of event IDs that should show the red dot
+     */
+    public void setInvitedEventIDs(List<String> invitedEventIDs) {
+        this.invitedEventIDs.clear();
+        if (invitedEventIDs != null) {
+            this.invitedEventIDs.addAll(invitedEventIDs);
+        }
+        notifyDataSetChanged();
     }
 
     /**
@@ -158,6 +174,15 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
                 .placeholder(R.drawable.shrug)
                 .error(R.drawable.shrug )
                 .into(holder.imageView);
+
+        // Show/hide red dot indicator based on whether user is invited to this event
+        if (position < eventIDs.size()) {
+            String eventId = eventIDs.get(position);
+            boolean isInvited = invitedEventIDs.contains(eventId);
+            holder.redDotIndicator.setVisibility(isInvited ? View.VISIBLE : View.GONE);
+        } else {
+            holder.redDotIndicator.setVisibility(View.GONE);
+        }
 
         // set an onClicklistener callback:
         holder.itemView.setOnClickListener(v -> {

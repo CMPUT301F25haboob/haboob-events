@@ -6,13 +6,16 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import java.io.Serializable;
 import java.sql.Array;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -186,6 +189,10 @@ public class Event implements Serializable {
 //        this.invitedEntrants.add(userID);
         this.waitingEntrants.add(userID);  // david's change, not sure why it was invitedEntrants before
 
+        // Remove from cancelled list if present (user is rejoining after leaving)
+        if (this.cancelledEntrants != null) {
+            this.cancelledEntrants.remove(userID);
+        }
 
         db.collection("events")
                 .whereEqualTo("eventID", eventID)
@@ -195,12 +202,31 @@ public class Event implements Serializable {
                         // Get the actual document ID from the query result
                         String documentId = queryDocumentSnapshots.getDocuments().get(0).getId();
 
-                        // Update the document using its ID
+                        // Update the document using its ID - add to waiting, remove from cancelled
+                        Map<String, Object> updates = new HashMap<>();
+                        updates.put("waitingEntrants", FieldValue.arrayUnion(userID));
+                        updates.put("cancelledEntrants", FieldValue.arrayRemove(userID));
+
                         db.collection("events")
                                 .document(documentId)
-                                .update("waitingEntrants", FieldValue.arrayUnion(userID))
+                                .update(updates)
                                 .addOnSuccessListener(aVoid -> {
-                                    Log.d("Event", "Successfully added user to waitingEntrants");
+                                    Log.d("Event", "Successfully added user to waitingEntrants and removed from cancelled");
+
+                                    // Also add this event to the user's event history
+                                    // Using set with merge to create the field if it doesn't exist
+                                    Map<String, Object> historyUpdate = new HashMap<>();
+                                    historyUpdate.put("event_history_list", FieldValue.arrayUnion(eventID));
+
+                                    db.collection("entrant")
+                                            .document(userID)
+                                            .set(historyUpdate, SetOptions.merge())
+                                            .addOnSuccessListener(aVoid2 -> {
+                                                Log.d("Event", "Successfully added event to user's history");
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                Log.e("Event", "Error updating user's event history", e);
+                                            });
                                 })
                                 .addOnFailureListener(e -> {
                                     Log.e("Event", "Error updating waitingEntrants", e);
@@ -347,6 +373,10 @@ public class Event implements Serializable {
             this.invitedEntrants.remove(userID);
         }
 
+        // Automatically fill vacancy from waiting list
+        LotterySampler sampler = new LotterySampler();
+        sampler.fillVacancyFromWaitlist(this);
+
         // Safety check — can't query without eventID
         if (this.eventID == null || this.eventID.isEmpty()) {
             Log.w("Event", "removeEntrantFromInvitedEntrants: eventID is null or empty");
@@ -395,6 +425,10 @@ public class Event implements Serializable {
             this.enrolledEntrants.remove(userID);
         }
 
+        // Automatically fill vacancy from waiting list
+        LotterySampler sampler = new LotterySampler();
+        sampler.fillVacancyFromWaitlist(this);
+
         // Safety check — can't query without eventID
         if (this.eventID == null || this.eventID.isEmpty()) {
             Log.w("Event", "removeEntrantFromEnrolledEntrants: eventID is null or empty");
@@ -429,6 +463,68 @@ public class Event implements Serializable {
                 })
                 .addOnFailureListener(e ->
                         Log.e("Event", "Failed to query event document by eventID", e)
+                );
+    }
+
+    /**
+     * Moves a user from invitedEntrants to enrolledEntrants when they accept their invitation.
+     * Does NOT trigger vacancy filling from the waiting list (unlike removeEntrantFromInvitedEntrants).
+     * Also removes the user from waitingEntrants if present.
+     *
+     * @param userID user ID to move
+     */
+    public void moveEntrantFromInvitedToEnrolled(String userID) {
+        // Remove from invited list locally
+        if (this.invitedEntrants != null) {
+            this.invitedEntrants.remove(userID);
+        }
+
+        // Add to enrolled list locally
+        if (this.enrolledEntrants != null && !this.enrolledEntrants.contains(userID)) {
+            this.enrolledEntrants.add(userID);
+        }
+
+        // Remove from waiting list locally (if present)
+        if (this.waitingEntrants != null) {
+            this.waitingEntrants.remove(userID);
+        }
+
+        // Safety check
+        if (this.eventID == null || this.eventID.isEmpty()) {
+            Log.w("Event", "moveEntrantFromInvitedToEnrolled: eventID is null or empty");
+            return;
+        }
+
+        // Update in Firestore
+        db.collection("events")
+                .whereEqualTo("eventID", this.eventID)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (querySnapshot.isEmpty()) {
+                        Log.w("Event", "No event document found matching eventID=" + this.eventID);
+                        return;
+                    }
+
+                    String docId = querySnapshot.getDocuments().get(0).getId();
+
+                    // Update all three lists in Firestore
+                    Map<String, Object> updates = new HashMap<>();
+                    updates.put("invitedEntrants", FieldValue.arrayRemove(userID));
+                    updates.put("enrolledEntrants", FieldValue.arrayUnion(userID));
+                    updates.put("waitingEntrants", FieldValue.arrayRemove(userID));
+
+                    db.collection("events")
+                            .document(docId)
+                            .update(updates)
+                            .addOnSuccessListener(aVoid ->
+                                    Log.d("Event", "Successfully moved user from invited to enrolled")
+                            )
+                            .addOnFailureListener(e ->
+                                    Log.e("Event", "Error moving user from invited to enrolled", e)
+                            );
+                })
+                .addOnFailureListener(e ->
+                        Log.e("Event", "Failed to query event document", e)
                 );
     }
 
