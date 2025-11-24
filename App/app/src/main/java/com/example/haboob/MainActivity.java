@@ -34,6 +34,13 @@ public class MainActivity extends AppCompatActivity {
         return eventsList;
     }
 
+    // create a method that refreshes our EventsList from Firebase:
+    public void refreshEventsList() {
+        if (eventsList != null) {
+            eventsList.loadEventsList();
+        }
+    }
+
     String eventID;
 
     @Override

@@ -129,6 +129,14 @@ public class EventViewerFragment extends Fragment {
         // grab the details of event:
         assert getActivity() != null;
         assert eventId != null;
+
+        // TODO: The below lines are whats causing the button updates issues
+        // We are using an events list from MainActivity which is outdated
+        // TODO: Instead, we should pass an events list from EntrantMainFragment is possible
+        // This will make it so that everytime you go back to entrant main fragment,
+        // we refresh the data
+        // That way, we don't do it every time we click on an event, since this causes
+        // hitches and flickers
         eventsList = ((MainActivity) getActivity()).getEventsList();
         eventToDisplay = eventsList.getEventByID(eventId);
 
