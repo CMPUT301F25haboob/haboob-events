@@ -428,11 +428,22 @@ public class EventViewerFragment extends Fragment {
 //            Toast.makeText(v.getContext(), "Left waitlist! ", Toast.LENGTH_SHORT).show();
 
             eventToDisplay.removeEntrantFromWaitingEntrants(deviceId); // remove the device ID from the waitingEntrantsList for the lottery
+
+            // If user was also invited, remove them from invited list (declining invitation)
+            if (eventToDisplay.getInvitedEntrants() != null &&
+                eventToDisplay.getInvitedEntrants().contains(deviceId)) {
+                eventToDisplay.removeEntrantFromInvitedEntrants(deviceId);
+                Log.d("EventViewerFragment", "User left waitlist and declined invitation");
+            }
+
             leaveWaitlistButton.setText("Left Waitlist!");
             leaveWaitlistButton.setBackgroundColor(getResources().getColor(R.color.black));
             userWaitListStatus.setVisibility(View.INVISIBLE);
+            acceptWaitListInvitationButton.setVisibility(View.VISIBLE);
             acceptWaitListInvitationButton.setText("Join Waitlist");
             acceptWaitListInvitationButton.setBackgroundColor(getResources().getColor(android.R.color.white));
+            joinEventButton.setVisibility(View.GONE);
+            declineInvitationButton.setVisibility(View.GONE);
 
 //             notify EntrantMainFragment to update carousels, as the user left the list
             getParentFragmentManager().setFragmentResult("USER_LEFT_WAITLIST", new Bundle());
