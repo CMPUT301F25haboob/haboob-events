@@ -501,6 +501,37 @@ public class EventViewerFragment extends Fragment {
             );
             notificationManager.sendToUser(notification);
         });
+
+        // Decline INVITATION OnclickListener
+        assert declineInvitationButton != null;
+        declineInvitationButton.setOnClickListener(v -> {
+            Toast.makeText(v.getContext(), "Declined invitation", Toast.LENGTH_SHORT).show();
+
+            // Remove user from invited list and waiting list
+            eventToDisplay.removeEntrantFromInvitedEntrants(deviceId);
+            eventToDisplay.removeEntrantFromWaitingEntrants(deviceId);
+            eventToDisplay.addEntrantToCancelledEntrants(deviceId);
+
+            // Update UI
+            declineInvitationButton.setVisibility(View.GONE);
+            joinEventButton.setVisibility(View.GONE);
+            leaveWaitlistButton.setVisibility(View.GONE);
+            acceptWaitListInvitationButton.setVisibility(View.VISIBLE);
+            acceptWaitListInvitationButton.setText("Join Waitlist");
+            userWaitListStatus.setVisibility(View.INVISIBLE);
+
+            // Notify EntrantMainFragment to update carousels
+            getParentFragmentManager().setFragmentResult("USER_LEFT_WAITLIST", new Bundle());
+
+            Notification notification = new Notification(
+                    eventToDisplay.getEventID(),
+                    eventToDisplay.getOrganizer(),
+                    deviceId,
+                    "You declined the invitation for: " + eventToDisplay.getEventTitle(),
+                    "invitation_declined"
+            );
+            notificationManager.sendToUser(notification);
+        });
     }
 
     /**
