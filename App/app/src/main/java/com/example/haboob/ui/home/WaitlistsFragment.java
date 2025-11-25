@@ -75,14 +75,13 @@ public class WaitlistsFragment extends Fragment {
         tagMap.put(R.id.filter_outdoor, "outdoor");
         tagMap.put(R.id.filter_music, "music");
 
-        // Tag filter -> adapter filter
-
+        // tagGroup represents the group of tags clicked by the user to filter events by tag
         tagGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (!isChecked) return;
 
             String query = tagMap.get(checkedId);
             if (query != null) {
-                search.setQuery(query, true);
+                search.setQuery(query, true); // sets the searchbar to the text inputted (whether that be filtered or manually inputted
                 search.clearFocus();
             }
         });
