@@ -125,19 +125,20 @@ public class OrganizerAllListsFragment extends Fragment implements OnMapReadyCal
 
     /**
      * Called when the map is ready to be used
-     * @param googleMap
+     * @param map
      */
     @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void onMapReady(GoogleMap map) {
+        this.googleMap = map;
 
         // Add a marker in Sydney and move the camera
         LatLng edmonton = new LatLng(53.5462, -113.4937);
 
         // Put all pins of user signup locations on the map
-        setPinsOnMap(googleMap);
+        setPinsOnMap();
 
         // Add dummy marker for now
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(edmonton));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(edmonton, 10));
 
         // Show the map controls
         googleMap.getUiSettings().setZoomControlsEnabled(true);
@@ -145,10 +146,9 @@ public class OrganizerAllListsFragment extends Fragment implements OnMapReadyCal
 
     /**
      * Called to populate all of the pins from entrants onto the map
-     * @param googleMap
+     *
      */
-    public void setPinsOnMap(GoogleMap googleMap) {
-
+    public void setPinsOnMap() {
         // Create a new pin for each entrant
         for (GeoPoint point : selectedEvent.getEntrantLocations()) {
 
