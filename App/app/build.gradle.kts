@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     id("com.google.gms.google-services")
+    alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
 }
 
 android {
@@ -36,6 +37,8 @@ android {
 }
 
 dependencies {
+    // Maps SDK for Android
+    implementation(libs.play.services.maps)
     // Testing
     // For FragmentScenario
     androidTestImplementation("androidx.fragment:fragment-testing:1.7.1")

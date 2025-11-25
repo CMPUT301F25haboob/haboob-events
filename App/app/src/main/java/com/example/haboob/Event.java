@@ -3,14 +3,13 @@ package com.example.haboob;
 import android.util.Log;
 
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.SetOptions;
+import com.google.type.LatLng;
 
 import java.io.Serializable;
-import java.sql.Array;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -61,7 +60,6 @@ public class Event implements Serializable {
     private boolean geoLocationRequired;
     private int lotterySampleSize;
     private int optionalWaitingListSize;
-    private GeoLocationMap geoLocationMap;
     private QRCode qrCode;
     private Poster poster;
 
@@ -71,6 +69,7 @@ public class Event implements Serializable {
     private ArrayList<String> waitingEntrants;  // -> List of all entrants who were not selected for the lottery, didn't cancel, and are waiting to fill in upon entrant cancellation
     private ArrayList<String> enrolledEntrants;  // -> List of all entrants who accepted their invite
     private ArrayList<String> cancelledEntrants;  // -> List of all entrants who cancelled their invite or were cancelled by the organizer
+    private ArrayList<GeoPoint> entrantLocations;  // -> List of locations that entrants sign up for an event from
 
     // to store the entrants that are in the lottery
 //    private ArrayList<String> entrant_ids_for_lottery; deprecated by david
@@ -142,6 +141,7 @@ public class Event implements Serializable {
         this.waitingEntrants = new ArrayList<String>();
         this.enrolledEntrants = new ArrayList<String>();
         this.cancelledEntrants = new ArrayList<String>();
+        this.entrantLocations = new ArrayList<GeoPoint>();
     }
 
     /**
@@ -300,6 +300,41 @@ public class Event implements Serializable {
                                 })
                                 .addOnFailureListener(e -> {
                                     Log.e("Event", "Error updating cancelledEntrants", e);
+                                });
+                    } else {
+                        Log.e("Event", "No event found with eventID: " + eventID);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("Event", "Error querying event", e);
+                });
+    }
+
+
+    /**
+     * Adds a user's location data to {@code entrantLocations} in-memory and in Firestore (arrayUnion)
+     *
+     * @param location user's location data to add
+     */
+    public void addEntrantLocation(GeoPoint location) {
+        this.entrantLocations.add(location);
+        db.collection("events")
+                .whereEqualTo("eventID", eventID)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        // Get the actual document ID from the query result
+                        String documentId = queryDocumentSnapshots.getDocuments().get(0).getId();
+
+                        // Update the document using its ID
+                        db.collection("events")
+                                .document(documentId)
+                                .update("entrantLocations", FieldValue.arrayUnion(location))
+                                .addOnSuccessListener(aVoid -> {
+                                    Log.d("Event", "Successfully added location to entrantLocations");
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e("Event", "Error updating entrantLocations", e);
                                 });
                     } else {
                         Log.e("Event", "No event found with eventID: " + eventID);
@@ -563,6 +598,55 @@ public class Event implements Serializable {
                 });
     }
 
+
+    /**
+     * Removes a user's location data from the local list as well as Firestore
+     *
+     * @param location user's location data to remove
+     */
+    public void removeEntrantLocation(GeoPoint location) {
+        // Remove locally
+        if (this.entrantLocations != null) {
+            this.entrantLocations.remove(location);
+        }
+
+        // Safety check — can't query without eventID
+        if (this.eventID == null || this.eventID.isEmpty()) {
+            Log.w("Event", "removeEntrantLocation: eventID is null or empty");
+            return;
+        }
+
+        // Find the document where eventID == this.eventID
+        db.collection("events")
+                .whereEqualTo("eventID", this.eventID)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+
+                    if (querySnapshot.isEmpty()) {
+                        Log.w("Event", "No event document found matching eventID=" + this.eventID);
+                        return;
+                    }
+
+                    // We expect exactly 1 document
+                    String docId = querySnapshot.getDocuments().get(0).getId();
+
+                    // Step 2: Remove the user from waitingEntrants using arrayRemove
+                    db.collection("events")
+                            .document(docId)
+                            .update("entrantLocations", FieldValue.arrayRemove(location))
+                            .addOnSuccessListener(aVoid ->
+                                    Log.d("Event", "Successfully removed " + location + " from entrantLocations in Firebase")
+                            )
+                            .addOnFailureListener(e ->
+                                    Log.e("Event", "Error updating entrantLocations", e)
+                            );
+
+                })
+                .addOnFailureListener(e ->
+                        Log.e("Event", "Failed to query event document by eventID", e)
+                );
+    }
+
     /**
      * Debug helper: logs the contents of the entrant lists and ensures {@code tags} is non-null.
      */
@@ -677,10 +761,10 @@ public class Event implements Serializable {
     public int getOptionalWaitingListSize() { return this.optionalWaitingListSize; }
 
     /**
-     * @return geolocation map metadata (may be null)
+     * @return ArrayList<LatLng> list of locations of all entrants (may be empty)
      */
-    public GeoLocationMap getGeoLocationMap() {
-        return this.geoLocationMap;
+    public ArrayList<GeoPoint> getEntrantLocations() {
+        return this.entrantLocations;
     }
 
     /**
@@ -781,9 +865,9 @@ public class Event implements Serializable {
         this.optionalWaitingListSize = optionalWaitingListSize;
     }
 
-    /** @param geoLocationMap geolocation map metadata */
-    public void setGeoLocationMap(GeoLocationMap geoLocationMap) {
-        this.geoLocationMap = geoLocationMap;
+    /** @param entrantLocations locations of all entrants */
+    public void setEntrantLocations(ArrayList<GeoPoint> entrantLocations) {
+        this.entrantLocations = entrantLocations;
     }
 
     /** @param qrCode qr code object */
