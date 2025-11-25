@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.EditText;
+import android.widget.PopupMenu;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -16,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  * {@code OrganizerNewEventFragment} is responsible for creating a new {@link Event}
@@ -61,10 +63,11 @@ public class OrganizerNewEventFragment extends Fragment {
         EditText etDescription = view.findViewById(R.id.event_details);
         EditText etCapacity = view.findViewById(R.id.num_selected);
         EditText etSignupLimit = view.findViewById(R.id.num_allowed_signup);
-        EditText etTags = view.findViewById(R.id.tags);
+        Button btnTags = view.findViewById(R.id.tags_button);
         CalendarView signupStartView = view.findViewById(R.id.start_date);
         CalendarView signupEndView = view.findViewById(R.id.end_date);
         Switch geoSwitch = view.findViewById(R.id.geo_data_required);
+        Button backButton = view.findViewById(R.id.back_button);
 
         // Set up listeners
         signupStartView.setOnDateChangeListener((startCalendar, year, month, dayOfMonth) -> {
@@ -81,6 +84,55 @@ public class OrganizerNewEventFragment extends Fragment {
             endDate[0] = end.getTime();
         });
 
+        backButton.setOnClickListener(v -> {
+            getParentFragmentManager().popBackStack();
+        });
+
+        // Author: Owen - On click of tags button show dropdown dialog and save selected tags
+        ArrayList<String> selectedTags = new ArrayList<>();
+
+        btnTags.setOnClickListener(v -> {
+            // Use global preset tags
+            ArrayList<String> presetTags = PresetTags.PRESET_TAGS;
+
+            // Convert to CharSequence[] for the dialog
+            CharSequence[] tagOptions = presetTags.toArray(new CharSequence[0]);
+
+            // Track which items are checked
+            boolean[] checkedItems = new boolean[tagOptions.length];
+
+            // Pre-check previously selected tags
+            for (int i = 0; i < presetTags.size(); i++) {
+                checkedItems[i] = selectedTags.contains(presetTags.get(i));
+            }
+
+            androidx.appcompat.app.AlertDialog.Builder builder =
+                    new androidx.appcompat.app.AlertDialog.Builder(requireContext());
+
+            builder.setTitle("Select Tags");
+
+            builder.setMultiChoiceItems(tagOptions, checkedItems, (dialog, which, isChecked) -> {
+                String tag = presetTags.get(which);  // get tag by index from list
+
+                if (isChecked) {
+                    if (!selectedTags.contains(tag)) {
+                        selectedTags.add(tag);
+                    }
+                } else {
+                    selectedTags.remove(tag);
+                }
+            });
+
+            builder.setPositiveButton("OK", (dialog, which) -> {
+                // keep button text constant
+                btnTags.setText("Select Tags");
+            });
+
+            builder.setNegativeButton("Cancel", null);
+
+            builder.show();
+        });
+
         // TODO: Still need to implement poster, QRcode, tags, and geo data
 
         Button confirmEventbutton = view.findViewById(R.id.confirm_event);
@@ -89,10 +141,6 @@ public class OrganizerNewEventFragment extends Fragment {
             // Get user-inputted data
             String eventTitle = etTitle.getText().toString();
             String eventDetails = etDescription.getText().toString();
-            String eventTags = etTags.getText().toString();
-
-            // Seperate and create new tags list here
-            ArrayList<String> tags = createTagsList(eventTags);
 
             String eventCapacity = etCapacity.getText().toString();
             int capacity = 0;
@@ -103,8 +151,14 @@ public class OrganizerNewEventFragment extends Fragment {
             boolean geoData = geoSwitch.isChecked();
 
             // Check that fields are filled
-            if (eventTitle.isEmpty() || eventDetails.isEmpty() || eventCapacity.isEmpty() || eventTags.isEmpty() || signupStart == null || signupEnd == null) {
+            if (eventTitle.isEmpty() || eventDetails.isEmpty() || eventCapacity.isEmpty() || signupStart == null || signupEnd == null) {
                 Toast.makeText(requireContext(), "Please fill in all required fields and select valid dates", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Author: Owen - Check that at least one tag is selected
+            if (selectedTags.isEmpty()) {
+                Toast.makeText(requireContext(), "Please select at least one tag", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -161,7 +215,7 @@ public class OrganizerNewEventFragment extends Fragment {
 
             // Create new Event object (pass in dummy data for now)
             Poster poster = new Poster();
-            Event newEvent = new Event(currentOrganizer.getOrganizerID(), signupStart, signupEnd, eventTitle, eventDetails, geoData, capacity, limit, poster, tags);
+            Event newEvent = new Event(currentOrganizer.getOrganizerID(), signupStart, signupEnd, eventTitle, eventDetails, geoData, capacity, limit, poster, selectedTags);
 
             // Add Event to organizer's eventList
             currentOrganizer.getEventList().addEvent(newEvent);

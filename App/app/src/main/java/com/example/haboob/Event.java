@@ -136,7 +136,9 @@ public class Event implements Serializable {
      */
     public void initLists() {
         // Initialize all the lists to use/populate later
-        this.tags = new ArrayList<String>();
+        if (this.tags == null) {
+            this.tags = new ArrayList<>();
+        }
         this.invitedEntrants = new ArrayList<String>();
         this.waitingEntrants = new ArrayList<String>();
         this.enrolledEntrants = new ArrayList<String>();
