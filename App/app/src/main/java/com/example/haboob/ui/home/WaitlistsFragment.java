@@ -54,8 +54,6 @@ public class WaitlistsFragment extends Fragment {
             Navigation.findNavController(v).navigateUp();
         });
 
-//        entrantWaitList = eventsList.getEventsList(); // grab all events available for browsing
-
 
         adapter = new WaitlistAdapter(requireContext(), new ArrayList<>(entrantWaitList));
         list.setAdapter(adapter);

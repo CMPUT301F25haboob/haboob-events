@@ -162,9 +162,6 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
     // recyclerView binding data to each viewHolder
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
-        // TODO: OPTIONAL: the fact that it has to load the images each time is a bit inefficient, maybe its a good idea
-        // TODO: to somehow save the photos on first load and then use those?
-
         // Bind image resource to ImageView
 //        holder.imageView.setImageResource(images.get(position));
 
@@ -188,7 +185,7 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
         holder.itemView.setOnClickListener(v -> {
             Log.d("TAG", "eventIDS size: " + eventIDs.size());
 
-            Toast.makeText(v.getContext(), "Clicked " + position, Toast.LENGTH_SHORT).show();
+//            Toast.makeText(v.getContext(), "Clicked " + position, Toast.LENGTH_SHORT).show();
 
             // navigate using an action
 //            Navigation.findNavController(v).navigate(R.id.action_mainEntrantView___to___EventView);
