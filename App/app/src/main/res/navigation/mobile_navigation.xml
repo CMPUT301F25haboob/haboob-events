@@ -84,6 +84,13 @@
         />
 
     <fragment
+        android:id="@+id/navigation_admin_notification"
+        android:name="com.example.haboob.AdminNotificationFragment"
+        android:label="AdminNotification"
+        tools:layout="@layout/admin_notification_fragment"
+        />
+
+    <fragment
         android:id="@+id/navigation_admin_users"
         android:name="com.example.haboob.AdminUserFragment"
         android:label="AdminUsers"

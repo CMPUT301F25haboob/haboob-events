@@ -72,7 +72,7 @@ public class AdminMainFragment extends Fragment {
         Button viewPostersButton = view.findViewById(R.id.admin_view_posters_button);
         Button viewEventsButton = view.findViewById(R.id.admin_view_events_button);
         Button viewUsersButton = view.findViewById(R.id.admin_view_users_button);
-        Button sendNotificationsButton = view.findViewById(R.id.admin_view_notifications_button);
+        Button viewNotificationsButton = view.findViewById(R.id.admin_view_notifications_button);
         ImageButton viewBackButton = view.findViewById(R.id.btn_admin_back);
 
         viewBackButton.setOnClickListener(v-> goBack());
@@ -105,7 +105,18 @@ public class AdminMainFragment extends Fragment {
                 NavHostFragment.findNavController(AdminMainFragment.this)
                         .navigate(R.id.navigation_admin_users);
             } catch (Exception e) {
-                Log.e("AdminMainFragment", "Navigation to events failed. Is the action ID set?", e);
+                Log.e("AdminMainFragment", "Navigation to Users failed. Is the action ID set?", e);
+                Toast.makeText(getContext(), "View Events (Not Implemented)", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Set click listener for View Notifications
+        viewNotificationsButton.setOnClickListener(v -> {
+            try {
+                NavHostFragment.findNavController(AdminMainFragment.this)
+                        .navigate(R.id.navigation_admin_notification);
+            } catch (Exception e) {
+                Log.e("AdminMainFragment", "Navigation to Notifications failed. Is the action ID set?", e);
                 Toast.makeText(getContext(), "View Events (Not Implemented)", Toast.LENGTH_SHORT).show();
             }
         });
