@@ -1,13 +1,23 @@
 package com.example.haboob;
 
-import static android.view.View.INVISIBLE;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentActivity;
+import android.os.Bundle;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.example.haboob.databinding.ActivityOrganizerViewMapsBinding;
+import com.google.firebase.firestore.GeoPoint;
 
+import static android.view.View.INVISIBLE;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,11 +52,11 @@ import java.util.HashMap;
  * UI controls include:
  * <ul>
  *   <li>Back button – returns to previous fragment</li>
- *   <li>CSV button – (TODO) export final enrolled list data</li>
- *   <li>Cancel entrant – (TODO) remove a selected entrant from a list</li>
+ *   <li>CSV button –  export final enrolled list data</li>
+ *   <li>Cancel entrant – remove a selected entrant from a list</li>
  * </ul>
  */
-public class OrganizerAllListsFragment extends Fragment {
+public class OrganizerAllListsFragment extends Fragment implements OnMapReadyCallback {
 
     // Inflate new view
     /** Expandable list UI component for grouped entrant lists. */
@@ -64,6 +74,9 @@ public class OrganizerAllListsFragment extends Fragment {
     /** The event whose lists are being displayed. */
     private Event selectedEvent;
 
+    /** Map of user signups for this event */
+    private GoogleMap googleMap;
+
     /**
      * Inflates the layout and unpacks the selected {@link Event} from arguments.
      * If the event is present, initializes the expandable lists; otherwise, navigates back.
@@ -78,6 +91,15 @@ public class OrganizerAllListsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.organizer_all_lists_layout, container, false);
+        // Attach the map fragment programmatically
+        SupportMapFragment mapFragment = SupportMapFragment.newInstance();
+
+        getChildFragmentManager()
+                .beginTransaction()
+                .replace(R.id.map_container, mapFragment)
+                .commit();
+
+        mapFragment.getMapAsync(this);
 
         // Unpack the bundle to get the event
         if (getArguments() != null) {
@@ -99,6 +121,41 @@ public class OrganizerAllListsFragment extends Fragment {
         }
 
         return view;
+    }
+
+    /**
+     * Called when the map is ready to be used
+     * @param googleMap
+     */
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+
+        // Add a marker in Sydney and move the camera
+        LatLng edmonton = new LatLng(53.5462, -113.4937);
+
+        // Put all pins of user signup locations on the map
+        setPinsOnMap(googleMap);
+
+        // Add dummy marker for now
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(edmonton));
+
+        // Show the map controls
+        googleMap.getUiSettings().setZoomControlsEnabled(true);
+    }
+
+    /**
+     * Called to populate all of the pins from entrants onto the map
+     * @param googleMap
+     */
+    public void setPinsOnMap(GoogleMap googleMap) {
+
+        // Create a new pin for each entrant
+        for (GeoPoint point : selectedEvent.getEntrantLocations()) {
+
+            // Refactor geopoint into latlong position to display to map
+            LatLng location = new LatLng(point.getLatitude(), point.getLongitude());
+            googleMap.addMarker(new MarkerOptions().position(location));
+        }
     }
 
     /**

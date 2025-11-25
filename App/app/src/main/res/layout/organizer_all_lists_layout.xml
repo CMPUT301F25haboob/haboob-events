@@ -5,7 +5,7 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- Header with Event Title and Back Button -->
+    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -20,32 +20,41 @@
             android:layout_weight="1"
             android:text="Event Title"
             android:textSize="24sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/back_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Back"
-            android:layout_marginStart="12dp"/>
-
+            android:layout_marginStart="12dp" />
     </LinearLayout>
 
+    <!-- Expandable list takes only the height it needs -->
     <ExpandableListView
         android:id="@+id/expandable_list_view"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="1dp"
+        android:layout_marginBottom="12dp"/>
+
+    <!-- Map expands to fill ALL remaining space -->
+    <FrameLayout
+        android:id="@+id/map_container"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:divider="@android:color/background_light"
-        android:dividerHeight="1dp"
-        />
+        android:layout_marginBottom="16dp"
+        android:background="@android:color/white"
+        android:elevation="4dp"
+        android:padding="8dp"/>
 
-    <!-- Bottom Button Container -->
+    <!-- Bottom buttons -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="16dp">
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/csv_data_button"
@@ -61,9 +70,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Send\nMessage"/>
-
-
     </LinearLayout>
-
 
 </LinearLayout>
