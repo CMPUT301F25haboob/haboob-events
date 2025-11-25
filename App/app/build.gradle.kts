@@ -39,6 +39,7 @@ android {
 dependencies {
     // Maps SDK for Android
     implementation(libs.play.services.maps)
+    implementation(libs.play.services.location)
     // Testing
     // For FragmentScenario
     androidTestImplementation("androidx.fragment:fragment-testing:1.7.1")

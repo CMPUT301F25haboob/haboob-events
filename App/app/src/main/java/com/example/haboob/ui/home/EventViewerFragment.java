@@ -1,9 +1,13 @@
 package com.example.haboob.ui.home;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
+import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +23,7 @@ import com.example.haboob.Notification;
 import com.example.haboob.NotificationManager;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
@@ -28,10 +33,17 @@ import com.example.haboob.EventQRCodeFragment;
 import com.example.haboob.EventsList;
 import com.example.haboob.MainActivity;
 import com.example.haboob.R;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -71,6 +83,10 @@ public class EventViewerFragment extends Fragment {
     private NotificationManager notificationManager;
     EventsList eventsList;
     Event eventToDisplay;
+    private FusedLocationProviderClient fusedLocationClient;
+    private LocationCallback locationCallback;
+    private static final int LOCATION_PERMISSION_REQUEST = 1001;
+
 
     public EventViewerFragment() {
         // Required empty public constructor
@@ -110,6 +126,7 @@ public class EventViewerFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.entrant_event_view, container, false);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
         db = FirebaseFirestore.getInstance();
 
         // Initialize views
@@ -399,7 +416,13 @@ public class EventViewerFragment extends Fragment {
                 return;
             }
 
-            Toast.makeText(v.getContext(), "Joined event waitlist! ", Toast.LENGTH_SHORT).show();
+            // Check if location data is required
+            if (eventToDisplay.getGeoLocationRequired()) {
+                startLocationLoggingOnce();
+            }
+
+            Toast.makeText(v.getContext(), "Accepted invitation! ", Toast.LENGTH_SHORT).show();
+            Toast.makeText(v.getContext(), "Joined waitlist! ", Toast.LENGTH_SHORT).show();
 
             acceptWaitListInvitationButton.setText("Joined!");
             acceptWaitListInvitationButton.setBackgroundColor(getResources().getColor(R.color.accept_green));
@@ -575,4 +598,67 @@ public class EventViewerFragment extends Fragment {
         }
         toolbar.setTitle("Error");
     }
+
+    @SuppressLint("MissingPermission")
+    private void startLocationLoggingOnce() {
+
+        // 1. Permissions
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 777);
+            return;
+        }
+
+        // Location request
+        LocationRequest request = LocationRequest.create()
+                .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+                .setInterval(1000);  // Doesn't matter; we only take one
+
+        // Callback that fires when a location is received
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult result) {
+                Location location = result.getLastLocation();
+
+                if (location != null) {
+
+                    double lat = location.getLatitude();
+                    double lon = location.getLongitude();
+                    GeoPoint gp = new GeoPoint(lat, lon);
+
+                    // Save once to the event
+                    eventToDisplay.addEntrantLocation(gp);
+
+                    Log.d("LOCATION", "Logged once: " + lat + ", " + lon);
+
+                    // STOP LISTENING - DON'T ADD MORE THAN ONCE
+                    fusedLocationClient.removeLocationUpdates(this);
+                }
+            }
+        };
+
+        fusedLocationClient.requestLocationUpdates(
+                request,
+                locationCallback,
+                Looper.getMainLooper()
+        );
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == 777 &&
+                grantResults.length > 0 &&
+                grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+            startLocationLoggingOnce();
+        }
+    }
+
+
 }
