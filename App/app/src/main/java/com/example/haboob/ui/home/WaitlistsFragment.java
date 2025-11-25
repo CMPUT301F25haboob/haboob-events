@@ -19,9 +19,12 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.example.haboob.Event;
 import com.example.haboob.EventsList;
 import com.example.haboob.R;
+import com.google.android.material.button.MaterialButtonToggleGroup;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 
@@ -49,6 +52,7 @@ public class WaitlistsFragment extends Fragment {
         ListView list = v.findViewById(R.id.waitlistsListView);
         SearchView search = v.findViewById(R.id.searchView);
         Button backButton = v.findViewById(R.id.back_button);
+        MaterialButtonToggleGroup tagGroup = v.findViewById(R.id.tag_filter_group); // grab the tagroup for filtering
 
         backButton.setOnClickListener(v1 -> {
             Navigation.findNavController(v).navigateUp();
@@ -56,6 +60,32 @@ public class WaitlistsFragment extends Fragment {
 
 //        entrantWaitList = eventsList.getEventsList(); // grab all events available for browsing
 
+        Map<Integer, String> tagMap = new HashMap<>();
+        tagMap.put(R.id.filter_all, "");
+        tagMap.put(R.id.filter_adults, "adults");
+        tagMap.put(R.id.filter_kids, "music");
+        tagMap.put(R.id.filter_gaming, "gaming");
+        tagMap.put(R.id.filter_fitness, "fitness");
+        tagMap.put(R.id.filter_sports, "sports");
+        tagMap.put(R.id.filter_family, "family");
+        tagMap.put(R.id.filter_seniors, "seniors");
+        tagMap.put(R.id.filter_art, "art");
+        tagMap.put(R.id.filter_free, "free");
+        tagMap.put(R.id.filter_indoor, "indoor");
+        tagMap.put(R.id.filter_outdoor, "outdoor");
+        tagMap.put(R.id.filter_music, "music");
+
+        // Tag filter -> adapter filter
+
+        tagGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (!isChecked) return;
+
+            String query = tagMap.get(checkedId);
+            if (query != null) {
+                search.setQuery(query, true);
+                search.clearFocus();
+            }
+        });
 
         adapter = new WaitlistAdapter(requireContext(), new ArrayList<>(entrantWaitList));
         list.setAdapter(adapter);

@@ -8,4 +8,5 @@
     <string name="waitlist_status_registered">You are currently in the waitlist for this event. You will be notified if someone drops out of the event.</string>
     <string name="enrolledInEvent">You are currently enrolled in this event!</string>
     <string name="title_activity_organizer_view_maps">OrganizerViewMapsActivity</string>
+    <string name="active_invite_status">You have been selected by the lottery! Please accept or decline your invitation:</string>
 </resources>

@@ -107,10 +107,33 @@ public class WaitlistAdapter extends ArrayAdapter<Event> implements Filterable {
                     out = new ArrayList<>(original);
                 } else {
                     out = new ArrayList<>();
+
                     for (Event e : original) {
-                        String hay = (e.getEventTitle())
-                                .toLowerCase();
-                        if (hay.contains(q)) out.add(e);
+                        boolean matches = false;
+
+                        // 1) Match title
+                        String title = e.getEventTitle();
+                        if (title != null &&
+                                title.toLowerCase().contains(q)) {
+                            matches = true;
+                        }
+
+                        // 2) Match tags
+                        if (!matches) { // only check tags if title didn't already match
+                            List<String> tags = e.getTags(); // <-- change to your real accessor
+                            if (tags != null) {
+                                for (String tag : tags) {
+                                    if (tag != null &&
+                                            tag.toLowerCase().contains(q)) {
+                                        matches = true;
+                                        break;          // no need to check more tags
+                                    }
+                                }
+                            }
+                        }
+                        if (matches) {
+                            out.add(e);
+                        }
                     }
                 }
                 FilterResults fr = new FilterResults();

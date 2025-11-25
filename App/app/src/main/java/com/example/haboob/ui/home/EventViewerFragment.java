@@ -2,6 +2,7 @@ package com.example.haboob.ui.home;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -40,6 +41,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 
@@ -248,14 +250,16 @@ public class EventViewerFragment extends Fragment {
                 acceptWaitListInvitationButton.setVisibility(View.GONE);
                 joinEventButton.setVisibility(View.VISIBLE); // Show accept invitation button
                 declineInvitationButton.setVisibility(View.VISIBLE); // Show decline invitation button
+                leaveWaitlistButton.setVisibility(View.GONE); // hide leave waitlist button
+                userWaitListStatus.setText(R.string.active_invite_status);
             } else {
                 acceptWaitListInvitationButton.setText("Joined!"); // set accept to joined
                 acceptWaitListInvitationButton.setBackgroundColor(getResources().getColor(R.color.accept_green));
                 joinEventButton.setVisibility(View.GONE);
                 declineInvitationButton.setVisibility(View.GONE);
+                userWaitListStatus.setText(R.string.waitlist_status_registered);
             }
 
-            userWaitListStatus.setText(R.string.waitlist_status_registered);
             leaveEventButton.setVisibility(View.GONE);
         }
         else if (Objects.equals(userStatus, "enrolled_in_event")){
@@ -447,7 +451,7 @@ public class EventViewerFragment extends Fragment {
         // Leave WAITLIST OnclickListener
         assert leaveWaitlistButton != null;
         leaveWaitlistButton.setOnClickListener(v -> {
-//            Toast.makeText(v.getContext(), "Left waitlist! ", Toast.LENGTH_SHORT).show();
+            Toast.makeText(v.getContext(), "Left waitlist!", Toast.LENGTH_SHORT).show();
 
             eventToDisplay.removeEntrantFromWaitingEntrants(deviceId); // remove the device ID from the waitingEntrantsList for the lottery
 
@@ -492,13 +496,15 @@ public class EventViewerFragment extends Fragment {
 //                return;
 //            }
             
-            Toast.makeText(v.getContext(), "Joined Event! ", Toast.LENGTH_SHORT).show();
+            Toast.makeText(v.getContext(), "Joined Event!", Toast.LENGTH_SHORT).show();
 
             joinEventButton.setText("Joined!");
             joinEventButton.setBackgroundColor(getResources().getColor(R.color.accept_green));
             leaveEventButton.setVisibility(View.VISIBLE);
             leaveWaitlistButton.setVisibility(View.GONE); // Hide leave waitlist button after accepting
             declineInvitationButton.setVisibility(View.GONE);
+            userWaitListStatus.setText(R.string.enrolledInEvent);
+
 
             // Move user from invited to enrolled (does NOT trigger vacancy filling)
             eventToDisplay.moveEntrantFromInvitedToEnrolled(deviceId);
@@ -517,30 +523,34 @@ public class EventViewerFragment extends Fragment {
         // Leave EVENT OnclickListener
         assert leaveEventButton != null;
         leaveEventButton.setOnClickListener(v -> {
-            Toast.makeText(v.getContext(), "Left Event! ", Toast.LENGTH_SHORT).show();
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Are you sure?")
+                    .setMessage("Once you leave the event, you will not be able to rejoin.")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        Toast.makeText(v.getContext(), "Left Event! ", Toast.LENGTH_SHORT).show();
 
-            eventToDisplay.removeEntrantFromEnrolledEntrants(deviceId); // remove the device ID from the waitingEntrantsList for the lottery
-            eventToDisplay.addEntrantToCancelledEntrants(deviceId); // add the device ID to the cancelledEntrants
-            leaveEventButton.setText("Left event!");
-            userWaitListStatus.setVisibility(View.INVISIBLE);
-            acceptWaitListInvitationButton.setVisibility(View.INVISIBLE);
+                        // if user clicks yes, then perform required actions:
+                        eventToDisplay.removeEntrantFromEnrolledEntrants(deviceId); // remove the device ID from the waitingEntrantsList for the lottery
+                        eventToDisplay.addEntrantToCancelledEntrants(deviceId); // add the device ID to the cancelledEntrants
+                        leaveEventButton.setText("Left event!");
+                        userWaitListStatus.setVisibility(View.INVISIBLE);
+                        acceptWaitListInvitationButton.setVisibility(View.INVISIBLE);
 
-//             notify EntrantMainFragment to update carousels, as the user left the list
-//            getParentFragmentManager().setFragmentResult("USER_LEFT_EVENT", new Bundle());
+                        NavHostFragment.findNavController(this).navigateUp();
 
-            NavHostFragment.findNavController(this).navigateUp();
-//            NavHostFragment.findNavController(this)
-//                    .navigate(R.id.navigation_home);
+                        // Owen Notification stuff
+                        Notification notification = new Notification(
+                                eventToDisplay.getEventID(),
+                                eventToDisplay.getOrganizer(),
+                                deviceId,
+                                "You left the event: " + eventToDisplay.getEventTitle()
+                        );
+                        notificationManager.sendToUser(notification);
 
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
 
-            // Owen Notification stuff
-            Notification notification = new Notification(
-                    eventToDisplay.getEventID(),
-                    eventToDisplay.getOrganizer(),
-                    deviceId,
-                    "You left the event: " + eventToDisplay.getEventTitle()
-            );
-            notificationManager.sendToUser(notification);
         });
 
         // Decline INVITATION OnclickListener
