@@ -218,6 +218,11 @@ public class EntrantMainFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        // Refresh MainActivity's EventsList so EventViewerFragment gets fresh data
+        if (getActivity() != null) {
+            ((MainActivity) getActivity()).refreshEventsList();
+        }
+
         loadEventsForUser(userID);
 
         // DEBUG: Logging each ID in the database:
@@ -324,6 +329,7 @@ public class EntrantMainFragment extends Fragment {
         });
 
 //     // Return the inflated view
+        Log.d("Debug", "EntrantMainFragment navigated to");
         return view;
     }
 

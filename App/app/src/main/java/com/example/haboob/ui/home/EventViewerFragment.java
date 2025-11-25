@@ -129,6 +129,14 @@ public class EventViewerFragment extends Fragment {
         // grab the details of event:
         assert getActivity() != null;
         assert eventId != null;
+
+        // TODO: The below lines are whats causing the button updates issues
+        // We are using an events list from MainActivity which is outdated
+        // TODO: Instead, we should pass an events list from EntrantMainFragment is possible
+        // This will make it so that everytime you go back to entrant main fragment,
+        // we refresh the data
+        // That way, we don't do it every time we click on an event, since this causes
+        // hitches and flickers
         eventsList = ((MainActivity) getActivity()).getEventsList();
         eventToDisplay = eventsList.getEventByID(eventId);
 
@@ -420,11 +428,22 @@ public class EventViewerFragment extends Fragment {
 //            Toast.makeText(v.getContext(), "Left waitlist! ", Toast.LENGTH_SHORT).show();
 
             eventToDisplay.removeEntrantFromWaitingEntrants(deviceId); // remove the device ID from the waitingEntrantsList for the lottery
+
+            // If user was also invited, remove them from invited list (declining invitation)
+            if (eventToDisplay.getInvitedEntrants() != null &&
+                eventToDisplay.getInvitedEntrants().contains(deviceId)) {
+                eventToDisplay.removeEntrantFromInvitedEntrants(deviceId);
+                Log.d("EventViewerFragment", "User left waitlist and declined invitation");
+            }
+
             leaveWaitlistButton.setText("Left Waitlist!");
             leaveWaitlistButton.setBackgroundColor(getResources().getColor(R.color.black));
             userWaitListStatus.setVisibility(View.INVISIBLE);
+            acceptWaitListInvitationButton.setVisibility(View.VISIBLE);
             acceptWaitListInvitationButton.setText("Join Waitlist");
             acceptWaitListInvitationButton.setBackgroundColor(getResources().getColor(android.R.color.white));
+            joinEventButton.setVisibility(View.GONE);
+            declineInvitationButton.setVisibility(View.GONE);
 
 //             notify EntrantMainFragment to update carousels, as the user left the list
             getParentFragmentManager().setFragmentResult("USER_LEFT_WAITLIST", new Bundle());
@@ -498,6 +517,37 @@ public class EventViewerFragment extends Fragment {
                     eventToDisplay.getOrganizer(),
                     deviceId,
                     "You left the event: " + eventToDisplay.getEventTitle()
+            );
+            notificationManager.sendToUser(notification);
+        });
+
+        // Decline INVITATION OnclickListener
+        assert declineInvitationButton != null;
+        declineInvitationButton.setOnClickListener(v -> {
+            Toast.makeText(v.getContext(), "Declined invitation", Toast.LENGTH_SHORT).show();
+
+            // Remove user from invited list and waiting list
+            eventToDisplay.removeEntrantFromInvitedEntrants(deviceId);
+            eventToDisplay.removeEntrantFromWaitingEntrants(deviceId);
+            eventToDisplay.addEntrantToCancelledEntrants(deviceId);
+
+            // Update UI
+            declineInvitationButton.setVisibility(View.GONE);
+            joinEventButton.setVisibility(View.GONE);
+            leaveWaitlistButton.setVisibility(View.GONE);
+            acceptWaitListInvitationButton.setVisibility(View.VISIBLE);
+            acceptWaitListInvitationButton.setText("Join Waitlist");
+            userWaitListStatus.setVisibility(View.INVISIBLE);
+
+            // Notify EntrantMainFragment to update carousels
+            getParentFragmentManager().setFragmentResult("USER_LEFT_WAITLIST", new Bundle());
+
+            Notification notification = new Notification(
+                    eventToDisplay.getEventID(),
+                    eventToDisplay.getOrganizer(),
+                    deviceId,
+                    "You declined the invitation for: " + eventToDisplay.getEventTitle(),
+                    "invitation_declined"
             );
             notificationManager.sendToUser(notification);
         });
