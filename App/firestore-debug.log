@@ -82,3 +82,7 @@ Nov 26, 2025 2:41:59 P.M. io.gapi.emulators.netty.HttpVersionRoutingHandler chan
 INFO: Detected non-HTTP/2 connection.
 Nov 26, 2025 2:42:59 P.M. io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected non-HTTP/2 connection.
+Nov 26, 2025 2:43:59 P.M. io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+*** shutting down gRPC server since JVM is shutting down
+*** server shut down

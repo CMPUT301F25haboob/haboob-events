@@ -12,7 +12,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class TestHaboobApp extends Application {
 
-    boolean test_mode = true;
+    boolean test_mode = false;
 
     // this code wont run if you dont "firebase init emulators" from terminal - use homebrew to install firebase CLI if not working
     // every time you test, you need to run in terminal: "firebase emulators:start --only firestore"
