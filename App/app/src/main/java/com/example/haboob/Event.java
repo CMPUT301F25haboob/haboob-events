@@ -73,7 +73,7 @@ public class Event implements Serializable {
 
     // to store the entrants that are in the lottery
 //    private ArrayList<String> entrant_ids_for_lottery; deprecated by david
-    private String event_image;
+    private String eventImage;
 
     /**
      * Default constructor used by Firestore deserialization.
@@ -128,6 +128,24 @@ public class Event implements Serializable {
         this.poster = poster;
         this.tags = tags;
         this.initLists();
+    }
+
+    // Convenience constructor without Poster object (since were not using it to create posters)
+    public Event(String organizer, Date registrationStartDate, Date registrationEndDate,
+                 String eventTitle, String eventDescription, boolean geoLocationRequired,
+                 int lotterySampleSize, int optionalWaitingListSize,
+                 ArrayList<String> tags) {
+
+        this(organizer,
+                registrationStartDate,
+                registrationEndDate,
+                eventTitle,
+                eventDescription,
+                geoLocationRequired,
+                lotterySampleSize,
+                optionalWaitingListSize,
+                null,          // poster is null
+                tags);
     }
 
     /**
@@ -783,6 +801,10 @@ public class Event implements Serializable {
         return this.poster;
     }
 
+    public String getEventImage() {
+        return eventImage;
+    }
+
     /**
      * Returns a defensive copy of the tags list.
      *
@@ -880,6 +902,10 @@ public class Event implements Serializable {
     /** @param poster poster object */
     public void setPoster(Poster poster) {
         this.poster = poster;
+    }
+
+    public void setEventImage(String eventImage) {
+        this.eventImage = eventImage;
     }
 
     /** @param tags tag list */
