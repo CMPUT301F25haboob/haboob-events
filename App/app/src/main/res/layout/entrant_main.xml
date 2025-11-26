@@ -121,7 +121,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/entrant_rv_upcoming"
                 android:layout_width="match_parent"
-                android:layout_height="96dp"
+                android:layout_height="175dp"
                 android:clipToPadding="false"
                 android:paddingBottom="12dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
@@ -155,7 +155,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/entrant_rv_waitlists"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
+                android:layout_height="175dp"
                 android:clipToPadding="false"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 

@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -44,6 +45,7 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
     public interface OnItemClick { void onClick(String eventId); }     // setting up the callback
     private final List<String> imageUrls = new ArrayList<>(); // always mutable
     private List<String> eventIDs = new ArrayList<>();
+    private List<String> eventTitles = new ArrayList<>(); // Titles of events to display
     private List<String> invitedEventIDs = new ArrayList<>(); // IDs of events that should show red dot
     private OnItemClick onItemClick;
     public EventImageAdapter(OnItemClick onItemClick) {     // Primary actor: caller supplies the click callback
@@ -83,16 +85,18 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
     }
 
     /**
-     * ViewHolder holding the poster {@link ImageView} and red dot indicator.
+     * ViewHolder holding the poster {@link ImageView}, event title {@link TextView}, and red dot indicator.
      *
      * <p>Acts as a lightweight cache of child views to support smooth scrolling.</p>
      */
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView imageView;
+        TextView eventTitle;
         View redDotIndicator;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.image_event);
+            eventTitle = itemView.findViewById(R.id.eventTitle);
             redDotIndicator = itemView.findViewById(R.id.red_dot_indicator);
         }
 
@@ -116,6 +120,21 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
         this.eventIDs.addAll(eventIDs);
         notifyDataSetChanged();
         Log.d("TAG", "InputIDs ran, size: " + eventIDs.size() + " EventIDs: " + eventIDs.toString());
+    }
+
+    /**
+     * Supplies the parallel list of event titles corresponding to the current {@link #imageUrls}.
+     * The order must match the image list for displaying the correct title.
+     *
+     * @param eventTitles event titles aligned by index with {@link #imageUrls}
+     */
+    public void inputTitles(List<String> eventTitles) {
+        this.eventTitles.clear();
+        if (eventTitles != null) {
+            this.eventTitles.addAll(eventTitles);
+        }
+        notifyDataSetChanged();
+        Log.d("TAG", "InputTitles ran, size: " + this.eventTitles.size());
     }
 
     /**
@@ -171,6 +190,13 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
                 .placeholder(R.drawable.shrug)
                 .error(R.drawable.shrug )
                 .into(holder.imageView);
+
+        // Set event title
+        if (position < eventTitles.size() && eventTitles.get(position) != null) {
+            holder.eventTitle.setText(eventTitles.get(position));
+        } else {
+            holder.eventTitle.setText("Event"); // Default text if title not available
+        }
 
         // Show/hide red dot indicator based on whether user is invited to this event
         if (position < eventIDs.size()) {

@@ -17,7 +17,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.example.haboob.Event;
 import com.example.haboob.EventsList;
 import com.example.haboob.MainActivity;
@@ -84,6 +86,11 @@ public class EntrantMainFragment extends Fragment {
 
     private EventsList eventsList3; // declare the eventsList object
     private Button myWaitlists;
+    private ImageView heroImage;
+
+    // Cache for hero image to prevent flickering
+    private String cachedHeroImageUrl = null;
+    private String cachedHeroEventId = null;
 
     public EntrantMainFragment() {
         // Required empty public constructor
@@ -166,21 +173,29 @@ public class EntrantMainFragment extends Fragment {
 //                Log.d("TAG", "EVENTSLIST 4 SIZE: " + listOfEvents.size());
                 List<String> imageURLs = new ArrayList<>();
                 List<String> eventIDs = new ArrayList<>();
+                List<String> eventTitles = new ArrayList<>();
 
                 addEventImagesLocally(enrolledEventsList, imageURLs); // imageURLS <- list of imageURLs from query
                 addEventIDsLocally(enrolledEventsList, eventIDs); // eventIDs <- list of eventIDs from query
+                addEventTitlesLocally(enrolledEventsList, eventTitles); // eventTitles <- list of eventTitles from query
 
                 // ********** Enrolled events image adapter: ****************
                 // replace the placeholder images after query is done:
                 enrolledEventsAdapter.replaceItems(imageURLs);
                 // input the IDs of the same images into the imageAdapter
                 enrolledEventsAdapter.inputIDs(eventIDs);
+                // input the titles of the same events into the imageAdapter
+                enrolledEventsAdapter.inputTitles(eventTitles);
                 Log.d("TAG", "ImageAdapter images Replaced");
+
+                // ********** Hero Image: Next Upcoming Event ****************
+                updateHeroImage(enrolledEventsList);
 
                 // ********** waitlist Events image adapter: ****************
                 // to see ALL events for testing:
                 addEventImagesLocally(waitListEvents, imageURLs); // imageURLS <- list of imageURLs from query
                 addEventIDsLocally(waitListEvents, eventIDs); // eventIDs <- list of eventIDs from query
+                addEventTitlesLocally(waitListEvents, eventTitles); // eventTitles <- list of eventTitles from query
 
                 // Track which events should show red dot (user is invited)
                 List<String> invitedEventIDs = new ArrayList<>();
@@ -194,6 +209,8 @@ public class EntrantMainFragment extends Fragment {
                 waitListsAdapter.replaceItems(imageURLs);
                 // input the IDs of the same images into the imageAdapter
                 waitListsAdapter.inputIDs(eventIDs);
+                // input the titles of the same events into the imageAdapter
+                waitListsAdapter.inputTitles(eventTitles);
                 // Set which events should show the red dot indicator
                 waitListsAdapter.setInvitedEventIDs(invitedEventIDs);
                 Log.d("TAG", "ImageAdapter images Replaced");
@@ -250,6 +267,29 @@ public class EntrantMainFragment extends Fragment {
        // Turns the XML file entrant_main.xml into actual View objects in memory.
         View view = inflater.inflate(R.layout.entrant_main, container, false);
 
+        // Initialize hero image
+        heroImage = view.findViewById(R.id.entrant_hero_image);
+
+        // Load cached hero image immediately to prevent flicker
+        if (cachedHeroImageUrl != null && cachedHeroEventId != null) {
+            Glide.with(this)
+                    .load(cachedHeroImageUrl)
+                    .placeholder(R.drawable.hockey_ex)
+                    .error(R.drawable.hockey_ex)
+                    .into(heroImage);
+
+            // Set up click listener with cached event ID
+            final String eventId = cachedHeroEventId;
+            heroImage.setOnClickListener(v -> {
+                Bundle args = new Bundle();
+                args.putString(EventViewerFragment.ARG_EVENT_ID, eventId);
+                args.putString("device_id", deviceId);
+                args.putBoolean("from_enrolledEvents", true);
+
+                NavHostFragment.findNavController(this)
+                        .navigate(R.id.entrant_event_view, args);
+            });
+        }
 
         // Dan
         // ***** Profile Button Navigation *****
@@ -486,6 +526,86 @@ public class EntrantMainFragment extends Fragment {
         for (Event event : eventsList2) {
             eventIDs.add(event.getEventID());
 //            Log.d("TAG", "Event: " + event.getEventTitle() + " ID string: " + event.getEventID());
+        }
+    }
+
+    /**
+     * Extracts {@link Event#getEventTitle()} from each event into {@code eventTitles}, preserving order.
+     *
+     * @param eventsList2 source events
+     * @param eventTitles destination list; cleared before population
+     */
+    public void addEventTitlesLocally(List<Event> eventsList2, List<String> eventTitles) {
+        eventTitles.clear();
+        for (Event event : eventsList2) {
+            String title = event.getEventTitle();
+            eventTitles.add(title != null ? title : "Untitled Event");
+        }
+    }
+
+    /**
+     * Updates the hero image with the next upcoming event (event with soonest registration end date that hasn't passed).
+     * Sets up click listener to navigate to EventViewerFragment.
+     *
+     * @param events list of enrolled events to search through
+     */
+    private void updateHeroImage(List<Event> events) {
+        if (heroImage == null || events == null || events.isEmpty()) {
+            return;
+        }
+
+        // Get current date
+        Date currentDate = new Date();
+
+        // Find the next upcoming event (registration end date is soonest but hasn't passed)
+        Event nextEvent = null;
+        Date soonestDate = null;
+
+        for (Event event : events) {
+            Date regEndDate = event.getRegistrationEndDate();
+
+            // Check if registration end date exists and hasn't passed
+            if (regEndDate != null && regEndDate.after(currentDate)) {
+                // If this is the first valid event or has a sooner date
+                if (soonestDate == null || regEndDate.before(soonestDate)) {
+                    soonestDate = regEndDate;
+                    nextEvent = event;
+                }
+            }
+        }
+
+        // If we found a next event, display it
+        if (nextEvent != null) {
+            final Event finalNextEvent = nextEvent; // For use in lambda
+
+            // Load event poster into hero image
+            Poster poster = nextEvent.getPoster();
+            if (poster != null && poster.getData() != null && !poster.getData().isEmpty()) {
+                // Cache the hero image URL and event ID
+                cachedHeroImageUrl = poster.getData();
+                cachedHeroEventId = nextEvent.getEventID();
+
+                Glide.with(this)
+                        .load(poster.getData())
+                        .placeholder(R.drawable.hockey_ex)
+                        .error(R.drawable.hockey_ex)
+                        .into(heroImage);
+            }
+
+            // Set up click listener to navigate to EventViewerFragment
+            heroImage.setOnClickListener(v -> {
+                Bundle args = new Bundle();
+                args.putString(EventViewerFragment.ARG_EVENT_ID, finalNextEvent.getEventID());
+                args.putString("device_id", deviceId);
+                args.putBoolean("from_enrolledEvents", true);
+
+                NavHostFragment.findNavController(this)
+                        .navigate(R.id.entrant_event_view, args);
+            });
+
+            Log.d("TAG", "Hero image set to next upcoming event: " + nextEvent.getEventTitle());
+        } else {
+            Log.d("TAG", "No upcoming events found for hero image");
         }
     }
 }
