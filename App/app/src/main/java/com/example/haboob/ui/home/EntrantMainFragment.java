@@ -166,21 +166,26 @@ public class EntrantMainFragment extends Fragment {
 //                Log.d("TAG", "EVENTSLIST 4 SIZE: " + listOfEvents.size());
                 List<String> imageURLs = new ArrayList<>();
                 List<String> eventIDs = new ArrayList<>();
+                List<String> eventTitles = new ArrayList<>();
 
                 addEventImagesLocally(enrolledEventsList, imageURLs); // imageURLS <- list of imageURLs from query
                 addEventIDsLocally(enrolledEventsList, eventIDs); // eventIDs <- list of eventIDs from query
+                addEventTitlesLocally(enrolledEventsList, eventTitles); // eventTitles <- list of eventTitles from query
 
                 // ********** Enrolled events image adapter: ****************
                 // replace the placeholder images after query is done:
                 enrolledEventsAdapter.replaceItems(imageURLs);
                 // input the IDs of the same images into the imageAdapter
                 enrolledEventsAdapter.inputIDs(eventIDs);
+                // input the titles of the same events into the imageAdapter
+                enrolledEventsAdapter.inputTitles(eventTitles);
                 Log.d("TAG", "ImageAdapter images Replaced");
 
                 // ********** waitlist Events image adapter: ****************
                 // to see ALL events for testing:
                 addEventImagesLocally(waitListEvents, imageURLs); // imageURLS <- list of imageURLs from query
                 addEventIDsLocally(waitListEvents, eventIDs); // eventIDs <- list of eventIDs from query
+                addEventTitlesLocally(waitListEvents, eventTitles); // eventTitles <- list of eventTitles from query
 
                 // Track which events should show red dot (user is invited)
                 List<String> invitedEventIDs = new ArrayList<>();
@@ -194,6 +199,8 @@ public class EntrantMainFragment extends Fragment {
                 waitListsAdapter.replaceItems(imageURLs);
                 // input the IDs of the same images into the imageAdapter
                 waitListsAdapter.inputIDs(eventIDs);
+                // input the titles of the same events into the imageAdapter
+                waitListsAdapter.inputTitles(eventTitles);
                 // Set which events should show the red dot indicator
                 waitListsAdapter.setInvitedEventIDs(invitedEventIDs);
                 Log.d("TAG", "ImageAdapter images Replaced");
@@ -486,6 +493,20 @@ public class EntrantMainFragment extends Fragment {
         for (Event event : eventsList2) {
             eventIDs.add(event.getEventID());
 //            Log.d("TAG", "Event: " + event.getEventTitle() + " ID string: " + event.getEventID());
+        }
+    }
+
+    /**
+     * Extracts {@link Event#getEventTitle()} from each event into {@code eventTitles}, preserving order.
+     *
+     * @param eventsList2 source events
+     * @param eventTitles destination list; cleared before population
+     */
+    public void addEventTitlesLocally(List<Event> eventsList2, List<String> eventTitles) {
+        eventTitles.clear();
+        for (Event event : eventsList2) {
+            String title = event.getEventTitle();
+            eventTitles.add(title != null ? title : "Untitled Event");
         }
     }
 }
