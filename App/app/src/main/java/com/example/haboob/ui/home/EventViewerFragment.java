@@ -381,6 +381,8 @@ public class EventViewerFragment extends Fragment {
             // Navigate to EventQRCodeFragment with event ID
             Bundle args = new Bundle();
             args.putString(EventQRCodeFragment.ARG_EVENT_ID, eventId);
+            args.putString("source", "entrant");
+
             NavHostFragment.findNavController(this)
                     .navigate(R.id.action_eventViewer_to_eventQRCode, args);
         });

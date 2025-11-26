@@ -27,6 +27,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,6 +35,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -215,6 +217,25 @@ public class OrganizerAllListsFragment extends Fragment implements OnMapReadyCal
         Button backButton = view.findViewById(R.id.back_button);
         Button csvDataButton = view.findViewById(R.id.csv_data_button);
         Button sendMsgButton = view.findViewById(R.id.send_message_button);
+        ImageButton qrCodeButton = view.findViewById(R.id.qr_button);
+
+        qrCodeButton.setOnClickListener(v -> {
+            // Take user to QR code fragment -> able to save as picture
+            // Navigate to EventQRCodeFragment with event ID
+            Bundle args = new Bundle();
+            args.putString(EventQRCodeFragment.ARG_EVENT_ID, selectedEvent.getEventID());
+            args.putString("source", "organizer");
+
+            EventQRCodeFragment fragment = new EventQRCodeFragment();
+            fragment.setArguments(args);
+
+            getParentFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.organizer_fragment_container, fragment)
+                    .addToBackStack(null)
+                    .commit();
+
+        });
 
         // Author: Owen - Dialogue for sending a notification to a selected list of entrants
         sendMsgButton.setOnClickListener(v -> {

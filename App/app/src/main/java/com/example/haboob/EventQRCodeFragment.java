@@ -62,8 +62,14 @@ public class EventQRCodeFragment extends Fragment {
         toolbar.setOnMenuItemClickListener(item -> {
             int id = item.getItemId();
             if (id == R.id.action_goBack) {
-                NavHostFragment.findNavController(this).navigateUp();
-                return true;
+
+                String source = getArguments().getString("source");
+                if (source.equals("organizer")) {
+                    getParentFragmentManager().popBackStack();
+                } else {
+                    NavHostFragment.findNavController(this).navigateUp();
+                    return true;
+                }
             }
             return false;
         });
