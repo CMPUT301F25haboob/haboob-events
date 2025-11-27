@@ -22,10 +22,12 @@ public class TestHaboobApp extends Application {
 
         Log.d("TestHaboobApp", "App started, test_mode = " + test_mode);
 
+
         if (test_mode) {
             FirebaseFirestore db = FirebaseFirestore.getInstance();
             db.useEmulator("10.0.2.2", 8080);
             Log.d("TestHaboobApp", "Using FIRESTORE EMULATOR");
+            Log.d("TAG", "TEST MODE IS ON, ARE YOU SURE U WANT THIS ON??? check class TestHaboob for documentation");
         } else {
             Log.d("TestHaboobApp", "Using REAL Firestore");
         }
