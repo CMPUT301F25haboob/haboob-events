@@ -1,11 +1,17 @@
 package com.example.haboob;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,6 +22,10 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 
 /**
  * Fragment that displays a QR code for an event
@@ -30,6 +40,8 @@ public class EventQRCodeFragment extends Fragment {
     private TextView eventIdValueTextView;
     private MaterialToolbar toolbar;
     private Bitmap qrBitmap;
+    private Button saveQRButton;
+
 
     public EventQRCodeFragment() {
         // Required empty public constructor
@@ -44,6 +56,7 @@ public class EventQRCodeFragment extends Fragment {
         toolbar = view.findViewById(R.id.topAppBar);
         qrCodeImageView = view.findViewById(R.id.qrCodeImage);
         eventIdValueTextView = view.findViewById(R.id.eventIdValue);
+        saveQRButton = view.findViewById(R.id.saveButton);
 
         // Get event ID from arguments
         if (getArguments() != null) {
@@ -57,6 +70,15 @@ public class EventQRCodeFragment extends Fragment {
 
         // Generate and display QR code
         generateAndDisplayQRCode(eventId);
+
+        // Handle saving to device
+        saveQRButton.setOnClickListener(v -> {
+            if (qrBitmap != null) {
+                saveImage();
+            } else {
+                Toast.makeText(getContext(), "QR code not generated", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         // Handle back navigation
         toolbar.setOnMenuItemClickListener(item -> {
@@ -113,5 +135,35 @@ public class EventQRCodeFragment extends Fragment {
             Toast.makeText(getContext(), "Error generating QR code", Toast.LENGTH_SHORT).show();
         }
     }
+
+    /**
+     * Saves the QR code image to the device's storage to share in the future
+     */
+    public void saveImage() {
+        if (qrBitmap == null) {
+            Toast.makeText(getContext(), "QR bitmap is null", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, "qrcode_" + eventId + ".jpg");
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+        values.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/HaboobQRs");
+
+        ContentResolver resolver = requireContext().getContentResolver();
+        Uri imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
+        try {
+            OutputStream out = resolver.openOutputStream(imageUri);
+            qrBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            out.close();
+
+            Toast.makeText(getContext(), "Saved to Pictures/HaboobQRs", Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(getContext(), "Failed saving image", Toast.LENGTH_LONG).show();
+        }
+    }
+
 
 }
