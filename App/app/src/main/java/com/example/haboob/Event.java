@@ -96,6 +96,7 @@ public class Event implements Serializable {
         if (!inMemoryOnly) {
             this.db = FirebaseFirestore.getInstance();
         }
+        this.eventID = UUID.randomUUID().toString();
         this.initLists();
     }
 
@@ -294,6 +295,12 @@ public class Event implements Serializable {
                 .addOnFailureListener(e -> {
                     Log.e("Event", "Error querying event", e);
                 });
+    }
+
+    // author: david - simply adds the device Id to the local enrolled events list + invited events list
+    public void addEntrantToEnrolledEntrantsTESTING(String userID) {
+        this.invitedEntrants.add(userID);
+        this.enrolledEntrants.add(userID);
     }
 
     /**

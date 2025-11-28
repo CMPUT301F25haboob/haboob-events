@@ -42,6 +42,8 @@ import com.google.android.gms.location.Priority;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 
@@ -128,6 +130,10 @@ public class EventViewerFragment extends Fragment {
         View view = inflater.inflate(R.layout.entrant_event_view, container, false);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
         db = FirebaseFirestore.getInstance();
+
+        FirebaseApp app = FirebaseApp.getInstance();
+        FirebaseOptions opts = app.getOptions();
+        Log.d("FirebaseProject", "projectId = " + opts.getProjectId());
 
         // Initialize views
         toolbar = view.findViewById(R.id.topAppBar);
