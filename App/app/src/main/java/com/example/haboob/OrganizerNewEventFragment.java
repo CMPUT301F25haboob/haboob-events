@@ -1,5 +1,14 @@
 package com.example.haboob;
 
+import android.net.Uri;
+import android.util.Log;
+
+import com.bumptech.glide.Glide;
+import com.cloudinary.android.MediaManager;
+import com.cloudinary.android.callback.ErrorInfo;
+import com.cloudinary.android.callback.UploadCallback;
+
+import java.util.Map;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -40,6 +49,51 @@ public class OrganizerNewEventFragment extends Fragment {
     // For image gallery picker
     private ActivityResultLauncher<String> imagePickerLauncher;
     private Uri selectedImageUri = null;
+
+    // Callback interface so we can get the URL back from Cloudinary
+    private interface OnImageUploadedListener {
+        void onUploaded(String url);
+    }
+
+    // Uploads the selected image URI to Cloudinary
+    private void uploadImageToCloudinary(Uri uri, OnImageUploadedListener listener) {
+        MediaManager.get().upload(uri)
+                .unsigned("haboob_unsigned")
+                .callback(new UploadCallback() {
+                    @Override
+                    public void onStart(String requestId) {
+                        Log.d("Cloudinary", "Upload started");
+                        Toast.makeText(requireContext(), "Uploading poster...", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onProgress(String requestId, long bytes, long totalBytes) {
+                        // Optional: you could show progress here
+                    }
+
+                    @Override
+                    public void onSuccess(String requestId, Map resultData) {
+                        String secureUrl = (String) resultData.get("secure_url");
+                        Log.d("Cloudinary", "Upload success: " + secureUrl);
+
+                        if (listener != null) {
+                            listener.onUploaded(secureUrl);
+                        }
+                    }
+
+                    @Override
+                    public void onError(String requestId, ErrorInfo error) {
+                        Log.e("Cloudinary", "Upload failed: " + error.getDescription());
+                        Toast.makeText(requireContext(), "Poster upload failed", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onReschedule(String requestId, ErrorInfo error) {
+                        Log.w("Cloudinary", "Upload rescheduled: " + error.getDescription());
+                    }
+                })
+                .dispatch();
+    }
 
     // Author: Owen - Setup image picker on create
     @Override
@@ -251,14 +305,18 @@ public class OrganizerNewEventFragment extends Fragment {
                 return;
             }
 
-            // If an image was selected, just store its URI string on the Event
-            if (selectedImageUri != null) {
-                newEvent.setEventImage(selectedImageUri.toString());
-            }
+            // If an image was selected, upload to Cloudinary first
+            uploadImageToCloudinary(selectedImageUri, new OnImageUploadedListener() {
+                @Override
+                public void onUploaded(String url) {
+                    // attach the URL to the Event
+                    newEvent.setEventImage(url);
 
-            // Save event to Firestore (through EventsList) and go back
-            currentOrganizer.getEventList().addEvent(newEvent);
-            getParentFragmentManager().popBackStack();
+                    // Save the event
+                    currentOrganizer.getEventList().addEvent(newEvent);
+                    getParentFragmentManager().popBackStack();
+                }
+            });
         });
 
         return view;

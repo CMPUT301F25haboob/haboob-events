@@ -1,5 +1,15 @@
 package com.example.haboob;
 
+import android.net.Uri;
+import android.util.Log;
+
+import com.bumptech.glide.Glide;
+import com.cloudinary.android.MediaManager;
+import com.cloudinary.android.callback.ErrorInfo;
+import com.cloudinary.android.callback.UploadCallback;
+
+import java.util.Map;
+
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,12 +24,16 @@ import android.widget.ToggleButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.cloudinary.android.MediaManager;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 
 /**
  * {@code OrganizerMainActivity} is the entry point for organizer workflows.
@@ -54,6 +68,8 @@ public class OrganizerMainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_organizer_activity);
 
+        initCloudinary();
+
         // Set up database and organizer using app
         db = FirebaseFirestore.getInstance();
         Intent intent = getIntent();
@@ -72,6 +88,13 @@ public class OrganizerMainActivity extends AppCompatActivity {
             currentOrganizer = new Organizer(organizerID, organizerFirstName, organizerLastName, organizerEmail, accountType, organizerPhone);
             goToOrganizerOptions(savedInstanceState);
         }
+    }
+
+    // Used to initialize Cloudinary in organizer workflow
+    private void initCloudinary() {
+        Map config = new HashMap();
+        config.put("cloud_name", "dxu3r4bi5");
+        MediaManager.init(this, config);
     }
 
     public void goToOrganizerOptions(Bundle savedInstanceState) {
