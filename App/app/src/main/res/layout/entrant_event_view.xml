@@ -148,7 +148,6 @@
                 android:text="Decline Invitation"
                 android:textAllCaps="false"
                 android:textStyle="bold"
-                android:textColor="@android:color/white"
                 app:backgroundTint="@color/leaving_red"
                 app:cornerRadius="16dp"
                 app:layout_constraintEnd_toEndOf="parent"

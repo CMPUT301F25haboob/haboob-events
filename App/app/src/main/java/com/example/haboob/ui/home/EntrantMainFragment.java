@@ -240,6 +240,14 @@ public class EntrantMainFragment extends Fragment {
             ((MainActivity) getActivity()).refreshEventsList();
         }
 
+        // Turns the XML file entrant_main.xml into actual View objects in memory.
+        View view = inflater.inflate(R.layout.entrant_main, container, false);
+
+        // Initialize hero image
+        heroImage = view.findViewById(R.id.entrant_hero_image);
+
+        heroImage.setImageResource(R.drawable.haboob);
+
         loadEventsForUser(userID);
 
         // DEBUG: Logging each ID in the database:
@@ -264,18 +272,12 @@ public class EntrantMainFragment extends Fragment {
 
         Log.d("TAG", "ListOf events size: " + waitListEvents.size());
 
-       // Turns the XML file entrant_main.xml into actual View objects in memory.
-        View view = inflater.inflate(R.layout.entrant_main, container, false);
-
-        // Initialize hero image
-        heroImage = view.findViewById(R.id.entrant_hero_image);
-
         // Load cached hero image immediately to prevent flicker
         if (cachedHeroImageUrl != null && cachedHeroEventId != null) {
             Glide.with(this)
                     .load(cachedHeroImageUrl)
-                    .placeholder(R.drawable.hockey_ex)
-                    .error(R.drawable.hockey_ex)
+                    .placeholder(R.drawable.haboob)
+                    .error(R.drawable.haboob)
                     .into(heroImage);
 
             // Set up click listener with cached event ID
@@ -587,10 +589,14 @@ public class EntrantMainFragment extends Fragment {
 
                 Glide.with(this)
                         .load(poster.getData())
-                        .placeholder(R.drawable.hockey_ex)
-                        .error(R.drawable.hockey_ex)
+                        .placeholder(R.drawable.haboob)
+                        .error(R.drawable.haboob)
                         .into(heroImage);
+            } else {
+                // No poster Show haboob explicitly
+                heroImage.setImageResource(R.drawable.haboob);
             }
+
 
             // Set up click listener to navigate to EventViewerFragment
             heroImage.setOnClickListener(v -> {

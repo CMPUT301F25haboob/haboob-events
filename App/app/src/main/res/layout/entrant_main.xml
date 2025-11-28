@@ -90,7 +90,7 @@
                     android:layout_height="wrap_content"
                     android:adjustViewBounds="true"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/hockey_ex" />
+                    android:src="@drawable/haboob" />
             </com.google.android.material.card.MaterialCardView>
 
             <!-- Upcoming events section -->

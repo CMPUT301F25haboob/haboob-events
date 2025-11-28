@@ -2,6 +2,7 @@ package com.example.haboob;
 
 import static android.view.View.INVISIBLE;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,11 +13,18 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.cloudinary.android.MediaManager;
+import com.cloudinary.android.callback.ErrorInfo;
+import com.cloudinary.android.callback.UploadCallback;
+
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * {@code OrganizerOptionsFragment} is the main fragment displayed for organizers
@@ -136,6 +144,11 @@ public class OrganizerOptionsFragment extends Fragment {
 
         // Edit event poster
         editPosterButton.setOnClickListener(v -> {
+            if (clickedEvent == null) {
+                Toast.makeText(requireContext(), "Please select an event first", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             OrganizerEditPosterFragment editPosterFragment = new OrganizerEditPosterFragment();
             Bundle bundle = new Bundle();
             bundle.putSerializable("event", clickedEvent);
@@ -147,6 +160,7 @@ public class OrganizerOptionsFragment extends Fragment {
                     .addToBackStack(null)
                     .commit();
         });
+
 
         // View entrant lists for selected event
         viewListsButton.setOnClickListener(v -> {
