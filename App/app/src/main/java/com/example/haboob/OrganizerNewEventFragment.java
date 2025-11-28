@@ -310,7 +310,8 @@ public class OrganizerNewEventFragment extends Fragment {
                 @Override
                 public void onUploaded(String url) {
                     // attach the URL to the Event
-                    newEvent.setEventImage(url);
+                    Poster p = new Poster(url);
+                    newEvent.setPoster(p);
 
                     // Save the event
                     currentOrganizer.getEventList().addEvent(newEvent);
