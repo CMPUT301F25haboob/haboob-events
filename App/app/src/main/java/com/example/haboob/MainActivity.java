@@ -63,10 +63,9 @@ public class MainActivity extends AppCompatActivity {
         // menu should be considered as top level destinations.
         // Put here the fragment IDs that map to bottom-nav tabs.
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications)
+                R.id.navigation_home, R.id.navigation_notifications)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
-//        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
 
         // If we scanned a qrcode, we need to handle that by naviagting to the correct

@@ -11,7 +11,7 @@
     <!-- AppBar: search bar and segmented buttons -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbar"
-        android:layout_width="match_parent"
+        android:layout_width="421dp"
         android:layout_height="wrap_content"
         android:background="?attr/colorSurface"
         android:paddingHorizontal="16dp"
@@ -20,40 +20,48 @@
         app:elevation="0dp">
 
         <!-- Search bar (M3) -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
 
-        <!-- Segmented controls (M3 buttons already) -->
-        <com.google.android.material.button.MaterialButtonToggleGroup
-            android:id="@+id/entrant_toggle_group"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:selectionRequired="true"
-            app:singleSelection="true">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_profile"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
+            <!-- Segmented controls (M3 buttons already) -->
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/entrant_toggle_group"
+                android:layout_width="315dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Profile" />
+                app:selectionRequired="true"
+                app:singleSelection="true">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_my_events"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="My Events" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_profile"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="131dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Profile" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_browse_waitlists"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1.2"
-                android:text="Open Waitlists" />
-        </com.google.android.material.button.MaterialButtonToggleGroup>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_browse_waitlists"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.2"
+                    android:text="Open Waitlists" />
+
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+
+            <ImageButton
+                android:id="@+id/infoButton"
+                android:layout_width="60dp"
+                android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:tint="@color/black"
+                app:srcCompat="@drawable/info_v3"
+                />
+        </LinearLayout>
+
+
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -149,7 +157,8 @@
                     android:layout_height="36dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="See all wait-lists"
-                    app:srcCompat="@drawable/ic_search_24" />
+                    app:srcCompat="@drawable/ic_search_24"
+                    />
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
@@ -161,5 +170,6 @@
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
