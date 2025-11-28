@@ -106,7 +106,7 @@ public class NotificationsFragment extends Fragment {
         adapter = new NotificationsAdapter(eventsList, (com.example.haboob.Notification notification) -> {
             Toast.makeText(
                     requireContext(),
-                    "Clicked: " + notification.getMessage(),
+                    "Clicked Notification",
                     Toast.LENGTH_SHORT
             ).show();
 
