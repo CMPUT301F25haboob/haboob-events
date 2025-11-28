@@ -178,7 +178,8 @@
         android:layout_marginTop="16dp"
         android:divider="?android:attr/listDivider"
         android:dividerHeight="1dp"
-        android:fastScrollEnabled="true" />
+        android:fastScrollEnabled="true"
+        android:paddingBottom="100dp"/>
 
 
 </LinearLayout>

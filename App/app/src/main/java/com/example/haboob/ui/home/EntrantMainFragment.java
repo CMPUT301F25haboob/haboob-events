@@ -17,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -28,6 +29,7 @@ import com.example.haboob.QRCode;
 import com.example.haboob.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -91,6 +93,7 @@ public class EntrantMainFragment extends Fragment {
     // Cache for hero image to prevent flickering
     private String cachedHeroImageUrl = null;
     private String cachedHeroEventId = null;
+    ImageButton infoButton;
 
     public EntrantMainFragment() {
         // Required empty public constructor
@@ -299,6 +302,12 @@ public class EntrantMainFragment extends Fragment {
                     .navigate(R.id.action_entrantMain_to_profile);
         });
 
+        // info button popup:
+        infoButton = view.findViewById(R.id.infoButton);
+
+
+
+
         // *****  ***** ***** ***** First carousel - My upcoming events ***** ***** ***** ***** ***** ***** *****
         // Find RecyclerView by ID
         RecyclerView recyclerView = view.findViewById(R.id.entrant_rv_upcoming);
@@ -405,6 +414,17 @@ public class EntrantMainFragment extends Fragment {
                 "USER_JOINED_EVENT", this, (reqKey, bundle) -> loadEventsForUser(userID)
         );
 
+        // Info button onclickListener:
+        assert infoButton != null;
+        infoButton.setOnClickListener(v -> {
+            Log.d("TAG", "Info button clicked");
+            View dialogView = getLayoutInflater().inflate(R.layout.dialog_event_info, null);
+
+            new MaterialAlertDialogBuilder(requireContext())
+                    .setView(dialogView)
+                    .setPositiveButton("Got it", null)
+                    .show();
+        });
 
         // set a listener that listens for myWaitlists button click, on navigate, it navigates there
         myWaitlists = view.findViewById(R.id.btn_browse_waitlists);

@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -543,6 +544,7 @@ public class EventViewerFragment extends Fragment {
                         leaveEventButton.setText("Left event!");
                         userWaitListStatus.setVisibility(View.INVISIBLE);
                         acceptWaitListInvitationButton.setVisibility(View.INVISIBLE);
+
 
                         NavHostFragment.findNavController(this).navigateUp();
 
