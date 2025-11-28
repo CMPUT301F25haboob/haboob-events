@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -172,10 +173,19 @@ public class OrganizerExpandableListsAdapter extends BaseExpandableListAdapter {
         }
 
         TextView listTitleTextView = convertView.findViewById(R.id.listTitle);
+        ImageView indicatorView = convertView.findViewById(R.id.group_indicator);
+
         listTitleTextView.setText(listTitle);
+
+        // Rotate the indicator based on expanded state
+        if (isExpanded) {
+            indicatorView.setRotation(0f); // Point up when expanded
+        } else {
+            indicatorView.setRotation(180f); // Point down when collapsed
+        }
+
         return convertView;
     }
-
     /**
      * Indicates whether IDs are stable across changes to the underlying data.
      *

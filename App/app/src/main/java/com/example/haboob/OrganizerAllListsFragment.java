@@ -210,7 +210,29 @@ public class OrganizerAllListsFragment extends Fragment implements OnMapReadyCal
                 }
             }
         });
+
         expandableListView.setAdapter(expandableListAdapter);
+
+        // Force re-measure on expand/collapse
+        expandableListView.setOnGroupExpandListener(groupPosition -> {
+            expandableListView.post(() -> {
+                expandableListView.requestLayout();
+                ViewGroup parent = (ViewGroup) expandableListView.getParent();
+                if (parent != null) {
+                    parent.requestLayout();
+                }
+            });
+        });
+
+        expandableListView.setOnGroupCollapseListener(groupPosition -> {
+            expandableListView.post(() -> {
+                expandableListView.requestLayout();
+                ViewGroup parent = (ViewGroup) expandableListView.getParent();
+                if (parent != null) {
+                    parent.requestLayout();
+                }
+            });
+        });
 
 
         // Button functionality, cancel entrant should be hidden until user in list is selected
