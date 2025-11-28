@@ -215,8 +215,6 @@ public class OrganizerNewEventFragment extends Fragment {
             builder.show();
         });
 
-        // TODO: Still need to implement poster, QRcode, tags, and geo data
-
         Button confirmEventbutton = view.findViewById(R.id.confirm_event);
         confirmEventbutton.setOnClickListener(v1 -> {
 

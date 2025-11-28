@@ -293,7 +293,6 @@ public class OrganizerAllListsFragment extends Fragment implements OnMapReadyCal
                     .show();
         });
 
-        // Create onClick listeners for all buttons:
         backButton.setOnClickListener(v ->  {
 
             // Just return to previous fragment
