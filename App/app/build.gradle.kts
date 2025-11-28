@@ -42,7 +42,7 @@ dependencies {
     implementation(libs.play.services.location)
     // Testing
     // For FragmentScenario
-    androidTestImplementation("androidx.fragment:fragment-testing:1.7.1")
+    debugImplementation("androidx.fragment:fragment-testing:1.7.1")
     // For TestNavHostController (using the same version as your other navigation libraries)
     androidTestImplementation("androidx.navigation:navigation-testing:2.9.4")
 
@@ -82,4 +82,11 @@ dependencies {
 
     // flexbox for event filters:
     implementation("com.google.android.flexbox:flexbox:3.0.0")
+
+    // Cloudinary dependencies for storing images
+    implementation("com.cloudinary:cloudinary-android:3.0.2")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.navigation:navigation-fragment:2.7.7")
+    implementation("androidx.navigation:navigation-ui:2.7.7")
 }
