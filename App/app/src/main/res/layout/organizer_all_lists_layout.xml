@@ -13,6 +13,19 @@
         android:gravity="center_vertical"
         android:layout_marginBottom="16dp">
 
+        <ImageButton
+            android:id="@+id/qr_button"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/qrcode_favicon"
+            android:tint="@null"
+            android:contentDescription="QR Code"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:layout_marginEnd="12dp" />
+
+
         <TextView
             android:id="@+id/event_title"
             android:layout_width="0dp"

@@ -1,5 +1,6 @@
 package com.example.haboob;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,9 +8,11 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.EditText;
-import android.widget.PopupMenu;
 import android.widget.Switch;
 import android.widget.Toast;
+import android.net.Uri;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -34,6 +37,25 @@ import java.util.List;
  * screen in the navigation stack.</p>
  */
 public class OrganizerNewEventFragment extends Fragment {
+    // For image gallery picker
+    private ActivityResultLauncher<String> imagePickerLauncher;
+    private Uri selectedImageUri = null;
+
+    // Author: Owen - Setup image picker on create
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.GetContent(),
+                uri -> {
+                    if (uri != null) {
+                        selectedImageUri = uri;
+                        Toast.makeText(requireContext(), "Poster selected", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+    }
 
     /**
      * Inflates the layout for creating a new event and handles all form submission logic.
@@ -68,6 +90,7 @@ public class OrganizerNewEventFragment extends Fragment {
         CalendarView signupEndView = view.findViewById(R.id.end_date);
         Switch geoSwitch = view.findViewById(R.id.geo_data_required);
         Button backButton = view.findViewById(R.id.back_button);
+        Button uploadPosterButton = view.findViewById(R.id.upload_picture_button);
 
         // Set up listeners
         signupStartView.setOnDateChangeListener((startCalendar, year, month, dayOfMonth) -> {
@@ -87,6 +110,11 @@ public class OrganizerNewEventFragment extends Fragment {
         backButton.setOnClickListener(v -> {
             getParentFragmentManager().popBackStack();
         });
+
+        // Author: Owen - Open gallery on uploadPosterButton click
+        uploadPosterButton.setOnClickListener(v ->
+                imagePickerLauncher.launch("image/*")
+        );
 
         // Author: Owen - On click of tags button show dropdown dialog and save selected tags
         ArrayList<String> selectedTags = new ArrayList<>();
@@ -214,47 +242,25 @@ public class OrganizerNewEventFragment extends Fragment {
             }
 
             // Create new Event object (pass in dummy data for now)
-            Poster poster = new Poster();
-            Event newEvent = new Event(currentOrganizer.getOrganizerID(), signupStart, signupEnd, eventTitle, eventDetails, geoData, capacity, limit, poster, selectedTags);
+            Event newEvent = new Event(currentOrganizer.getOrganizerID(), signupStart, signupEnd, eventTitle, eventDetails, geoData, capacity, limit, selectedTags);
 
-            // Add Event to organizer's eventList
+            // If no image selected, just save the event directly
+            if (selectedImageUri == null) {
+                currentOrganizer.getEventList().addEvent(newEvent);
+                getParentFragmentManager().popBackStack();
+                return;
+            }
+
+            // If an image was selected, just store its URI string on the Event
+            if (selectedImageUri != null) {
+                newEvent.setEventImage(selectedImageUri.toString());
+            }
+
+            // Save event to Firestore (through EventsList) and go back
             currentOrganizer.getEventList().addEvent(newEvent);
-
-            // Navigate back to previous fragment
             getParentFragmentManager().popBackStack();
         });
 
         return view;
-    }
-
-    /**
-     * Separates the user-inputted tags string by commas and returns a cleaned list of tags.
-     * <p>
-     * Each tag is trimmed of whitespace and converted to lowercase. Empty entries
-     * (such as multiple commas with no text) are ignored.
-     *
-     * @param tagString Comma-separated list of tags entered by the user
-     * @return ArrayList of cleaned, lowercase tags; empty list if none are valid
-     */
-    public ArrayList<String> createTagsList(String tagString) {
-
-        // Ensure input isn't null or empty space
-        if (tagString == null || tagString.trim().isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        String[] tags = tagString.split(",");
-        ArrayList<String> tagList = new ArrayList<>();
-
-        for (String tag : tags) {
-            String cleanTag = tag.trim().toLowerCase();
-
-            // Ensure that we don't have tags of just space ", , "
-            if (!cleanTag.isEmpty()) {
-                tagList.add(cleanTag);
-            }
-        }
-
-        return tagList;
     }
 }

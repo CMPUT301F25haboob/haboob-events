@@ -94,8 +94,13 @@ public class OrganizerOptionsFragment extends Fragment {
         organizerEvents = new ArrayList<>();
         eventNames = new ArrayList<>();
 
-        // Attach adapter to the ListView
-        organizerEventsAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, eventNames);
+        // Attach adapter to the ListView using custom CardView row
+        organizerEventsAdapter = new ArrayAdapter<>(
+                requireContext(),
+                R.layout.organizer_event_item, // CardView row XML
+                R.id.tv_event_name, // TextView inside that layout
+                eventNames
+        );
         organizerEventsView = view.findViewById(R.id.organizer_events);
         organizerEventsView.setAdapter(organizerEventsAdapter);
 

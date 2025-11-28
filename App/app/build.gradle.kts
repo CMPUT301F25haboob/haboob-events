@@ -70,6 +70,9 @@ dependencies {
     implementation("com.google.zxing:core:3.5.3")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 
+    // For storing images in Firebase storage (cloud storage)
+    implementation("com.google.firebase:firebase-storage:20.3.0")
+
     // JUnit 4 for local unit tests
     //testImplementation("junit:junit:4.13.2")
     //androidTestImplementation("androidx.test.ext:junit:1.1.5")
