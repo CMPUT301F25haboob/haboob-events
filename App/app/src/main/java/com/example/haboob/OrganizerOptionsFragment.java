@@ -46,16 +46,18 @@ public class OrganizerOptionsFragment extends Fragment {
 
     // ---------- UI COMPONENTS ----------
     /** ListView that displays all events created by the organizer. */
-    private ListView organizerEventsView;
+    private ListView organizerUpcomingEventsView;
+    private ListView organizerCurrentEventsView;
 
     /** List of events belonging to the organizer. */
+    private EventsList organizerEventsList;
     private ArrayList<Event> organizerEvents;
-
-    /** List of event titles (displayed in the ListView). */
-    private ArrayList<String> eventNames;
+    private ArrayList<Event> organizerUpcomingEvents;
+    private ArrayList<Event> organizerCurrentEvents;
 
     /** Adapter that connects event titles to the ListView. */
-    private ArrayAdapter<String> organizerEventsAdapter;
+    private EventAdapter organizerUpcomingEventsAdapter;
+    private EventAdapter organizerCurrentEventsAdapter;
 
     /** Keeps track of which event (position) was clicked in the list. */
     private int selectedPosition = -1;
@@ -99,18 +101,20 @@ public class OrganizerOptionsFragment extends Fragment {
         Log.d("OrganizerOptions", "Organizer (" + currentOrganizer.getOrganizerID() + ") loaded successfully");
 
         // Initialize local lists
-        organizerEvents = new ArrayList<>();
-        eventNames = new ArrayList<>();
+        organizerUpcomingEvents = new ArrayList<>();
+        organizerCurrentEvents = new ArrayList<>();
 
-        // Attach adapter to the ListView using custom CardView row
-        organizerEventsAdapter = new ArrayAdapter<>(
-                requireContext(),
-                R.layout.organizer_event_item, // CardView row XML
-                R.id.tv_event_name, // TextView inside that layout
-                eventNames
-        );
-        organizerEventsView = view.findViewById(R.id.organizer_events);
-        organizerEventsView.setAdapter(organizerEventsAdapter);
+
+        // Attach adapter to the ListViews using custom CardView row
+        // Create and set adapters using custom EventAdapter (To be able to add the red dot)
+        organizerCurrentEventsAdapter = new EventAdapter(getContext(), organizerCurrentEvents);
+        organizerUpcomingEventsAdapter = new EventAdapter(getContext(), organizerUpcomingEvents);
+
+        organizerCurrentEventsView = view.findViewById(R.id.organizer_events);
+        organizerCurrentEventsView.setAdapter(organizerCurrentEventsAdapter);
+
+        organizerUpcomingEventsView = view.findViewById(R.id.upcoming_events_list);
+        organizerUpcomingEventsView.setAdapter(organizerUpcomingEventsAdapter);
 
         // Retrieve buttons
         Button createEventButton = view.findViewById(R.id.create_event);
@@ -124,8 +128,15 @@ public class OrganizerOptionsFragment extends Fragment {
         drawLotteryButton.setVisibility(INVISIBLE);
 
         // --- Event Selection Logic ---
-        organizerEventsView.setOnItemClickListener((parent1, view1, position, id) -> {
-            clickedEvent = organizerEvents.get(position);
+        organizerUpcomingEventsView.setOnItemClickListener((parent1, view1, position, id) -> {
+            clickedEvent = organizerUpcomingEvents.get(position);
+            editPosterButton.setVisibility(View.VISIBLE);
+            viewListsButton.setVisibility(View.VISIBLE);
+            drawLotteryButton.setVisibility(View.VISIBLE);
+        });
+
+        organizerCurrentEventsView.setOnItemClickListener((parent1, view1, position, id) -> {
+            clickedEvent = organizerCurrentEvents.get(position);
             editPosterButton.setVisibility(View.VISIBLE);
             viewListsButton.setVisibility(View.VISIBLE);
             drawLotteryButton.setVisibility(View.VISIBLE);
@@ -174,11 +185,12 @@ public class OrganizerOptionsFragment extends Fragment {
                     .replace(R.id.organizer_fragment_container, allListsFragment)
                     .addToBackStack(null)
                     .commit();
+
         });
 
         // Draw lottery for selected event
         drawLotteryButton.setOnClickListener(v -> {
-            // TODO: Just calls a function (Dan made?)
+
             date = new Date();
             if (clickedEvent.getRegistrationEndDate().after(date)) {
                 Toast.makeText(getContext(), "Cannot draw yet, registration has not closed", Toast.LENGTH_LONG).show();
@@ -187,9 +199,14 @@ public class OrganizerOptionsFragment extends Fragment {
             LotterySampler sampler  = new LotterySampler();
             try {
                 sampler.performLottery(clickedEvent);
+                Toast.makeText(parent, "Lottery Drawn!", Toast.LENGTH_SHORT).show();
             } catch (IllegalArgumentException e) {
                 Toast.makeText(parent, e.getMessage(), Toast.LENGTH_SHORT).show();
             }
+
+            // Refresh the UI (Adapters)
+            organizerUpcomingEventsAdapter.notifyDataSetChanged();
+            organizerCurrentEventsAdapter.notifyDataSetChanged();
         });
 
         // Load events for the organizer
@@ -316,25 +333,28 @@ public class OrganizerOptionsFragment extends Fragment {
         }
 
         try {
-            organizerEvents = currentOrganizer.getEventList()
-                    .getOrganizerEvents(currentOrganizer.getOrganizerID());
+            organizerEventsList = currentOrganizer.getEventList();
+            organizerEvents = organizerEventsList.getOrganizerEvents(currentOrganizer.getOrganizerID());
 
             Log.d("OrganizerOptions", "Found " + organizerEvents.size() + " events for organizer");
 
-            eventNames.clear();
-            for (Event e : organizerEvents) {
-                if (e != null && e.getEventTitle() != null) {
-                    eventNames.add(e.getEventTitle());
-                } else {
-                    Log.w("OrganizerOptions", "Found null event or event title");
-                }
-            }
+            // Get the filtered lists
+            ArrayList<Event> upcomingEvents = organizerEventsList.getOrganizerUpcomingEvents(organizerEvents);
+            ArrayList<Event> currentEvents = organizerEventsList.getOrganizerCurrentEvents(organizerEvents);
 
-            if (organizerEventsAdapter != null) {
-                organizerEventsAdapter.notifyDataSetChanged();
-                Log.d("OrganizerOptions", "Adapter updated with " + eventNames.size() + " event names");
+            // IMPORTANT: Clear and repopulate the existing lists (don't create new ones!)
+            organizerUpcomingEvents.clear();
+            organizerUpcomingEvents.addAll(upcomingEvents);
+
+            organizerCurrentEvents.clear();
+            organizerCurrentEvents.addAll(currentEvents);
+
+            if (organizerUpcomingEventsAdapter != null && organizerCurrentEventsAdapter != null) {
+                organizerUpcomingEventsAdapter.notifyDataSetChanged();
+                organizerCurrentEventsAdapter.notifyDataSetChanged();
+                Log.d("OrganizerOptions", "Adapters refreshed -> current: " + organizerCurrentEvents.size() + ", upcoming: " + organizerUpcomingEvents.size());
             } else {
-                Log.e("OrganizerOptions", "Adapter is null!");
+                Log.e("OrganizerOptions", "Null Adapter(s)!");
             }
         } catch (Exception e) {
             Log.e("OrganizerOptions", "Error in refreshEventList", e);
