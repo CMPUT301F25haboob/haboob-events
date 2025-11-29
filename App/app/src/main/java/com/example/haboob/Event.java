@@ -3,6 +3,7 @@ package com.example.haboob;
 import android.util.Log;
 
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
@@ -909,6 +910,36 @@ public class Event implements Serializable {
     /** @param poster poster object */
     public void setPoster(Poster poster) {
         this.poster = poster;
+
+        // Store in Firebase
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("events")
+                .whereEqualTo("eventID", eventID)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        // Get the first matching document
+                        DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
+                        String documentId = document.getId();
+
+                        // Now update using the actual document ID
+                        db.collection("events")
+                                .document(documentId)
+                                .update("poster.data", poster.getData())
+                                .addOnSuccessListener(aVoid -> {
+                                    Log.d("Firestore", "Poster data updated successfully");
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e("Firestore", "Error updating poster data", e);
+                                });
+                    } else {
+                        Log.d("Firestore", "No event found with that eventID");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("Firestore", "Error querying events", e);
+                });
     }
 
     public void setEventImage(String eventImage) {
