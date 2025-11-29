@@ -76,12 +76,6 @@
         tools:layout="@layout/admin_poster_fragment"
         />
 
-    <fragment
-        android:id="@+id/navigation_admin_events"
-        android:name="com.example.haboob.AdminPosterFragment"
-        android:label="AdminEvents"
-        tools:layout="@layout/admin_poster_fragment"
-        />
 
     <fragment
         android:id="@+id/navigation_admin_notification"
@@ -107,4 +101,16 @@
             app:destination="@id/navigation_admin_posters" />
     </fragment>
 
-</navigation>
+
+    <fragment
+        android:id="@+id/navigation_admin_poster_detail"
+        android:name="com.example.haboob.AdminPosterDetailFragment"
+        android:label="Poster Detail"
+        tools:layout="@layout/admin_poster_view">
+        <argument
+            android:name="poster_id"
+            app:argType="string" />
+    </fragment>
+
+
+    </navigation>

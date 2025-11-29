@@ -91,7 +91,13 @@ public class ProfileFragment extends Fragment {
         deleteButton.setOnClickListener(v -> confirmDeleteProfile());
 
         // Set up admin textview button listener
-        accountTextTextView.setOnClickListener(v -> goToAdmin());
+        accountTextTextView.setOnClickListener(v -> {
+            int len = accountType.length();
+
+            if(accountType.charAt(len-1) == '+'){
+                goToAdmin();
+            }
+        });
 
         // Reused code from EventViewerFragment for navigating back to home
         // when the back button is pressed

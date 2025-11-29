@@ -38,14 +38,7 @@
             android:id="@+id/admin_view_posters_button"
             android:layout_width="250dp"
             android:layout_height="wrap_content"
-            android:text="View Posters"
-            android:layout_marginBottom="16dp"/>
-
-        <Button
-            android:id="@+id/admin_view_events_button"
-            android:layout_width="250dp"
-            android:layout_height="wrap_content"
-            android:text="View Events"
+            android:text="View Events and Images"
             android:layout_marginBottom="16dp"/>
 
         <Button
@@ -59,7 +52,7 @@
             android:id="@+id/admin_view_notifications_button"
             android:layout_width="250dp"
             android:layout_height="wrap_content"
-            android:text="Send Notifications"/>
+            android:text="View Notifications"/>
 
     </LinearLayout>
 </RelativeLayout>
