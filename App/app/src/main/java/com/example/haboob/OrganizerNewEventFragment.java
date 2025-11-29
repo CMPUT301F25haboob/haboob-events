@@ -296,8 +296,13 @@ public class OrganizerNewEventFragment extends Fragment {
             // Create new Event object (pass in dummy data for now)
             Event newEvent = new Event(currentOrganizer.getOrganizerID(), signupStart, signupEnd, eventTitle, eventDetails, geoData, capacity, limit, selectedTags);
 
-            // If no image selected, just save the event directly
+            // If no image selected, just save the event directly with the dummy image url
             if (selectedImageUri == null) {
+                // attach the "no image available" URL to the event
+                Poster p = new Poster();
+                newEvent.setPoster(p);
+
+                // Save the event
                 currentOrganizer.getEventList().addEvent(newEvent);
                 getParentFragmentManager().popBackStack();
                 return;
