@@ -87,8 +87,6 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Vi
         // Update to use Event getters
         holder.posterTitle.setText(event.getEventTitle()); // Uses getEventTitle()
 
-        // Placeholder Status: Assuming getEventID() can serve as a temporary status/detail
-        holder.posterStatus.setText("ID: " + event.getEventID());
 
         // Placeholder for image loading: Event is assumed to have a getPoster() method
         // which contains the image data (based on Event.class bytecode)
@@ -118,14 +116,21 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Vi
      * This improves scrolling performance by avoiding repeated findViewById calls.
      */
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        /** The card view containing all event information */
+        /**
+         * The card view containing all event information
+         */
         public final MaterialCardView posterCard;
-        /** ImageView for displaying the event's poster image */
+        /**
+         * ImageView for displaying the event's poster image
+         */
         public final ImageView posterImage;
-        /** TextView for displaying the event title */
+        /**
+         * TextView for displaying the event title
+         */
         public final TextView posterTitle;
-        /** TextView for displaying event status or ID information */
-        public final TextView posterStatus;
+        /**
+         * TextView for displaying event status or ID information
+         */
 
         /**
          * Constructs a ViewHolder and caches all child view references.
@@ -137,7 +142,6 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Vi
             posterCard = view.findViewById(R.id.card_admin_poster);
             posterImage = view.findViewById(R.id.poster_image_view);
             posterTitle = view.findViewById(R.id.event_title);
-            posterStatus = view.findViewById(R.id.poster_select_checkbox);
         }
     }
 }

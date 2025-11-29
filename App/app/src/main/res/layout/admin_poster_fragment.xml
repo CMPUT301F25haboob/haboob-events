@@ -18,7 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorSurface"
-            app:title="Admin Poster"
+            app:title="Admin View Event and Images"
             app:titleCentered="false"
             app:menu="@menu/menu_event_detail"
             app:titleTextColor="@android:color/black" />
@@ -31,12 +31,11 @@
         android:layout_height="match_parent"
         android:clipToPadding="false"
         android:paddingTop="8dp"
-        android:paddingBottom="8dp"
+        android:paddingBottom="110dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:listitem="@layout/admin_poster_content"
         tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-        tools:spanCount="2"
-        />
+        tools:listitem="@layout/admin_poster_content"
+        tools:spanCount="2" />
 
     <ProgressBar
         android:id="@+id/progress_bar_admin_posters"
