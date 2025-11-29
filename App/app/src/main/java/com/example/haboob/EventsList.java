@@ -334,4 +334,27 @@ public class EventsList {
         }
         return live;
     }
+
+    // Functions to get the organizer's upcoming and current events
+    public ArrayList<Event> getOrganizerCurrentEvents(ArrayList<Event> orgEventsList) {
+        ArrayList<Event> current = new ArrayList<>();
+        Date now = new Date();
+        for (Event e : orgEventsList) {
+            if (e == null) continue;
+            Date end = e.getRegistrationEndDate();
+            if (end == null || end.before(now)) current.add(e);
+        }
+        return current;
+    }
+
+    public ArrayList<Event> getOrganizerUpcomingEvents(ArrayList<Event> orgEventsList) {
+        ArrayList<Event> upcoming = new ArrayList<>();
+        Date now = new Date();
+        for (Event e : orgEventsList) {
+            if (e == null) continue;
+            Date end = e.getRegistrationEndDate();
+            if (end == null || end.after(now)) upcoming.add(e);
+        }
+        return upcoming;
+    }
 }
