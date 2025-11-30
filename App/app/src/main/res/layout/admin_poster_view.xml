@@ -1,55 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:background="@android:color/white"
+tools:context=".AdminPosterDetailFragment">
+
+<!-- App Bar with Back Button -->
+<com.google.android.material.appbar.AppBarLayout
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/white"
-    tools:context=".AdminPosterDetailFragment">
+    android:layout_height="wrap_content">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <!-- App Bar -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/posterViewTopAppBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorSurface"
+        app:title="Admin Viewing Poster"
+        app:titleCentered="false"
+        app:menu="@menu/menu_event_detail"
+        app:titleTextColor="@android:color/black" />
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/posterViewTopAppBar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorSurface"
-            app:title="Admin View Poster"
-            app:titleCentered="false"
-            app:titleTextColor="@android:color/black">
+</com.google.android.material.appbar.AppBarLayout>
 
-            <ImageButton
-                android:id="@+id/admin_poster_back_btn"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_gravity="end|center_vertical"
-                android:layout_marginEnd="16dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Back"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_arrow_back_24"
-                app:tint="@android:color/black" />
-
-        </com.google.android.material.appbar.MaterialToolbar>
-
-    </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:paddingBottom="110dp"
-        >
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp"
-            >
+            android:padding="16dp">
 
             <TextView
                 android:id="@+id/poster_detail_title"
@@ -58,73 +45,17 @@
                 android:textSize="24sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
-                android:layout_marginBottom="4dp"
-                tools:text="Event Title"/>
+                android:layout_marginBottom="8dp"
+                tools:text="Event Poster Title Goes Here"/>
 
             <TextView
                 android:id="@+id/poster_detail_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
+                android:textSize="16sp"
                 android:textColor="@android:color/darker_gray"
                 android:layout_marginBottom="16dp"
-                tools:text="Organizer info..."/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Event Details:"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:textColor="@android:color/black"
-                android:layout_marginBottom="4dp"/>
-
-            <TextView
-                android:id="@+id/poster_detail_description"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:textColor="@android:color/black"
-                android:layout_marginBottom="16dp"
-                tools:text="This is a description of the event..."/>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="16dp">
-
-                <TextView
-                    android:id="@+id/poster_detail_start_date"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:layout_marginBottom="2dp"
-                    tools:text="Start: ..."/>
-
-                <TextView
-                    android:id="@+id/poster_detail_end_date"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:layout_marginBottom="2dp"
-                    tools:text="End: ..."/>
-
-                <TextView
-                    android:id="@+id/poster_detail_limit"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:layout_marginBottom="2dp"
-                    tools:text="Registration Limit: ..."/>
-
-                <TextView
-                    android:id="@+id/poster_detail_waitlist_size"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    tools:text="Current Waitlist: ..."/>
-            </LinearLayout>
+                tools:text="Status: Pending Review | Event ID: XXXXX"/>
 
             <ImageView
                 android:id="@+id/poster_full_image"
@@ -132,7 +63,7 @@
                 android:layout_height="wrap_content"
                 android:adjustViewBounds="true"
                 android:scaleType="fitCenter"
-                android:minHeight="200dp"
+                android:minHeight="300dp"
                 android:layout_marginBottom="24dp"
                 android:src="@drawable/shrug"
                 android:contentDescription="Full Event Poster"/>
@@ -145,23 +76,10 @@
                 android:layout_marginTop="8dp">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_remove_poster_image"
+                    android:id="@+id/btn_remove_poster"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:text="Remove Poster Image"
-                    android:textAllCaps="false"
-                    android:textStyle="bold"
-                    android:textSize="16sp"
-                    app:cornerRadius="16dp"
-                    android:layout_marginBottom="12dp"
-                    app:backgroundTint="@color/purple_500"
-                    android:textColor="@android:color/white"/>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_delete_event"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:text="Delete Entire Event"
+                    android:text="Remove Poster"
                     android:textAllCaps="false"
                     android:textStyle="bold"
                     android:textSize="16sp"

@@ -1,6 +1,5 @@
 package com.example.haboob;
 
-import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,39 +14,23 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
-import com.bumptech.glide.Glide;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.util.Date;
 
 /**
- * Fragment to display the full details of a poster/event for administrative review.
+ * Fragment to display the full details of a poster for administrative review.
  */
 public class AdminPosterDetailFragment extends Fragment {
 
     private static final String TAG = "AdminPosterDetailFrag";
 
     private MaterialToolbar toolbar;
-    private View backButton;
     private TextView titleTextView;
     private TextView statusTextView;
-
-    // Details Views
-    private TextView descriptionTextView;
-    private TextView startDateTextView;
-    private TextView endDateTextView;
-    private TextView limitTextView;
-    private TextView waitlistSizeTextView;
-
     private ImageView fullImageView;
-    private MaterialButton removeImageButton;
-    private MaterialButton deleteEventButton;
+    private MaterialButton removeButton; // Renamed from rejectButton
 
-    private String posterId;
-    private FirebaseFirestore db;
+    private String posterId; // The ID of the poster passed from the previous fragment
 
     public AdminPosterDetailFragment() {
         // Required empty public constructor
@@ -56,11 +39,11 @@ public class AdminPosterDetailFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Safely retrieve the posterId passed via arguments
         if (getArguments() != null) {
             posterId = getArguments().getString("poster_id");
-            Log.d(TAG, "Received Event ID: " + posterId);
+            Log.d(TAG, "Received Poster ID: " + posterId);
         }
-        db = FirebaseFirestore.getInstance();
     }
 
     @Nullable
@@ -73,137 +56,62 @@ public class AdminPosterDetailFragment extends Fragment {
         toolbar = view.findViewById(R.id.posterViewTopAppBar);
         titleTextView = view.findViewById(R.id.poster_detail_title);
         statusTextView = view.findViewById(R.id.poster_detail_status);
-
-        descriptionTextView = view.findViewById(R.id.poster_detail_description);
-        startDateTextView = view.findViewById(R.id.poster_detail_start_date);
-        endDateTextView = view.findViewById(R.id.poster_detail_end_date);
-        limitTextView = view.findViewById(R.id.poster_detail_limit);
-        waitlistSizeTextView = view.findViewById(R.id.poster_detail_waitlist_size);
-
         fullImageView = view.findViewById(R.id.poster_full_image);
-        removeImageButton = view.findViewById(R.id.btn_remove_poster_image);
-        deleteEventButton = view.findViewById(R.id.btn_delete_event);
-        backButton = view.findViewById(R.id.admin_poster_back_btn);
+        removeButton = view.findViewById(R.id.btn_remove_poster); // Updated ID
 
         // Set up listeners
-        if (backButton != null) {
-            backButton.setOnClickListener(v -> {
-                NavHostFragment.findNavController(this).popBackStack();
-            });
-        }
+        toolbar.setNavigationOnClickListener(v -> {
+            // Handle the back button click
+            NavHostFragment.findNavController(this).popBackStack();
+        });
 
-        removeImageButton.setOnClickListener(v -> handleRemoveImage());
-        deleteEventButton.setOnClickListener(v -> handleDeleteEvent());
+        removeButton.setOnClickListener(v -> handleRemoval()); // Updated listener
 
+        // Load content based on posterId
         if (posterId != null) {
-            loadEventDetails(posterId);
+            loadPosterDetails(posterId);
         } else {
-            titleTextView.setText("Error: No Event Selected");
-            removeImageButton.setEnabled(false);
-            deleteEventButton.setEnabled(false);
+            titleTextView.setText("Error: No Poster Selected");
+            Toast.makeText(getContext(), "Error: Poster ID missing.", Toast.LENGTH_LONG).show();
         }
 
         return view;
     }
 
-    private void loadEventDetails(String id) {
-        db.collection("events")
-                .whereEqualTo("eventID", id)
-                .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    if (!querySnapshot.isEmpty()) {
-                        DocumentSnapshot documentSnapshot = querySnapshot.getDocuments().get(0);
-                        Event event = documentSnapshot.toObject(Event.class);
-                        if (event != null) {
-                            titleTextView.setText(event.getEventTitle());
-                            statusTextView.setText("Organizer ID: " + event.getOrganizer());
+    /**
+     * Placeholder method to fetch and display poster details from a database (e.g., Firebase).
+     * @param id The ID of the poster to load.
+     */
+    private void loadPosterDetails(String id) {
+        // TODO: Replace this mock data with actual Firestore fetching logic using 'id'
+        Log.d(TAG, "Fetching details for poster ID: " + id);
 
-                            // Description
-                            descriptionTextView.setText(event.getEventDescription() != null ? event.getEventDescription() : "No description");
+        // --- MOCK DATA SIMULATION ---
+        String mockTitle = "Community Coding Workshop";
+        String mockStatus = "Pending Review | Submitted by Organizer A";
+        String mockImageUrl = "https://placehold.co/600x800/2ecc71/white?text=Poster+Image";
 
-                            // Dates
-                            Date start = event.getRegistrationStartDate();
-                            Date end = event.getRegistrationEndDate();
-                            startDateTextView.setText("Registration Start: " + (start != null ? start.toString() : "N/A"));
-                            endDateTextView.setText("Registration End: " + (end != null ? end.toString() : "N/A"));
+        titleTextView.setText(mockTitle);
+        statusTextView.setText(mockStatus);
 
-                            // Limits and Counts
-                            int limit = event.getOptionalWaitingListSize();
-                            if (limit < 0) {
-                                limitTextView.setText("Registration Limit: Uncapped");
-                            } else {
-                                limitTextView.setText("Registration Limit: " + limit);
-                            }
-
-                            int waitlistCount = (event.getWaitingEntrants() != null) ? event.getWaitingEntrants().size() : 0;
-                            waitlistSizeTextView.setText("Amount in Lottery (Waitlist): " + waitlistCount);
-
-                            // Image
-                            if (event.getPoster() != null && event.getPoster().getData() != null && !event.getPoster().getData().isEmpty()) {
-                                Glide.with(this)
-                                        .load(event.getPoster().getData())
-                                        .placeholder(R.drawable.shrug)
-                                        .error(R.drawable.shrug)
-                                        .into(fullImageView);
-                            } else {
-                                fullImageView.setImageResource(R.drawable.shrug);
-                                removeImageButton.setEnabled(false); // Disable if no image
-                            }
-                        }
-                    } else {
-                        titleTextView.setText("Event not found");
-                        removeImageButton.setEnabled(false);
-                        deleteEventButton.setEnabled(false);
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error fetching event details", e);
-                    Toast.makeText(getContext(), "Failed to load details.", Toast.LENGTH_SHORT).show();
-                });
+        // Load the image into the ImageView
+        // Use a standard Android resource as a placeholder since an external library is not used.
+        // TODO: Implement a custom image loading solution (e.g., using HttpURLConnection and AsyncTask)
+        //       to fetch the image from mockImageUrl in a background thread without a library.
+        fullImageView.setImageResource(R.drawable.shrug);
+        // --- END MOCK DATA ---
     }
 
-    private void handleRemoveImage() {
-        if (posterId == null) return;
 
-        db.collection("events").whereEqualTo("eventID", posterId).get()
-                .addOnSuccessListener(querySnapshot -> {
-                    if (!querySnapshot.isEmpty()) {
-                        String docId = querySnapshot.getDocuments().get(0).getId();
-                        db.collection("events").document(docId)
-                                .update("poster.data", "")
-                                .addOnSuccessListener(aVoid -> {
-                                    Toast.makeText(getContext(), "Poster image removed.", Toast.LENGTH_SHORT).show();
-                                    NavHostFragment.findNavController(this).popBackStack();
-                                })
-                                .addOnFailureListener(e -> {
-                                    Log.e(TAG, "Error removing poster image", e);
-                                    Toast.makeText(getContext(), "Failed to remove image.", Toast.LENGTH_SHORT).show();
-                                });
-                    }
-                });
-    }
-
-    private void handleDeleteEvent() {
-        if (posterId == null) return;
-
-        new AlertDialog.Builder(requireContext())
-                .setTitle("Delete Event")
-                .setMessage("Are you sure you want to delete this event? This cannot be undone.")
-                .setPositiveButton("Delete", (dialog, which) -> {
-                    db.collection("events").whereEqualTo("eventID", posterId).get()
-                            .addOnSuccessListener(querySnapshot -> {
-                                if (!querySnapshot.isEmpty()) {
-                                    String docId = querySnapshot.getDocuments().get(0).getId();
-                                    db.collection("events").document(docId)
-                                            .delete()
-                                            .addOnSuccessListener(aVoid -> {
-                                                Toast.makeText(getContext(), "Event deleted.", Toast.LENGTH_SHORT).show();
-                                                NavHostFragment.findNavController(this).popBackStack();
-                                            });
-                                }
-                            });
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+    /**
+     * Handles the removal process for the poster. (Renamed from handleRejection)
+     */
+    private void handleRemoval() {
+        if (posterId != null) {
+            Log.d(TAG, "Removing poster: " + posterId);
+            Toast.makeText(getContext(), "Poster " + posterId + " Removed!", Toast.LENGTH_SHORT).show();
+            // TODO: Implement actual database update for removal
+            NavHostFragment.findNavController(this).popBackStack();
+        }
     }
 }

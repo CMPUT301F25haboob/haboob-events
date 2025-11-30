@@ -31,7 +31,6 @@ public class RegisterActivity extends AppCompatActivity {
     private String userAccountType; // This will either be "Entrant" or "Organizer" based on the user input
     private String deviceId;
     private FirebaseFirestore db;
-    private Boolean admin;
 
     @SuppressLint("HardwareIds")
     @Override
