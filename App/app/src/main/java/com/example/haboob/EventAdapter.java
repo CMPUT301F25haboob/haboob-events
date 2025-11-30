@@ -10,12 +10,25 @@ import android.widget.TextView;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * ArrayAdapter for displaying Event objects in a simple list view.
+ * Shows each event's title and marks events requiring a lottery with a red indicator.
+ */
 public class EventAdapter extends ArrayAdapter<Event> {
-
+    /**
+     * Creates an EventAdapter for displaying the given list of events.
+     *
+     * @param context the hosting context
+     * @param events  list of events to display
+     */
     public EventAdapter(Context context, List<Event> events) {
         super(context, 0, events);
     }
 
+    /**
+     * Returns the list item view for an Event, showing its title and applying
+     * a red indicator icon when a lottery can be drawn for that event.
+     */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         Event event = getItem(position);

@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RegisterActivity extends AppCompatActivity {
-
     // Fields
     private TextInputEditText firstNameInput;
     private TextInputEditText lastNameInput;
