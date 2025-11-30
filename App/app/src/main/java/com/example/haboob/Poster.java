@@ -7,13 +7,7 @@ public class Poster {
     private Picture imgSource;
     private String data;
 
-//    public Poster(Picture imgSource) {
-//        this.imgSource = imgSource;
-//    }
-
-    public Poster() {
-        // Empty Constructor
-    }
+    public Poster() {}
 
     public Poster(String data) {
         this.data = data;

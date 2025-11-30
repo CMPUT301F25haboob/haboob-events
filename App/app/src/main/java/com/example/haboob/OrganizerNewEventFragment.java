@@ -50,12 +50,17 @@ public class OrganizerNewEventFragment extends Fragment {
     private ActivityResultLauncher<String> imagePickerLauncher;
     private Uri selectedImageUri = null;
 
-    // Callback interface so we can get the URL back from Cloudinary
+    /**
+     * Callback used to receive the Cloudinary image URL once an upload completes.
+     */
     private interface OnImageUploadedListener {
         void onUploaded(String url);
     }
 
-    // Uploads the selected image URI to Cloudinary
+    /**
+     * Uploads the selected image to Cloudinary and returns the uploaded URL
+     * through the provided callback listener.
+     */
     private void uploadImageToCloudinary(Uri uri, OnImageUploadedListener listener) {
         MediaManager.get().upload(uri)
                 .unsigned("haboob_unsigned")
@@ -95,7 +100,9 @@ public class OrganizerNewEventFragment extends Fragment {
                 .dispatch();
     }
 
-    // Author: Owen - Setup image picker on create
+    /**
+     * Sets up the image picker launcher used to select a poster image from the device gallery.
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,12 +119,15 @@ public class OrganizerNewEventFragment extends Fragment {
     }
 
     /**
-     * Inflates the layout for creating a new event and handles all form submission logic.
-     *
-     * @param inflater  LayoutInflater used to inflate the fragment layout
-     * @param container Parent ViewGroup container
-     * @param savedInstanceState Previously saved instance state, if available
-     * @return The inflated View for this fragment
+     * Inflates the UI for creating a new event and initializes all form elements,
+     * including title, description, capacity, signup limits, tags, registration dates,
+     * geo-data requirements, and optional poster image selection.
+     * <p>
+     * Sets up listeners for date pickers, tag selection, image picking, and the
+     * confirm button. Performs full validation on all user inputs before constructing
+     * a new {@link Event} object, attaching an optional poster image, and saving it
+     * to the organizer’s {@link EventsList}. On success, the fragment returns to the
+     * previous screen.
      */
     @Nullable
     @Override

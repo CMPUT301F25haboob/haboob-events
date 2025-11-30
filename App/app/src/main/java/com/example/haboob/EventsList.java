@@ -295,11 +295,12 @@ public class EventsList {
         }
         return out;
     }
-    
+
     /**
-     * Return a list of events that the given entrant is waitlisted for
+     * Returns a list of events that the given entrant is currently enrolled in.
      *
-     * @return List of currently enrolled events
+     * @param entrantID the entrant’s unique user ID
+     * @return list of events in which this entrant is enrolled
      */
     public ArrayList<Event> getEntrantEnrolledEvents(String entrantID) {
         ArrayList<Event> EnrolledEventList = new ArrayList<>();
@@ -317,7 +318,6 @@ public class EventsList {
         return EnrolledEventList;
     }
 
-    // Return a list of events that aren't past their registration end date
     /**
      * Returns all “live” events — events that either have no registration end date
      * or whose registration end date is after the current date.
@@ -335,7 +335,16 @@ public class EventsList {
         return live;
     }
 
-    // Functions to get the organizer's upcoming and current events
+    /**
+     * Returns the organizer’s “current” events based on registration end date.
+     * <p>
+     * An event is considered current if its registration end date is either
+     * {@code null} or before the current time.
+     * </p>
+     *
+     * @param orgEventsList list of events associated with the organizer
+     * @return list of events whose registration has already closed (or has no end date)
+     */
     public ArrayList<Event> getOrganizerCurrentEvents(ArrayList<Event> orgEventsList) {
         ArrayList<Event> current = new ArrayList<>();
         Date now = new Date();
@@ -347,6 +356,16 @@ public class EventsList {
         return current;
     }
 
+    /**
+     * Returns the organizer’s upcoming events based on registration end date.
+     * <p>
+     * An event is considered upcoming if its registration end date is either
+     * {@code null} or after the current time.
+     * </p>
+     *
+     * @param orgEventsList list of events associated with the organizer
+     * @return list of events whose registration is still open (or has no end date)
+     */
     public ArrayList<Event> getOrganizerUpcomingEvents(ArrayList<Event> orgEventsList) {
         ArrayList<Event> upcoming = new ArrayList<>();
         Date now = new Date();

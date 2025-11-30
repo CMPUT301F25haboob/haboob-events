@@ -94,13 +94,21 @@ public class OrganizerMainActivity extends AppCompatActivity {
         }
     }
 
-    // Used to initialize Cloudinary in organizer workflow
+    /**
+     * Initializes Cloudinary for the organizer workflow using a basic config map.
+     * Must be called before any Cloudinary uploads occur.
+     */
     private void initCloudinary() {
         Map config = new HashMap();
         config.put("cloud_name", "dxu3r4bi5");
         MediaManager.init(this, config);
     }
 
+    /**
+     * Loads the organizer options screen if this is the first creation of the activity.
+     *
+     * @param savedInstanceState saved state bundle, or null on first load
+     */
     public void goToOrganizerOptions(Bundle savedInstanceState) {
         // New fragment to show the buttons for organizer
         if (savedInstanceState == null) {
@@ -116,7 +124,6 @@ public class OrganizerMainActivity extends AppCompatActivity {
      *
      * @return the current organizer
      */
-    // Getter function so that later fragments can still access the app through logged-in user
     public Organizer getCurrentOrganizer() {
         return currentOrganizer;
     }

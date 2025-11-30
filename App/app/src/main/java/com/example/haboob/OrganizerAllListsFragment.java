@@ -44,18 +44,23 @@ import java.util.Date;
 import java.util.HashMap;
 
 /**
- * {@code OrganizerAllListsFragment} displays all entrant-related lists for a selected {@link Event}
- * (e.g., invited, waiting, enrolled, cancelled) in an {@link ExpandableListView}.
+ * Fragment used by organizers to review and manage all entrant-related lists for a single
+ * {@link Event}, and to visualize entrant signup locations on a Google Map.
  * <p>
- * The fragment expects an {@link Event} instance to be supplied via arguments under the key
- * {@code "event"} (as a {@link java.io.Serializable}). If the argument or event is missing,
- * it logs an error and pops the back stack.
- * <p>
- * UI controls include:
+ * The fragment expects an {@link Event} instance passed in the arguments under the key
+ * {@code "event"} as a {@link java.io.Serializable}. If the event cannot be recovered,
+ * the fragment logs an error and immediately pops the back stack.
+ * </p>
+ *
+ * <p>Core responsibilities include:</p>
  * <ul>
- *   <li>Back button – returns to previous fragment</li>
- *   <li>CSV button –  export final enrolled list data</li>
- *   <li>Cancel entrant – remove a selected entrant from a list</li>
+ *     <li>Displaying grouped entrant lists (invited, waiting, enrolled, cancelled) in an
+ *         {@link ExpandableListView} using {@link OrganizerExpandableListsAdapter}.</li>
+ *     <li>Rendering a {@link GoogleMap} and placing markers for each entrant location.</li>
+ *     <li>Allowing organizers to cancel entrants from the enrolled list and notifying them.</li>
+ *     <li>Exporting the enrolled entrant list as a CSV file that can be shared externally.</li>
+ *     <li>Sending notifications to specific entrant groups via {@link NotificationManager}.</li>
+ *     <li>Navigating to auxiliary views such as the event QR code screen.</li>
  * </ul>
  */
 public class OrganizerAllListsFragment extends Fragment implements OnMapReadyCallback {
@@ -80,13 +85,18 @@ public class OrganizerAllListsFragment extends Fragment implements OnMapReadyCal
     private GoogleMap googleMap;
 
     /**
-     * Inflates the layout and unpacks the selected {@link Event} from arguments.
-     * If the event is present, initializes the expandable lists; otherwise, navigates back.
+     * Inflates the organizer lists layout, attaches the {@link SupportMapFragment} for displaying
+     * entrant locations, and unpacks the selected {@link Event} from the fragment arguments.
+     * <p>
+     * If a valid {@link Event} is found, this method delegates to {@link #displayLists(View)} to
+     * initialize all UI elements. If no event can be recovered, the method logs a diagnostic message
+     * and pops the fragment back stack to return to the previous screen.
+     * </p>
      *
-     * @param inflater  LayoutInflater to inflate the view
-     * @param container parent view group
-     * @param savedInstanceState saved instance state, if any
-     * @return the inflated view
+     * @param inflater  the {@link LayoutInflater} used to inflate the fragment layout
+     * @param container the parent {@link ViewGroup} into which the fragment view will be placed
+     * @param savedInstanceState saved instance state bundle, or {@code null} if none
+     * @return the root {@link View} for this fragment's UI
      */
     @Nullable
     @Override
@@ -126,9 +136,16 @@ public class OrganizerAllListsFragment extends Fragment implements OnMapReadyCal
     }
 
     /**
-     * Called when the map is ready to be used
-     * @param map
+     * Callback invoked when the {@link GoogleMap} instance is ready for use.
+     * <p>
+     * Stores the provided map reference, places markers for each entrant location by calling
+     * {@link #setPinsOnMap()}, centers the camera on Edmonton with a default zoom level, and
+     * enables basic map UI controls (such as zoom buttons).
+     * </p>
+     *
+     * @param map the fully initialized {@link GoogleMap} instance attached to this fragment
      */
+
     @Override
     public void onMapReady(GoogleMap map) {
         this.googleMap = map;
@@ -147,8 +164,14 @@ public class OrganizerAllListsFragment extends Fragment implements OnMapReadyCal
     }
 
     /**
-     * Called to populate all of the pins from entrants onto the map
-     *
+     * Iterates over all entrant locations associated with {@link #selectedEvent} and adds
+     * a {@link com.google.android.gms.maps.model.Marker} for each one to the attached
+     * {@link GoogleMap}.
+     * <p>
+     * Each stored {@link GeoPoint} is converted into a {@link LatLng} before being rendered.
+     * This method assumes that both {@link #selectedEvent} and {@link #googleMap} are non-null
+     * and have been initialized prior to invocation.
+     * </p>
      */
     public void setPinsOnMap() {
         // Create a new pin for each entrant
@@ -340,7 +363,18 @@ public class OrganizerAllListsFragment extends Fragment implements OnMapReadyCal
         });
     }
 
-    // CSV-related functions
+    /**
+     * Builds a CSV-formatted {@link String} representing the enrolled entrants for the given
+     * {@link Event}.
+     * <p>
+     * The first line contains a header, followed by one line per enrolled entrant ID.
+     * This text can be written to a file and shared externally using
+     * {@link #saveCsvToFile(Context, String, String)} and {@link #shareCsv(Context, Uri)}.
+     * </p>
+     *
+     * @param event the {@link Event} whose enrolled entrant IDs should be exported
+     * @return CSV text containing a header row and one row per enrolled entrant ID
+     */
     private String generateCsv(Event event) {
         StringBuilder sb = new StringBuilder();
 
@@ -357,8 +391,15 @@ public class OrganizerAllListsFragment extends Fragment implements OnMapReadyCal
 
 
     /**
-     * Shows a confirmation dialog to cancel an entrant from the invite list
-     * @param entrantID the ID of the entrant to cancel
+     * Displays a confirmation dialog asking the organizer whether they want to cancel the
+     * specified entrant.
+     * <p>
+     * If the organizer confirms, {@link #cancelUser(String)} is invoked to perform the
+     * cancellation and notify the user. If the organizer declines, the dialog is simply
+     * dismissed and no changes are made.
+     * </p>
+     *
+     * @param entrantID the ID of the entrant to potentially cancel from the event
      */
     private void showCancellationDialog(String entrantID) {
         // Show new alert
@@ -383,7 +424,25 @@ public class OrganizerAllListsFragment extends Fragment implements OnMapReadyCal
                 .show();
     }
 
-
+    /**
+     * Cancels the specified entrant by moving them from the invited list to the cancelled list
+     * in the {@link Event}, refreshes the expandable list UI, and sends a notification to the
+     * affected user.
+     * <p>
+     * Internally, this method:
+     * </p>
+     * <ul>
+     *     <li>Updates the {@link Event} model (invited → cancelled).</li>
+     *     <li>Rebuilds {@link #expandableListDetail} and {@link #expandableListAdapter} so that
+     *         the UI reflects the latest data.</li>
+     *     <li>Re-attaches the child click listener that triggers
+     *         {@link #showCancellationDialog(String)} for future clicks.</li>
+     *     <li>Constructs and dispatches a {@link Notification} via {@link NotificationManager}
+     *         to inform the entrant that they have been cancelled.</li>
+     * </ul>
+     *
+     * @param entrantID the ID of the entrant being cancelled
+     */
     private void cancelUser(String entrantID) {
         // Remove user from invitedList, add to cancelledList
         selectedEvent.removeEntrantFromInvitedEntrants(entrantID);
@@ -416,7 +475,22 @@ public class OrganizerAllListsFragment extends Fragment implements OnMapReadyCal
         nm.sendToUser(cancelNotif);
     }
 
-
+    /**
+     * Writes the provided CSV text to a file in the app's external files directory and returns
+     * a {@link Uri} that can be shared with other apps via a {@link FileProvider}.
+     * <p>
+     * The method uses the application-specific external storage returned by
+     * {@link Context#getExternalFilesDir(String)} and wraps the resulting file inside a
+     * {@link FileProvider} using the authority {@code &lt;packageName&gt;.provider}. Any
+     * exceptions encountered during file creation or writing result in a {@code null} return
+     * value.
+     * </p>
+     *
+     * @param context  a valid {@link Context}, typically the hosting activity
+     * @param csvText  the CSV content to be written to disk
+     * @param fileName the desired file name (e.g., {@code "entrants_eventId.csv"})
+     * @return a shareable {@link Uri} pointing to the written file, or {@code null} if creation fails
+     */
     private Uri saveCsvToFile(Context context, String csvText, String fileName) {
         try {
             File path = context.getExternalFilesDir(null); // app external directory
@@ -438,7 +512,19 @@ public class OrganizerAllListsFragment extends Fragment implements OnMapReadyCal
         }
     }
 
-
+    /**
+     * Launches a system share sheet for the given CSV file {@link Uri} using an
+     * {@link Intent#ACTION_SEND} intent.
+     * <p>
+     * The intent is configured with MIME type {@code "text/csv"}, attaches the file as
+     * {@link Intent#EXTRA_STREAM}, and grants temporary read permission via
+     * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION}. The user is prompted to choose
+     * an appropriate app for handling the exported CSV file.
+     * </p>
+     *
+     * @param context a valid {@link Context} used to start the chooser activity
+     * @param fileUri the {@link Uri} of the CSV file to share
+     */
     private void shareCsv(Context context, Uri fileUri) {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/csv");
