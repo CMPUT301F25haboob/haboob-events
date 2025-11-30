@@ -77,11 +77,19 @@
         tools:layout="@layout/admin_poster_fragment"
         />
 
-    <fragment
-        android:id="@+id/navigation_admin_events"
 
-        android:label="AdminEvents"
-        tools:layout="@layout/admin_poster_fragment"
+    <fragment
+        android:id="@+id/navigation_admin_notification"
+        android:name="com.example.haboob.AdminNotificationFragment"
+        android:label="AdminNotification"
+        tools:layout="@layout/admin_notification_fragment"
+        />
+
+    <fragment
+        android:id="@+id/navigation_admin_users"
+        android:name="com.example.haboob.AdminUserFragment"
+        android:label="AdminUsers"
+        tools:layout="@layout/admin_users_fragment"
         />
 
     <fragment
@@ -94,17 +102,16 @@
             app:destination="@id/navigation_admin_posters" />
     </fragment>
 
-    <fragment
-        android:id="@+id/navigation_admin_notifications"
-        android:name="com.example.haboob.AdminMainFragment"
-        android:label="AdminMain"
-        tools:layout="@layout/admin_main_fragment" />
-
 
     <fragment
-        android:id="@+id/navigation_admin_users"
-        android:name="com.example.haboob.AdminMainFragment"
-        android:label="AdminMain"
-        tools:layout="@layout/admin_main_fragment" />
+        android:id="@+id/navigation_admin_poster_detail"
+        android:name="com.example.haboob.AdminPosterDetailFragment"
+        android:label="Poster Detail"
+        tools:layout="@layout/admin_poster_view">
+        <argument
+            android:name="poster_id"
+            app:argType="string" />
+    </fragment>
 
-</navigation>
+
+    </navigation>

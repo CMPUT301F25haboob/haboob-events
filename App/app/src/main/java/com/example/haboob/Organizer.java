@@ -73,6 +73,10 @@ public class Organizer extends User {
      *
      * @return the organizer ID
      */
+
+    @Override
+    public String getDeviceId(){return this.organizerID; }
+
     public String getOrganizerID() {
         return this.organizerID;
     }

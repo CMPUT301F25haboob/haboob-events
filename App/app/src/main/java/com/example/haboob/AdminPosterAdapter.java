@@ -57,7 +57,7 @@ public class AdminPosterAdapter extends RecyclerView.Adapter<AdminPosterAdapter.
     /**
      * Constructs an AdminPosterAdapter with the specified event list and click listener.
      *
-     * @param eventList The list of Event objects with posters to display
+     * @param istist The list of Event objects with posters to display
      * @param listener The click listener for handling poster card clicks
      */
     public AdminPosterAdapter(List<Event> eventList, OnPosterClickListener listener) {
@@ -107,7 +107,6 @@ public class AdminPosterAdapter extends RecyclerView.Adapter<AdminPosterAdapter.
 
         // Bind data using Event details
         holder.posterTitle.setText(event.getEventTitle());
-        holder.posterSelectCheckbox.setChecked(false);
 
         // Always set the default image or clear the view before attempting to load a new one
         holder.posterImage.setImageResource(defaultImageResId);
@@ -141,9 +140,7 @@ public class AdminPosterAdapter extends RecyclerView.Adapter<AdminPosterAdapter.
         holder.posterCard.setOnClickListener(v -> listener.onPosterClick(event));
 
         // Checkbox listener
-        holder.posterSelectCheckbox.setOnClickListener(v -> {
-            Log.d("Adapter", "Checkbox clicked for event: " + event.getEventID() + ". New state: " + holder.posterSelectCheckbox.isChecked());
-        });
+
     }
 
     /**
@@ -166,8 +163,6 @@ public class AdminPosterAdapter extends RecyclerView.Adapter<AdminPosterAdapter.
         public final ImageView posterImage;
         /** TextView for displaying the poster/event title */
         public final TextView posterTitle;
-        /** CheckBox for selecting the poster (future multi-selection feature) */
-        public final CheckBox posterSelectCheckbox;
 
         /**
          * Constructs a ViewHolder and caches all child view references.
@@ -179,7 +174,7 @@ public class AdminPosterAdapter extends RecyclerView.Adapter<AdminPosterAdapter.
             posterCard = view.findViewById(R.id.card_admin_poster);
             posterImage = view.findViewById(R.id.poster_image_view);
             posterTitle = view.findViewById(R.id.poster_title_text_view);
-            posterSelectCheckbox = view.findViewById(R.id.poster_select_checkbox);
+
         }
     }
 }

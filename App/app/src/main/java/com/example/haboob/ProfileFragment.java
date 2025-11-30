@@ -95,7 +95,13 @@ public class ProfileFragment extends Fragment {
         historyButton.setOnClickListener(v -> goToHistory());
 
         // Set up admin textview button listener
-        accountTextTextView.setOnClickListener(v -> goToAdmin());
+        accountTextTextView.setOnClickListener(v -> {
+            int len = accountType.length();
+
+            if(accountType.charAt(len-1) == '+'){
+                goToAdmin();
+            }
+        });
 
         // Reused code from EventViewerFragment for navigating back to home
         // when the back button is pressed
