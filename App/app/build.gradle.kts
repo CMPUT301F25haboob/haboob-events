@@ -45,7 +45,7 @@ dependencies {
     debugImplementation("androidx.fragment:fragment-testing:1.7.1")
     // For TestNavHostController (using the same version as your other navigation libraries)
     androidTestImplementation("androidx.navigation:navigation-testing:2.9.4")
-
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation("com.google.android.material:material:1.12.0")
