@@ -80,7 +80,7 @@ dependencies {
 
 
     // JavaDocs
-    // implementation(files("/home/astro/Android/Sdk/platforms/android-36/android.jar"))
+    implementation(files("/home/astro/Android/Sdk/platforms/android-36/android.jar"))
 
 
     // mockito testing dependencies - david
@@ -92,7 +92,7 @@ dependencies {
     androidTestImplementation("com.google.android.gms:play-services-tasks:18.0.2")
 
     // flexbox for event filters:
-    implementation("com.google.android.flexbox:flexbox:3.0.0")
+    // implementation("com.google.android.flexbox:flexbox:3.0.0")
 
     // Cloudinary dependencies for storing images
     implementation("com.cloudinary:cloudinary-android:3.0.2")

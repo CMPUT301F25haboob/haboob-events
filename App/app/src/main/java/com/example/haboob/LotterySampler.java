@@ -4,24 +4,52 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/* Author: Dan
-* This class is almost like a helper class for Event which will handle the lottery
-* logic for an event
-*/
+/**
+ * Helper class for handling lottery logic for events.
+ * This class manages the random selection of entrants from waiting lists,
+ * moving selected entrants to invited lists, and filling vacancies when
+ * invited entrants decline.
+ *
+ * The lottery system ensures fair random selection and automatically sends
+ * notifications to both selected and non-selected entrants.
+ *
+ * Features:
+ * - Random lottery sampling from waiting lists
+ * - Automatic notification sending to winners and non-winners
+ * - Vacancy filling when invited entrants decline
+ * - Preview sampling without modifying event data
+ *
+ * @author Dan, Owen
+ * @version 1.0
+ */
 public class LotterySampler {
 
+    /**
+     * NotificationManager for sending notifications to entrants.
+     */
     private NotificationManager nManager;
 
+    /**
+     * Constructs a new LotterySampler with the specified NotificationManager.
+     *
+     * @param nManager The NotificationManager to use for sending notifications
+     */
     public LotterySampler(NotificationManager nManager) {
         this.nManager = nManager;
     }
+
     /**
      * Performs lottery sampling on an event's entrants list.
      * Randomly selects entrants up to the event's lottery sample size and moves them to invitedEntrants.
      * Remaining entrants are moved to waitingEntrants.
      *
+     * The method calculates available spots by subtracting currently invited and enrolled
+     * entrants from the lottery sample size. Selected entrants are notified of their
+     * invitation, while non-selected entrants are notified they remain on the waitlist.
+     *
      * @param event The event to perform lottery sampling on
-     * @throws IllegalArgumentException if event is null or has no entrants
+     * @throws IllegalArgumentException if event is null, has no entrants, or sample size is invalid
+     * @author Dan, Owen
      */
     public void performLottery(Event event) {
 
@@ -65,7 +93,7 @@ public class LotterySampler {
                 event.getEventID(),
                 event.getOrganizer(),
                 String.format("You were not selected to be invited to join the event: %s\n\n" +
-                        "You’ll remain on the waitlist and may be selected if another user declines their invitation.", event.getEventTitle())
+                        "You'll remain on the waitlist and may be selected if another user declines their invitation.", event.getEventTitle())
         );
 
         // Create new NotificationManager object
@@ -79,11 +107,14 @@ public class LotterySampler {
 
     /**
      * Performs lottery sampling and returns the selected entrant IDs without modifying the event.
-     * Useful for preview or testing purposes.
+     * This method is useful for preview or testing purposes where you want to see
+     * potential lottery results without actually changing event data.
+     *
+     * The selection is random and uses shuffling to ensure fairness.
      *
      * @param entrants List of entrant IDs to sample from
      * @param sampleSize Number of entrants to select
-     * @return List of randomly selected entrant IDs
+     * @return List of randomly selected entrant IDs, or empty list if parameters are invalid
      */
     public List<String> sampleEntrants(List<String> entrants, int sampleSize) {
         if (entrants == null || entrants.isEmpty()) {
@@ -103,11 +134,16 @@ public class LotterySampler {
 
     /**
      * Fills a vacancy by selecting one entrant from the waiting list.
-     * Called when an invited entrant cancels their invitation.
+     * This method is called when an invited entrant cancels their invitation,
+     * creating an available spot that can be filled from the waiting list.
+     *
+     * The selected entrant is randomly chosen, moved from waiting to invited,
+     * and automatically sent a notification about their invitation.
      *
      * @param event The event to fill a vacancy for
      * @return The ID of the newly selected entrant, or null if no one is waiting
      * @throws IllegalArgumentException if event is null
+     * @author Dan, Owen
      */
     public String fillVacancyFromWaitlist(Event event) {
         if (event == null) {
