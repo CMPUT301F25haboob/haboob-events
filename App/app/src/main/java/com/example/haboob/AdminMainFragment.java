@@ -1,3 +1,22 @@
+/**
+ display all options as an admin
+ Copyright (C) 2025  jeff
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 package com.example.haboob;
 
 import android.os.Bundle;
@@ -22,9 +41,12 @@ import androidx.navigation.fragment.NavHostFragment;
  * <ul>
  *   <li>Viewing and managing event posters</li>
  *   <li>Viewing and managing events</li>
- *   <li>Viewing and managing users (commented out)</li>
- *   <li>Sending notifications to users (commented out)</li>
+ *   <li>Viewing and managing users</li>
+ *   <li>Sending notifications to users</li>
  * </ul>
+ *
+ * <p>The fragment handles navigation errors gracefully and provides user feedback
+ * through Toast messages when navigation fails.</p>
  *
  * @author Jeff
  * @version 1.0
@@ -58,8 +80,8 @@ public class AdminMainFragment extends Fragment {
      * Sets up UI components and click listeners after the view is created.
      *
      * <p>This method initializes all navigation buttons and sets up their click
-     * listeners to navigate to appropriate admin sections. Some features are
-     * currently commented out (users, notifications).</p>
+     * listeners to navigate to appropriate admin sections. Navigation errors are
+     * caught and logged, with user-friendly error messages displayed via Toast.</p>
      *
      * @param view The View returned by onCreateView
      * @param savedInstanceState Previously saved state of the fragment, if any
@@ -113,7 +135,8 @@ public class AdminMainFragment extends Fragment {
 
     /**
      * Navigates back to the profile fragment.
-     * This method is called when the back button is pressed.
+     * This method is called when the back button is pressed in the admin panel.
+     * Uses the Navigation component to navigate to the profile fragment destination.
      */
     private void goBack(){
         NavHostFragment.findNavController(this)

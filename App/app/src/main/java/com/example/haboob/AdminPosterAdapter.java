@@ -1,3 +1,21 @@
+/**
+ Adapter to displays all posters for an admin
+ Copyright (C) 2025  jeff
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.example.haboob;
 
 import android.util.Log;
@@ -25,8 +43,12 @@ import java.util.List;
  *   <li>Asynchronous image loading with Glide</li>
  *   <li>Placeholder and error image handling</li>
  *   <li>Click handling for individual poster cards</li>
- *   <li>Checkbox support for multi-selection (future functionality)</li>
+ *   <li>Automatic fallback to default image if loading fails</li>
  * </ul>
+ *
+ * <p>The adapter retrieves image URLs from the Poster's getData() field and loads them
+ * asynchronously. If an image cannot be loaded or does not exist, a default placeholder
+ * is displayed instead.</p>
  *
  * @author Jeff
  * @version 1.0
@@ -44,6 +66,7 @@ public class AdminPosterAdapter extends RecyclerView.Adapter<AdminPosterAdapter.
 
     /**
      * Interface for handling click events on poster cards.
+     * Implement this interface to respond to user clicks on poster items.
      */
     public interface OnPosterClickListener {
         /**
@@ -57,7 +80,7 @@ public class AdminPosterAdapter extends RecyclerView.Adapter<AdminPosterAdapter.
     /**
      * Constructs an AdminPosterAdapter with the specified event list and click listener.
      *
-     * @param istist The list of Event objects with posters to display
+     * @param eventList The list of Event objects with posters to display
      * @param listener The click listener for handling poster card clicks
      */
     public AdminPosterAdapter(List<Event> eventList, OnPosterClickListener listener) {
@@ -83,16 +106,17 @@ public class AdminPosterAdapter extends RecyclerView.Adapter<AdminPosterAdapter.
     /**
      * Binds event data to the ViewHolder, including loading poster images via Glide.
      *
-     * <p>This method:</p>
+     * <p>This method performs the following operations:</p>
      * <ul>
-     *   <li>Sets the event title</li>
-     *   <li>Loads the poster image from URL using Glide</li>
-     *   <li>Handles placeholder and error images</li>
-     *   <li>Sets up click listeners for the card and checkbox</li>
+     *   <li>Sets the event title in the title TextView</li>
+     *   <li>Retrieves the poster image URL from the Poster's getData() field</li>
+     *   <li>Uses Glide to asynchronously load the image from the URL</li>
+     *   <li>Applies placeholder and error images as needed</li>
+     *   <li>Sets up click listeners for the poster card</li>
      * </ul>
      *
-     * <p>The image source is retrieved from the Poster's getData() field,
-     * which should contain a valid URL string.</p>
+     * <p>If the poster URL is invalid, empty, or fails to load, a default shrug
+     * drawable is displayed. All loading errors are logged for debugging.</p>
      *
      * @param holder The ViewHolder to bind data to
      * @param position The position of the item in the adapter's data set
@@ -155,12 +179,15 @@ public class AdminPosterAdapter extends RecyclerView.Adapter<AdminPosterAdapter.
 
     /**
      * ViewHolder class for caching view references within each poster card.
+     * Improves scrolling performance by avoiding repeated findViewById calls.
      */
     public static class ViewHolder extends RecyclerView.ViewHolder {
         /** The card view containing all poster information */
         public final MaterialCardView posterCard;
+
         /** ImageView for displaying the poster image */
         public final ImageView posterImage;
+
         /** TextView for displaying the poster/event title */
         public final TextView posterTitle;
 

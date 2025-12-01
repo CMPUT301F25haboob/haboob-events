@@ -1,3 +1,21 @@
+/**
+ Adapter to displays all users for an admin
+ Copyright (C) 2025  jeff
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.example.haboob;
 
 import android.graphics.Color;
@@ -20,16 +38,34 @@ import java.util.Random;
  * Adapter for displaying User objects in a RecyclerView within the Admin view.
  * Binds user data to card views and handles click events for user actions.
  *
- * @author Haboob Team
+ * <p>This adapter displays user information in card format with the following features:</p>
+ * <ul>
+ *   <li>Colored avatar circles with user initials</li>
+ *   <li>User name, email, and phone number display</li>
+ *   <li>Account type chips (Entrant, Organizer, etc.)</li>
+ *   <li>Delete button for removing users</li>
+ *   <li>Click handling for viewing user details</li>
+ * </ul>
+ *
+ * <p>Avatar colors are generated deterministically from user names to ensure
+ * consistent coloring across app sessions.</p>
+ *
+ * @author Jeff
  * @version 1.0
+ * @see User
+ * @see RecyclerView.Adapter
  */
 public class AdminUserAdapter extends RecyclerView.Adapter<AdminUserAdapter.ViewHolder> {
 
+    /** List of User objects to be displayed */
     private final List<User> userList;
+
+    /** Listener for handling user action events */
     private final OnUserActionListener listener;
 
     /**
      * Interface for handling user action events.
+     * Implement this interface to respond to user interactions with the adapter items.
      */
     public interface OnUserActionListener {
         /**
@@ -76,6 +112,17 @@ public class AdminUserAdapter extends RecyclerView.Adapter<AdminUserAdapter.View
 
     /**
      * Binds user data to the specified ViewHolder.
+     *
+     * <p>This method populates all user information fields:</p>
+     * <ul>
+     *   <li>Sets user name by combining first and last names</li>
+     *   <li>Displays email address</li>
+     *   <li>Shows device ID</li>
+     *   <li>Displays phone number if available, hides field if empty</li>
+     *   <li>Shows account type in a chip</li>
+     *   <li>Creates a colored avatar with user initials</li>
+     *   <li>Sets up click listeners for card and delete button</li>
+     * </ul>
      *
      * @param holder The ViewHolder to bind data to
      * @param position The position of the item within the adapter's data set
@@ -143,9 +190,12 @@ public class AdminUserAdapter extends RecyclerView.Adapter<AdminUserAdapter.View
     /**
      * Gets the initials from first and last name.
      *
+     * <p>Extracts the first character from both first and last names
+     * and combines them into a two-character uppercase string.</p>
+     *
      * @param firstName User's first name
      * @param lastName User's last name
-     * @return Two-character initials
+     * @return Two-character initials in uppercase
      */
     private String getInitials(String firstName, String lastName) {
         String first = (firstName != null && !firstName.isEmpty()) ? firstName.substring(0, 1) : "";
@@ -156,8 +206,12 @@ public class AdminUserAdapter extends RecyclerView.Adapter<AdminUserAdapter.View
     /**
      * Generates a consistent color from a string (for avatar backgrounds).
      *
-     * @param text The text to generate color from
-     * @return A color integer
+     * <p>Uses the string's hashCode to seed a Random generator, ensuring the same
+     * string always produces the same color. Colors are generated with good
+     * saturation (0.6-0.8) and brightness (0.7-0.9) for readability.</p>
+     *
+     * @param text The text to generate color from (typically the user's full name)
+     * @return A color integer suitable for use as a background color
      */
     private int generateColorFromString(String text) {
         // Generate a hash from the string
@@ -176,17 +230,33 @@ public class AdminUserAdapter extends RecyclerView.Adapter<AdminUserAdapter.View
 
     /**
      * ViewHolder class for caching view references within each user card.
+     * Improves scrolling performance by avoiding repeated findViewById calls.
      */
     public static class ViewHolder extends RecyclerView.ViewHolder {
+        /** The card view containing all user information */
         public final MaterialCardView userCard;
+
+        /** TextView displaying user avatar with initials */
         public final TextView userAvatar;
+
+        /** TextView displaying the user's full name */
         public final TextView userName;
+
+        /** TextView displaying the user's email address */
         public final TextView userEmail;
+
+        /** TextView displaying the user's phone number */
         public final TextView userPhone;
+
+        /** Chip displaying the user's account type */
         public final Chip userAccountType;
+
+        /** Button for deleting the user */
         public final MaterialButton deleteButton;
 
+        /** TextView displaying the user's device ID */
         public final TextView userId;
+
         /**
          * Constructs a ViewHolder and caches all child view references.
          *
