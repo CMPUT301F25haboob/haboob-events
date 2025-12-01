@@ -28,25 +28,73 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 
 /**
- * Fragment that displays a QR code for an event
- * Author: Dan
+ * Fragment that displays and manages QR codes for events.
+ * This fragment generates a QR code based on an event ID and allows users
+ * to view and save the QR code image to their device.
+ *
+ * Features:
+ * - Generates QR code from event ID
+ * - Displays QR code image
+ * - Saves QR code to device storage (Pictures/HaboobQRs)
+ * - Handles navigation from both organizer and entrant views
+ *
+ * @author Dan
+ * @version 1.0
  */
 public class EventQRCodeFragment extends Fragment {
 
+    /**
+     * Argument key for passing the event ID to this fragment.
+     */
     public static final String ARG_EVENT_ID = "arg_event_id";
 
+    /**
+     * The ID of the event for which to generate a QR code.
+     */
     private String eventId;
+
+    /**
+     * ImageView for displaying the generated QR code.
+     */
     private ImageView qrCodeImageView;
+
+    /**
+     * TextView for displaying the event ID text.
+     */
     private TextView eventIdValueTextView;
+
+    /**
+     * Toolbar for navigation controls.
+     */
     private MaterialToolbar toolbar;
+
+    /**
+     * Bitmap representation of the generated QR code.
+     */
     private Bitmap qrBitmap;
+
+    /**
+     * Button for saving the QR code to device storage.
+     */
     private Button saveQRButton;
 
 
+    /**
+     * Required empty public constructor.
+     */
     public EventQRCodeFragment() {
         // Required empty public constructor
     }
 
+    /**
+     * Creates and returns the view hierarchy associated with the fragment.
+     * Initializes all UI components, generates the QR code, and sets up event listeners.
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate views
+     * @param container The parent view that this fragment's UI should be attached to
+     * @param savedInstanceState Previously saved state of the fragment
+     * @return The View for the fragment's UI, or the view if event ID is missing
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -100,7 +148,11 @@ public class EventQRCodeFragment extends Fragment {
     }
 
     /**
-     * Generates and displays the QR code for the event
+     * Generates and displays the QR code for the event.
+     * Creates a QRCode object with the event ID, generates a 512x512 pixel bitmap,
+     * and displays it in the ImageView. Handles errors gracefully with appropriate
+     * user feedback.
+     *
      * @param eventId The event ID to encode in the QR code
      */
     private void generateAndDisplayQRCode(String eventId) {
@@ -137,7 +189,10 @@ public class EventQRCodeFragment extends Fragment {
     }
 
     /**
-     * Saves the QR code image to the device's storage to share in the future
+     * Saves the QR code image to the device's storage for future sharing.
+     * The image is saved to the Pictures/HaboobQRs directory with the filename
+     * format "qrcode_{eventId}.jpg". Uses MediaStore API for Android 10+ compatibility.
+     * Displays a toast message indicating success or failure.
      */
     public void saveImage() {
         if (qrBitmap == null) {

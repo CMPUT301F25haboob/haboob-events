@@ -17,6 +17,21 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Activity for user registration.
+ * Allows new users to create an account by entering their personal information
+ * and selecting an account type (Entrant or Organizer).
+ *
+ * Features:
+ * - Checks if user is already registered and redirects accordingly
+ * - Collects user information (name, email, phone)
+ * - Account type selection (Entrant or Organizer)
+ * - Input validation
+ * - Saves user data to Firebase Firestore
+ *
+ * @author David
+ * @version 1.0
+ */
 public class RegisterActivity extends AppCompatActivity {
     // Fields
     private TextInputEditText firstNameInput;
@@ -27,11 +42,33 @@ public class RegisterActivity extends AppCompatActivity {
     private MaterialButton organizerButton;
     private MaterialButton registerButton;
 
-    private String userAccountType; // This will either be "Entrant" or "Organizer" based on the user input
+    /**
+     * The selected account type - either "Entrant" or "Organizer".
+     */
+    private String userAccountType;
+
+    /**
+     * The unique device ID for this user.
+     */
     private String deviceId;
+
+    /**
+     * Firebase Firestore instance for database operations.
+     */
     private FirebaseFirestore db;
+
+    /**
+     * Flag indicating if the user has admin privileges.
+     */
     private Boolean admin;
 
+    /**
+     * Called when the activity is first created.
+     * Initializes Firebase, retrieves device ID, and checks if the user is already registered.
+     * If registered, redirects to the appropriate activity; otherwise, shows registration UI.
+     *
+     * @param savedInstanceState Previously saved state of the activity
+     */
     @SuppressLint("HardwareIds")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -65,7 +102,7 @@ public class RegisterActivity extends AppCompatActivity {
                         // Pass the data if needed
                         intent.putExtra("device_id", deviceId);
                         startActivity(intent);
-                        finish(); // Don’t show Register screen again
+                        finish(); // Don't show Register screen again
                     } else {
                         // No user found — show the registration UI
                         showRegistrationUI();
@@ -78,6 +115,10 @@ public class RegisterActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Shows the registration UI and sets up all input fields and button listeners.
+     * Handles account type selection and registration submission.
+     */
     private void showRegistrationUI()
     {
         // Find all the components we need

@@ -28,8 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * ProfileFragment allows users to view and update their account information
- * Author: Dan
+ * Fragment that allows users to view and update their account information.
  *
  * Features:
  * - Load current user data from Firebase
@@ -37,6 +36,9 @@ import java.util.Map;
  * - Save changes to Firebase
  * - Input validation
  * - Delete profile (optional)
+ *
+ * @author Dan
+ * @version 1.0
  */
 public class ProfileFragment extends Fragment {
 
@@ -59,10 +61,22 @@ public class ProfileFragment extends Fragment {
     private String deviceId;
     private String accountType;
 
+    /**
+     * Required empty public constructor.
+     */
     public ProfileFragment() {
         // Required empty public constructor
     }
 
+    /**
+     * Creates and returns the view hierarchy associated with the fragment.
+     * Initializes Firebase, loads user data, and sets up all UI components and listeners.
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate views
+     * @param container The parent view that this fragment's UI should be attached to
+     * @param savedInstanceState Previously saved state of the fragment
+     * @return The View for the fragment's UI
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -121,7 +135,8 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
-     * Loads the current user's data from Firebase
+     * Loads the current user's data from Firebase.
+     * Retrieves user information from the 'users' collection and populates the UI fields.
      */
     private void loadUserData() {
         Log.d(TAG, "Loading user data for device: " + deviceId);
@@ -155,7 +170,8 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
-     * Validates and saves the profile changes to Firebase
+     * Validates and saves the profile changes to Firebase.
+     * Updates both the 'users' collection and the account-specific collection (entrant/organizer).
      */
     private void saveProfileChanges() {
         // Get values from input fields
@@ -215,7 +231,10 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
-     * Updates the account-specific collection (entrant or organizer)
+     * Updates the account-specific collection (entrant or organizer) with profile changes.
+     *
+     * @param updates Map containing the updated profile fields
+     * @param accountType The type of account (Entrant or Organizer)
      */
     private void updateAccountTypeCollection(Map<String, Object> updates, String accountType) {
         String collection = accountType.toLowerCase();
@@ -231,7 +250,8 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
-     * Called when save operation succeeds
+     * Called when save operation succeeds.
+     * Displays a success message and re-enables the save button.
      */
     private void onSaveSuccess() {
         Log.d(TAG, "Profile updated successfully");
@@ -241,7 +261,13 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
-     * Validates user inputs
+     * Validates user inputs for profile updates.
+     * Checks that required fields are filled and meet format requirements.
+     *
+     * @param firstName The first name to validate
+     * @param lastName The last name to validate
+     * @param email The email to validate
+     * @return true if all inputs are valid, false otherwise
      */
     private boolean validateInputs(String firstName, String lastName, String email) {
         // Validate first name
@@ -291,7 +317,8 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
-     * Shows confirmation dialog before deleting profile
+     * Shows confirmation dialog before deleting profile.
+     * Prompts the user to confirm deletion before proceeding.
      */
     private void confirmDeleteProfile() {
         new AlertDialog.Builder(requireContext())
@@ -303,7 +330,8 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
-     * Deletes the user's profile from Firebase
+     * Deletes the user's profile from Firebase.
+     * First removes the user from all event lists, then deletes their profile data.
      */
     private void deleteProfile() {
         deleteButton.setEnabled(false);
@@ -362,7 +390,8 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
-     * Deletes the user from Firestore collections
+     * Deletes the user from Firestore collections.
+     * Removes the user from both the 'users' collection and their account-specific collection.
      */
     private void deleteUserFromFirestore() {
         // Delete from users collection
@@ -399,7 +428,8 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
-     * Navigates to RegisterActivity and finishes the current activity
+     * Navigates to RegisterActivity and finishes the current activity.
+     * Used after successful profile deletion to redirect to registration.
      */
     private void navigateToRegisterActivity() {
         Intent intent = new Intent(getActivity(), RegisterActivity.class);
@@ -410,11 +440,18 @@ public class ProfileFragment extends Fragment {
         }
     }
 
+    /**
+     * Navigates to the admin screen.
+     * Only accessible if the account type ends with '+'.
+     */
     private void goToAdmin(){
         NavHostFragment.findNavController(this)
                 .navigate(R.id.navigation_admin);
     }
 
+    /**
+     * Navigates to the history screen to view past events.
+     */
     private void goToHistory(){
         NavHostFragment.findNavController(this)
                 .navigate(R.id.navigation_history);

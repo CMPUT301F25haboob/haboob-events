@@ -32,30 +32,95 @@ import android.widget.Switch;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Fragment for displaying and managing user notifications.
+ *
+ * Features:
+ * - Displays all notifications for the current user
+ * - Supports muting/unmuting notifications
+ * - Persists mute state using SharedPreferences
+ * - Navigates to event details when notification is clicked
+ * - Loads event information from EventsList
+ *
+ * @author Owen
+ * @version 1.0
+ */
 public class NotificationsFragment extends Fragment {
 
+    /**
+     * RecyclerView for displaying the list of notifications.
+     */
     private RecyclerView recyclerView;
+
+    /**
+     * Adapter for managing notification items in the RecyclerView.
+     */
     private NotificationsAdapter adapter;
+
+    /**
+     * Manager for loading notifications from Firebase.
+     */
     private NotificationManager notificationManager;
+
+    /**
+     * The unique device ID for the current user.
+     */
     private String userId;
 
-    // Mute toggle + prefs
+    /**
+     * Switch for muting/unmuting notifications.
+     */
     private Switch muteSwitch;
-    private SharedPreferences prefs;
-    private static final String PREFS_NAME = "notifications_prefs";
-    private static final String KEY_MUTED = "notifications_muted";
-    EventsList eventsList; //  David - init eventsList because java gets angry if I dont
 
+    /**
+     * SharedPreferences for persisting notification mute state.
+     */
+    private SharedPreferences prefs;
+
+    /**
+     * SharedPreferences file name.
+     */
+    private static final String PREFS_NAME = "notifications_prefs";
+
+    /**
+     * Key for storing mute state in SharedPreferences.
+     */
+    private static final String KEY_MUTED = "notifications_muted";
+
+    /**
+     * EventsList for looking up event details.
+     */
+    EventsList eventsList;
+
+    /**
+     * Required empty public constructor.
+     */
     public NotificationsFragment() {
         // Required empty public constructor
     }
 
+    /**
+     * Creates and returns the view hierarchy associated with the fragment.
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate views
+     * @param container The parent view that this fragment's UI should be attached to
+     * @param savedInstanceState Previously saved state of the fragment
+     * @return The View for the fragment's UI
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_notifications, container, false);
     }
 
+    /**
+     * Called immediately after onCreateView() returns.
+     * Initializes all UI components, loads EventsList, sets up the RecyclerView,
+     * configures the mute switch, and loads notifications.
+     *
+     * @param view The View returned by onCreateView()
+     * @param savedInstanceState Previously saved state of the fragment
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -172,6 +237,11 @@ public class NotificationsFragment extends Fragment {
         loadNotifications();
     }
 
+    /**
+     * Loads notifications from Firebase for the current user.
+     * If notifications are muted, displays an empty list instead.
+     * Updates the adapter with the loaded notifications.
+     */
     private void loadNotifications() {
         boolean muted = prefs.getBoolean(KEY_MUTED, false);
 

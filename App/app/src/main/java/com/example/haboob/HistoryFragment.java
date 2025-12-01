@@ -23,8 +23,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * HistoryFragment displays all events the user has ever joined a waitlist for
- * Author: Dan
+ * Fragment that displays all events the user has ever joined a waitlist for.
+ * This fragment retrieves the user's event history from Firestore and displays
+ * it in a RecyclerView with event details and images.
+ *
+ * @author Dan
+ * @version 1.0
  */
 public class HistoryFragment extends Fragment {
 
@@ -38,10 +42,22 @@ public class HistoryFragment extends Fragment {
     private EventsList eventsList;
     private List<Event> historyEvents;
 
+    /**
+     * Required empty public constructor.
+     */
     public HistoryFragment() {
         // Required empty public constructor
     }
 
+    /**
+     * Creates and returns the view hierarchy associated with the fragment.
+     * Initializes all UI components and sets up the RecyclerView for displaying history.
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate views
+     * @param container The parent view that this fragment's UI should be attached to
+     * @param savedInstanceState Previously saved state of the fragment
+     * @return The View for the fragment's UI
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -85,7 +101,9 @@ public class HistoryFragment extends Fragment {
     }
 
     /**
-     * Loads all events from the user's event_history_list
+     * Loads all events from the user's event_history_list from Firestore.
+     * First retrieves the list of event IDs from the user's entrant document,
+     * then loads the full event details for each ID.
      */
     private void loadHistoryEvents() {
         historyEvents = new ArrayList<>();
@@ -143,7 +161,7 @@ public class HistoryFragment extends Fragment {
     }
 
     /**
-     * Updates the RecyclerView adapter with events
+     * Updates the RecyclerView adapter with the loaded history events.
      */
     private void updateAdapter() {
         historyAdapter.updateEvents(historyEvents);
