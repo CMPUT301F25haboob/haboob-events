@@ -28,6 +28,23 @@ import java.util.Map;
 import java.util.Objects;
 
 
+/**
+ * Fragment responsible for displaying all available waitlists (events that
+ * the entrant can browse or join). Provides functionality for:
+ *
+ * <ul>
+ *     <li>Loading events asynchronously from Firestore (via {@link EventsList})</li>
+ *     <li>Displaying events in a {@link ListView}</li>
+ *     <li>Searching events by title or tag using a {@link SearchView}</li>
+ *     <li>Filtering events via Material toggle buttons (tags)</li>
+ *     <li>Navigating to an event viewer when a list item is selected</li>
+ * </ul>
+ *
+ * <p>This fragment expects a device ID argument passed from
+ * EntrantMainFragment. The device ID is used to determine which waitlists
+ * are relevant to the user.</p>
+ */
+
 public class WaitlistsFragment extends Fragment {
 
     private WaitlistAdapter adapter;
@@ -36,6 +53,15 @@ public class WaitlistsFragment extends Fragment {
     public static final String ARG_DEVICE_ID = "device_id";
     public String deviceId;
 
+    /**
+     * Inflates the Waitlists UI, sets up the search bar, tag filters,
+     * list adapter, back navigation, and fires the initial event load.
+     *
+     * @param inflater  LayoutInflater for inflating XML.
+     * @param container Parent view container for this fragment.
+     * @param savedInstanceState Saved state bundle.
+     * @return the inflated fragment root view.
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -122,7 +148,21 @@ public class WaitlistsFragment extends Fragment {
         return v;
     }
 
-    // queries the dataBase, relies on a callback to adds events to local EventList Array, updates the imageAdapter with the new images from the database
+
+    /**
+     * Initiates asynchronous loading of events from Firestore via {@link EventsList}.
+     * Uses the {@link EventsList.OnEventsLoadedListener} callback to receive the
+     * loaded events, then refreshes the adapter with the new data.
+     *
+     * Queries the dataBase, relies on a callback to adds events to local EventList Array,
+     * updates the imageAdapter with the new images from the database
+     *
+     * <p>This method sets up:</p>
+     * <ul>
+     *     <li>onEventsLoaded → populates entrantWaitList and updates adapter</li>
+     *     <li>onError → logs Firestore load failure</li>
+     * </ul>
+     */
     private void loadEventsForUser() {
 
 
