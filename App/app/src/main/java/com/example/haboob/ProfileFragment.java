@@ -23,12 +23,12 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * ProfileFragment allows users to view and update their account information
- * Author: Dan
+ * Fragment that allows users to view and update their account information.
  *
  * Features:
  * - Load current user data from Firebase
@@ -36,6 +36,9 @@ import java.util.Map;
  * - Save changes to Firebase
  * - Input validation
  * - Delete profile (optional)
+ *
+ * @author Dan
+ * @version 1.0
  */
 public class ProfileFragment extends Fragment {
 
@@ -49,6 +52,7 @@ public class ProfileFragment extends Fragment {
     private TextView accountTypeTextView;
     private MaterialButton saveButton;
     private MaterialButton deleteButton;
+    private MaterialButton historyButton;
     private MaterialToolbar toolbar;
     private TextView accountTextTextView;
 
@@ -57,10 +61,22 @@ public class ProfileFragment extends Fragment {
     private String deviceId;
     private String accountType;
 
+    /**
+     * Required empty public constructor.
+     */
     public ProfileFragment() {
         // Required empty public constructor
     }
 
+    /**
+     * Creates and returns the view hierarchy associated with the fragment.
+     * Initializes Firebase, loads user data, and sets up all UI components and listeners.
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate views
+     * @param container The parent view that this fragment's UI should be attached to
+     * @param savedInstanceState Previously saved state of the fragment
+     * @return The View for the fragment's UI
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -80,6 +96,7 @@ public class ProfileFragment extends Fragment {
         accountTypeTextView = view.findViewById(R.id.accountTypeTextView);
         saveButton = view.findViewById(R.id.btnSaveProfile);
         deleteButton = view.findViewById(R.id.btnDeleteProfile);
+        historyButton = view.findViewById(R.id.btnHistory);
         toolbar = view.findViewById(R.id.topAppBar);
         accountTextTextView = view.findViewById(R.id.SCIbutton);
 
@@ -89,9 +106,16 @@ public class ProfileFragment extends Fragment {
         // Set up button listeners
         saveButton.setOnClickListener(v -> saveProfileChanges());
         deleteButton.setOnClickListener(v -> confirmDeleteProfile());
+        historyButton.setOnClickListener(v -> goToHistory());
 
         // Set up admin textview button listener
-        accountTextTextView.setOnClickListener(v -> goToAdmin());
+        accountTextTextView.setOnClickListener(v -> {
+            int len = accountType.length();
+
+            if(accountType.charAt(len-1) == '+'){
+                goToAdmin();
+            }
+        });
 
         // Reused code from EventViewerFragment for navigating back to home
         // when the back button is pressed
@@ -111,7 +135,8 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
-     * Loads the current user's data from Firebase
+     * Loads the current user's data from Firebase.
+     * Retrieves user information from the 'users' collection and populates the UI fields.
      */
     private void loadUserData() {
         Log.d(TAG, "Loading user data for device: " + deviceId);
@@ -145,7 +170,8 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
-     * Validates and saves the profile changes to Firebase
+     * Validates and saves the profile changes to Firebase.
+     * Updates both the 'users' collection and the account-specific collection (entrant/organizer).
      */
     private void saveProfileChanges() {
         // Get values from input fields
@@ -205,7 +231,10 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
-     * Updates the account-specific collection (entrant or organizer)
+     * Updates the account-specific collection (entrant or organizer) with profile changes.
+     *
+     * @param updates Map containing the updated profile fields
+     * @param accountType The type of account (Entrant or Organizer)
      */
     private void updateAccountTypeCollection(Map<String, Object> updates, String accountType) {
         String collection = accountType.toLowerCase();
@@ -221,7 +250,8 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
-     * Called when save operation succeeds
+     * Called when save operation succeeds.
+     * Displays a success message and re-enables the save button.
      */
     private void onSaveSuccess() {
         Log.d(TAG, "Profile updated successfully");
@@ -231,12 +261,25 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
-     * Validates user inputs
+     * Validates user inputs for profile updates.
+     * Checks that required fields are filled and meet format requirements.
+     *
+     * @param firstName The first name to validate
+     * @param lastName The last name to validate
+     * @param email The email to validate
+     * @return true if all inputs are valid, false otherwise
      */
     private boolean validateInputs(String firstName, String lastName, String email) {
         // Validate first name
         if (firstName.isEmpty()) {
             firstNameEditText.setError("First name is required");
+            firstNameEditText.requestFocus();
+            return false;
+        }
+
+        // Validate that first name doesn't contain numbers
+        if (firstName.matches(".*\\d.*")) {
+            firstNameEditText.setError("First name cannot contain numbers");
             firstNameEditText.requestFocus();
             return false;
         }
@@ -248,6 +291,13 @@ public class ProfileFragment extends Fragment {
             return false;
         }
 
+        // Validate that last name doesn't contain numbers
+        if (lastName.matches(".*\\d.*")) {
+            lastNameEditText.setError("Last name cannot contain numbers");
+            lastNameEditText.requestFocus();
+            return false;
+        }
+
         // Validate email
         if (email.isEmpty()) {
             emailEditText.setError("Email is required");
@@ -255,8 +305,9 @@ public class ProfileFragment extends Fragment {
             return false;
         }
 
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            emailEditText.setError("Please enter a valid email");
+        // Validate email format (must contain @ and .com)
+        if (!email.contains("@") || !email.contains(".com")) {
+            emailEditText.setError("Enter a valid email");
             emailEditText.requestFocus();
             return false;
         }
@@ -266,7 +317,8 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
-     * Shows confirmation dialog before deleting profile
+     * Shows confirmation dialog before deleting profile.
+     * Prompts the user to confirm deletion before proceeding.
      */
     private void confirmDeleteProfile() {
         new AlertDialog.Builder(requireContext())
@@ -278,13 +330,70 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
-     * Deletes the user's profile from Firebase
-     * TODO: We need this to delete the users from all events, waitlists, etc.
+     * Deletes the user's profile from Firebase.
+     * First removes the user from all event lists, then deletes their profile data.
      */
     private void deleteProfile() {
         deleteButton.setEnabled(false);
         deleteButton.setText("Deleting...");
 
+        // Before deleting the user from users, delete them from all events
+        final EventsList[] eventsListWrapper = new EventsList[1];
+        eventsListWrapper[0] = new EventsList(new EventsList.OnEventsLoadedListener() {
+            @Override
+            public void onEventsLoaded() {
+                // Get all events
+                ArrayList<Event> allEvents = eventsListWrapper[0].getEventsList();
+
+                // Remove this user from all event lists (waiting, enrolled, invited, cancelled)
+                for (Event event : allEvents) {
+                    if (event == null) continue;
+
+                    // Check and remove from waiting list
+                    if (event.getWaitingEntrants() != null && event.getWaitingEntrants().contains(deviceId)) {
+                        event.removeEntrantFromWaitingEntrants(deviceId);
+                        Log.d(TAG, "Removed user from waiting list of event: " + event.getEventID());
+                    }
+
+                    // Check and remove from enrolled list
+                    if (event.getEnrolledEntrants() != null && event.getEnrolledEntrants().contains(deviceId)) {
+                        event.removeEntrantFromEnrolledEntrants(deviceId);
+                        Log.d(TAG, "Removed user from enrolled list of event: " + event.getEventID());
+                    }
+
+                    // Check and remove from invited list
+                    if (event.getInvitedEntrants() != null && event.getInvitedEntrants().contains(deviceId)) {
+                        event.removeEntrantFromInvitedEntrants(deviceId);
+                        Log.d(TAG, "Removed user from invited list of event: " + event.getEventID());
+                    }
+
+                    // Check and remove from cancelled list
+                    if (event.getCancelledEntrants() != null && event.getCancelledEntrants().contains(deviceId)) {
+                        event.removeEntrantFromCancelledEntrants(deviceId);
+                        Log.d(TAG, "Removed user from cancelled list of event: " + event.getEventID());
+                    }
+                }
+
+                // After removing from all events, proceed with deleting the user
+                deleteUserFromFirestore();
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.e(TAG, "Error loading events for deletion", e);
+                Toast.makeText(getContext(), "Failed to load events: " + e.getMessage(),
+                        Toast.LENGTH_LONG).show();
+                deleteButton.setEnabled(true);
+                deleteButton.setText("Delete Profile");
+            }
+        });
+    }
+
+    /**
+     * Deletes the user from Firestore collections.
+     * Removes the user from both the 'users' collection and their account-specific collection.
+     */
+    private void deleteUserFromFirestore() {
         // Delete from users collection
         db.collection("users").document(deviceId)
                 .delete()
@@ -319,7 +428,8 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
-     * Navigates to RegisterActivity and finishes the current activity
+     * Navigates to RegisterActivity and finishes the current activity.
+     * Used after successful profile deletion to redirect to registration.
      */
     private void navigateToRegisterActivity() {
         Intent intent = new Intent(getActivity(), RegisterActivity.class);
@@ -330,12 +440,21 @@ public class ProfileFragment extends Fragment {
         }
     }
 
+    /**
+     * Navigates to the admin screen.
+     * Only accessible if the account type ends with '+'.
+     */
     private void goToAdmin(){
         NavHostFragment.findNavController(this)
                 .navigate(R.id.navigation_admin);
     }
 
-
-
+    /**
+     * Navigates to the history screen to view past events.
+     */
+    private void goToHistory(){
+        NavHostFragment.findNavController(this)
+                .navigate(R.id.navigation_history);
+    }
 
 }

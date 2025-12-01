@@ -6,13 +6,16 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.SetOptions;
+import com.google.type.LatLng;
 
 import java.io.Serializable;
-import java.sql.Array;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -58,7 +61,6 @@ public class Event implements Serializable {
     private boolean geoLocationRequired;
     private int lotterySampleSize;
     private int optionalWaitingListSize;
-    private GeoLocationMap geoLocationMap;
     private QRCode qrCode;
     private Poster poster;
 
@@ -68,10 +70,11 @@ public class Event implements Serializable {
     private ArrayList<String> waitingEntrants;  // -> List of all entrants who were not selected for the lottery, didn't cancel, and are waiting to fill in upon entrant cancellation
     private ArrayList<String> enrolledEntrants;  // -> List of all entrants who accepted their invite
     private ArrayList<String> cancelledEntrants;  // -> List of all entrants who cancelled their invite or were cancelled by the organizer
+    private ArrayList<GeoPoint> entrantLocations;  // -> List of locations that entrants sign up for an event from
 
     // to store the entrants that are in the lottery
 //    private ArrayList<String> entrant_ids_for_lottery; deprecated by david
-    private String event_image;
+    private String eventImage;
 
     /**
      * Default constructor used by Firestore deserialization.
@@ -94,6 +97,7 @@ public class Event implements Serializable {
         if (!inMemoryOnly) {
             this.db = FirebaseFirestore.getInstance();
         }
+        this.eventID = UUID.randomUUID().toString();
         this.initLists();
     }
 
@@ -108,11 +112,10 @@ public class Event implements Serializable {
      * @param geoLocationRequired whether geolocation is required
      * @param lotterySampleSize size of lottery sample (invites)
      * @param optionalWaitingListSize optional waiting list size; use -1 if unlimited/not set
-     * @param qrCode event QR code object
      * @param poster event poster object
      * @param tags tag list for filtering/search
      */
-    public Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, int optionalWaitingListSize, QRCode qrCode, Poster poster, ArrayList<String> tags) {
+    public Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, int optionalWaitingListSize, Poster poster, ArrayList<String> tags) {
         this.eventID = UUID.randomUUID().toString();
         this.db = FirebaseFirestore.getInstance();
         this.organizerID = organizer;
@@ -123,10 +126,28 @@ public class Event implements Serializable {
         this.geoLocationRequired = geoLocationRequired;
         this.lotterySampleSize = lotterySampleSize;
         this.optionalWaitingListSize = optionalWaitingListSize;
-        this.qrCode = qrCode;
+        this.qrCode = new QRCode(this.eventID);
         this.poster = poster;
         this.tags = tags;
         this.initLists();
+    }
+
+    // Convenience constructor without Poster object (since were not using it to create posters)
+    public Event(String organizer, Date registrationStartDate, Date registrationEndDate,
+                 String eventTitle, String eventDescription, boolean geoLocationRequired,
+                 int lotterySampleSize, int optionalWaitingListSize,
+                 ArrayList<String> tags) {
+
+        this(organizer,
+                registrationStartDate,
+                registrationEndDate,
+                eventTitle,
+                eventDescription,
+                geoLocationRequired,
+                lotterySampleSize,
+                optionalWaitingListSize,
+                null,          // poster is null
+                tags);
     }
 
     /**
@@ -135,11 +156,14 @@ public class Event implements Serializable {
      */
     public void initLists() {
         // Initialize all the lists to use/populate later
-        this.tags = new ArrayList<String>();
+        if (this.tags == null) {
+            this.tags = new ArrayList<>();
+        }
         this.invitedEntrants = new ArrayList<String>();
         this.waitingEntrants = new ArrayList<String>();
         this.enrolledEntrants = new ArrayList<String>();
         this.cancelledEntrants = new ArrayList<String>();
+        this.entrantLocations = new ArrayList<GeoPoint>();
     }
 
     /**
@@ -184,7 +208,13 @@ public class Event implements Serializable {
      * @param userID user ID to add
      */
     public void addEntrantToWaitingEntrants(String userID) {
-        this.invitedEntrants.add(userID);
+//        this.invitedEntrants.add(userID);
+        this.waitingEntrants.add(userID);  // david's change, not sure why it was invitedEntrants before
+
+        // Remove from cancelled list if present (user is rejoining after leaving)
+        if (this.cancelledEntrants != null) {
+            this.cancelledEntrants.remove(userID);
+        }
 
         db.collection("events")
                 .whereEqualTo("eventID", eventID)
@@ -194,12 +224,31 @@ public class Event implements Serializable {
                         // Get the actual document ID from the query result
                         String documentId = queryDocumentSnapshots.getDocuments().get(0).getId();
 
-                        // Update the document using its ID
+                        // Update the document using its ID - add to waiting, remove from cancelled
+                        Map<String, Object> updates = new HashMap<>();
+                        updates.put("waitingEntrants", FieldValue.arrayUnion(userID));
+                        updates.put("cancelledEntrants", FieldValue.arrayRemove(userID));
+
                         db.collection("events")
                                 .document(documentId)
-                                .update("waitingEntrants", FieldValue.arrayUnion(userID))
+                                .update(updates)
                                 .addOnSuccessListener(aVoid -> {
-                                    Log.d("Event", "Successfully added user to waitingEntrants");
+                                    Log.d("Event", "Successfully added user to waitingEntrants and removed from cancelled");
+
+                                    // Also add this event to the user's event history
+                                    // Using set with merge to create the field if it doesn't exist
+                                    Map<String, Object> historyUpdate = new HashMap<>();
+                                    historyUpdate.put("event_history_list", FieldValue.arrayUnion(eventID));
+
+                                    db.collection("entrant")
+                                            .document(userID)
+                                            .set(historyUpdate, SetOptions.merge())
+                                            .addOnSuccessListener(aVoid2 -> {
+                                                Log.d("Event", "Successfully added event to user's history");
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                Log.e("Event", "Error updating user's event history", e);
+                                            });
                                 })
                                 .addOnFailureListener(e -> {
                                     Log.e("Event", "Error updating waitingEntrants", e);
@@ -249,6 +298,12 @@ public class Event implements Serializable {
                 });
     }
 
+    // author: david - simply adds the device Id to the local enrolled events list + invited events list
+    public void addEntrantToEnrolledEntrantsTESTING(String userID) {
+        this.invitedEntrants.add(userID);
+        this.enrolledEntrants.add(userID);
+    }
+
     /**
      * Adds a user ID to {@code cancelledEntrants} in-memory and in Firestore (arrayUnion).
      *
@@ -273,6 +328,41 @@ public class Event implements Serializable {
                                 })
                                 .addOnFailureListener(e -> {
                                     Log.e("Event", "Error updating cancelledEntrants", e);
+                                });
+                    } else {
+                        Log.e("Event", "No event found with eventID: " + eventID);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("Event", "Error querying event", e);
+                });
+    }
+
+
+    /**
+     * Adds a user's location data to {@code entrantLocations} in-memory and in Firestore (arrayUnion)
+     *
+     * @param location user's location data to add
+     */
+    public void addEntrantLocation(GeoPoint location) {
+        this.entrantLocations.add(location);
+        db.collection("events")
+                .whereEqualTo("eventID", eventID)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        // Get the actual document ID from the query result
+                        String documentId = queryDocumentSnapshots.getDocuments().get(0).getId();
+
+                        // Update the document using its ID
+                        db.collection("events")
+                                .document(documentId)
+                                .update("entrantLocations", FieldValue.arrayUnion(location))
+                                .addOnSuccessListener(aVoid -> {
+                                    Log.d("Event", "Successfully added location to entrantLocations");
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e("Event", "Error updating entrantLocations", e);
                                 });
                     } else {
                         Log.e("Event", "No event found with eventID: " + eventID);
@@ -346,6 +436,10 @@ public class Event implements Serializable {
             this.invitedEntrants.remove(userID);
         }
 
+        // Automatically fill vacancy from waiting list
+        LotterySampler sampler = new LotterySampler(new NotificationManager());
+        sampler.fillVacancyFromWaitlist(this);
+
         // Safety check — can't query without eventID
         if (this.eventID == null || this.eventID.isEmpty()) {
             Log.w("Event", "removeEntrantFromInvitedEntrants: eventID is null or empty");
@@ -394,6 +488,10 @@ public class Event implements Serializable {
             this.enrolledEntrants.remove(userID);
         }
 
+        // Automatically fill vacancy from waiting list
+        LotterySampler sampler = new LotterySampler(new NotificationManager());
+        sampler.fillVacancyFromWaitlist(this);
+
         // Safety check — can't query without eventID
         if (this.eventID == null || this.eventID.isEmpty()) {
             Log.w("Event", "removeEntrantFromEnrolledEntrants: eventID is null or empty");
@@ -432,6 +530,68 @@ public class Event implements Serializable {
     }
 
     /**
+     * Moves a user from invitedEntrants to enrolledEntrants when they accept their invitation.
+     * Does NOT trigger vacancy filling from the waiting list (unlike removeEntrantFromInvitedEntrants).
+     * Also removes the user from waitingEntrants if present.
+     *
+     * @param userID user ID to move
+     */
+    public void moveEntrantFromInvitedToEnrolled(String userID) {
+        // Remove from invited list locally
+        if (this.invitedEntrants != null) {
+            this.invitedEntrants.remove(userID);
+        }
+
+        // Add to enrolled list locally
+        if (this.enrolledEntrants != null && !this.enrolledEntrants.contains(userID)) {
+            this.enrolledEntrants.add(userID);
+        }
+
+        // Remove from waiting list locally (if present)
+        if (this.waitingEntrants != null) {
+            this.waitingEntrants.remove(userID);
+        }
+
+        // Safety check
+        if (this.eventID == null || this.eventID.isEmpty()) {
+            Log.w("Event", "moveEntrantFromInvitedToEnrolled: eventID is null or empty");
+            return;
+        }
+
+        // Update in Firestore
+        db.collection("events")
+                .whereEqualTo("eventID", this.eventID)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (querySnapshot.isEmpty()) {
+                        Log.w("Event", "No event document found matching eventID=" + this.eventID);
+                        return;
+                    }
+
+                    String docId = querySnapshot.getDocuments().get(0).getId();
+
+                    // Update all three lists in Firestore
+                    Map<String, Object> updates = new HashMap<>();
+                    updates.put("invitedEntrants", FieldValue.arrayRemove(userID));
+                    updates.put("enrolledEntrants", FieldValue.arrayUnion(userID));
+                    updates.put("waitingEntrants", FieldValue.arrayRemove(userID));
+
+                    db.collection("events")
+                            .document(docId)
+                            .update(updates)
+                            .addOnSuccessListener(aVoid ->
+                                    Log.d("Event", "Successfully moved user from invited to enrolled")
+                            )
+                            .addOnFailureListener(e ->
+                                    Log.e("Event", "Error moving user from invited to enrolled", e)
+                            );
+                })
+                .addOnFailureListener(e ->
+                        Log.e("Event", "Failed to query event document", e)
+                );
+    }
+
+    /**
      * Adds a user ID to {@code cancelledEntrants} in Firestore (arrayUnion) and locally.
      * (Method name suggests removal; current implementation adds. Keep as-is if intentional.)
      *
@@ -466,6 +626,55 @@ public class Event implements Serializable {
                 });
     }
 
+
+    /**
+     * Removes a user's location data from the local list as well as Firestore
+     *
+     * @param location user's location data to remove
+     */
+    public void removeEntrantLocation(GeoPoint location) {
+        // Remove locally
+        if (this.entrantLocations != null) {
+            this.entrantLocations.remove(location);
+        }
+
+        // Safety check — can't query without eventID
+        if (this.eventID == null || this.eventID.isEmpty()) {
+            Log.w("Event", "removeEntrantLocation: eventID is null or empty");
+            return;
+        }
+
+        // Find the document where eventID == this.eventID
+        db.collection("events")
+                .whereEqualTo("eventID", this.eventID)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+
+                    if (querySnapshot.isEmpty()) {
+                        Log.w("Event", "No event document found matching eventID=" + this.eventID);
+                        return;
+                    }
+
+                    // We expect exactly 1 document
+                    String docId = querySnapshot.getDocuments().get(0).getId();
+
+                    // Step 2: Remove the user from waitingEntrants using arrayRemove
+                    db.collection("events")
+                            .document(docId)
+                            .update("entrantLocations", FieldValue.arrayRemove(location))
+                            .addOnSuccessListener(aVoid ->
+                                    Log.d("Event", "Successfully removed " + location + " from entrantLocations in Firebase")
+                            )
+                            .addOnFailureListener(e ->
+                                    Log.e("Event", "Error updating entrantLocations", e)
+                            );
+
+                })
+                .addOnFailureListener(e ->
+                        Log.e("Event", "Failed to query event document by eventID", e)
+                );
+    }
+
     /**
      * Debug helper: logs the contents of the entrant lists and ensures {@code tags} is non-null.
      */
@@ -482,7 +691,6 @@ public class Event implements Serializable {
      * Minimal constructor used by tests that expect a specific signature.
      * (Fields are not initialized; provided only to satisfy test scaffolding.)
      */
-    // For EventsListTest
     public Event(String organizerId, Date date, Date date1, String s, String s1, boolean b, int i, Object o, Object o1, List<String> tags) {
     }
 
@@ -525,7 +733,7 @@ public class Event implements Serializable {
     public String getOrganizer() {
         return this.organizerID;
     }
-    
+
 
     /**
      * @return event UUID stored in the document field
@@ -580,10 +788,10 @@ public class Event implements Serializable {
     public int getOptionalWaitingListSize() { return this.optionalWaitingListSize; }
 
     /**
-     * @return geolocation map metadata (may be null)
+     * @return ArrayList<LatLng> list of locations of all entrants (may be empty)
      */
-    public GeoLocationMap getGeoLocationMap() {
-        return this.geoLocationMap;
+    public ArrayList<GeoPoint> getEntrantLocations() {
+        return this.entrantLocations;
     }
 
     /**
@@ -684,9 +892,9 @@ public class Event implements Serializable {
         this.optionalWaitingListSize = optionalWaitingListSize;
     }
 
-    /** @param geoLocationMap geolocation map metadata */
-    public void setGeoLocationMap(GeoLocationMap geoLocationMap) {
-        this.geoLocationMap = geoLocationMap;
+    /** @param entrantLocations locations of all entrants */
+    public void setEntrantLocations(ArrayList<GeoPoint> entrantLocations) {
+        this.entrantLocations = entrantLocations;
     }
 
     /** @param qrCode qr code object */
@@ -697,6 +905,36 @@ public class Event implements Serializable {
     /** @param poster poster object */
     public void setPoster(Poster poster) {
         this.poster = poster;
+
+        // Store in Firebase
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("events")
+                .whereEqualTo("eventID", eventID)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        // Get the first matching document
+                        DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
+                        String documentId = document.getId();
+
+                        // Now update using the actual document ID
+                        db.collection("events")
+                                .document(documentId)
+                                .update("poster.data", poster.getData())
+                                .addOnSuccessListener(aVoid -> {
+                                    Log.d("Firestore", "Poster data updated successfully");
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e("Firestore", "Error updating poster data", e);
+                                });
+                    } else {
+                        Log.d("Firestore", "No event found with that eventID");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("Firestore", "Error querying events", e);
+                });
     }
 
     /** @param tags tag list */

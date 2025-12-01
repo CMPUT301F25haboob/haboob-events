@@ -1,3 +1,22 @@
+/**
+ Fragment to displays all posters for an admin
+ Copyright (C) 2025  jeff
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 package com.example.haboob;
 
 import android.os.Bundle;
@@ -16,53 +35,52 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Fragment for displaying a filtered list of events with posters for administrative management.
+ * Fragment for displaying all events in the system for administrative management.
+ * Shows a grid of events with their posters (or a placeholder if no poster exists).
  *
- * <p>This fragment:</p>
+ * <p>This fragment provides administrators with a visual overview of all events in
+ * the system. Events are displayed in a grid layout with their poster images.
+ * If an event has no poster or the poster is removed, a placeholder image is shown
+ * to ensure the event remains visible to administrators.</p>
+ *
+ * <p>Key features:</p>
  * <ul>
- *   <li>Displays only events that have associated poster images</li>
- *   <li>Uses a grid layout (2 columns) for poster display</li>
- *   <li>Loads event data asynchronously from Firestore</li>
- *   <li>Provides navigation back to the admin main screen</li>
- *   <li>Handles click events on individual posters</li>
+ *   <li>Displays all events from Firestore in a grid layout</li>
+ *   <li>Shows poster images or placeholders for each event</li>
+ *   <li>Handles loading states with progress indicator</li>
+ *   <li>Supports click navigation to event detail view</li>
+ *   <li>Automatically refreshes when fragment becomes visible</li>
  * </ul>
  *
- * <p>The fragment uses {@link EventsList} to manage event data and filters
- * out events that don't have a Poster object attached.</p>
- *
- * @author Haboob Team
+ * @author Jeff
  * @version 1.0
- * @see Fragment
  * @see AdminPosterAdapter
+ * @see Event
  * @see EventsList
  */
 public class AdminPosterFragment extends Fragment implements AdminPosterAdapter.OnPosterClickListener {
 
-    /** Tag for logging purposes */
+    /** Tag for logging */
     private static final String TAG = "AdminPosterFragment";
 
-    /** RecyclerView for displaying the grid of posters */
+    /** RecyclerView for displaying event posters in a grid */
     private RecyclerView recyclerView;
 
-    /** ProgressBar shown while data is loading */
+    /** Progress bar shown during data loading */
     private ProgressBar progressBar;
 
-    /** Adapter for binding event data to the RecyclerView */
+    /** Adapter for the RecyclerView */
     private AdminPosterAdapter adapter;
 
-    /** List of events with posters to be displayed */
+    /** List of all events loaded from Firestore */
     private List<Event> eventList;
 
-    /** Firestore database instance for data access */
-    private FirebaseFirestore db;
-
-    /** EventsList manager for loading and managing event data */
+    /** Manager for loading events from Firestore */
     private EventsList eventsListManager;
 
     /**
@@ -73,16 +91,11 @@ public class AdminPosterFragment extends Fragment implements AdminPosterAdapter.
     }
 
     /**
-     * Inflates the fragment's layout and initializes all UI components and data loading.
+     * Inflates the fragment's layout and initializes all UI components.
      *
-     * <p>This method sets up:</p>
-     * <ul>
-     *   <li>RecyclerView with GridLayoutManager (2 columns)</li>
-     *   <li>Toolbar with back navigation</li>
-     *   <li>Progress bar for loading indication</li>
-     *   <li>Firestore connection</li>
-     *   <li>EventsList loading with callback</li>
-     * </ul>
+     * <p>Sets up the RecyclerView with a GridLayoutManager for two-column display,
+     * initializes the EventsList manager with Firestore connectivity, and configures
+     * the toolbar navigation.</p>
      *
      * @param inflater The LayoutInflater object to inflate views
      * @param container The parent view that the fragment's UI should be attached to
@@ -100,21 +113,17 @@ public class AdminPosterFragment extends Fragment implements AdminPosterAdapter.
         progressBar = view.findViewById(R.id.progress_bar_admin_posters);
         MaterialToolbar toolbar = view.findViewById(R.id.posterTopAppBar);
 
-        // Setup Firestore
-        db = FirebaseFirestore.getInstance();
-
-        eventsListManager = new EventsList(true);
+        // Initialize EventsList with inMemoryOnly = false to connect to Firestore
+        eventsListManager = new EventsList(false);
 
         // Back navigation listener
         toolbar.setOnMenuItemClickListener(item -> {
             int id = item.getItemId();
-
             if (id == R.id.action_goBack) {
                 NavHostFragment.findNavController(this)
                         .navigate(R.id.navigation_admin);
                 return true;
             }
-
             return false;
         });
 
@@ -127,113 +136,85 @@ public class AdminPosterFragment extends Fragment implements AdminPosterAdapter.
         adapter = new AdminPosterAdapter(eventList, this);
         recyclerView.setAdapter(adapter);
 
-        // Start loading data from Firestore using the EventsList constructor with a listener
-        progressBar.setVisibility(View.VISIBLE);
-
-        eventsListManager = new EventsList(new EventsList.OnEventsLoadedListener() {
-            @Override
-            public void onEventsLoaded() {
-                // Data loading succeeded. Filter and update UI on the main thread.
-                eventList.clear();
-
-                // Filter logic: Only add events that have a Poster object (not null).
-                for (Event event : eventsListManager.getEventsList()) {
-                    if (event.getPoster() != null) {
-                        eventList.add(event);
-                    }
-                }
-
-                // Update UI
-                adapter.notifyDataSetChanged();
-                progressBar.setVisibility(View.GONE);
-                Log.d(TAG, "Events with Posters loaded: " + eventList.size());
-            }
-
-            @Override
-            public void onError(Exception e) {
-                // Handle the loading failure
-                progressBar.setVisibility(View.GONE);
-                Log.e(TAG, "Error loading events: " + e.getMessage());
-                Toast.makeText(getContext(), "Error loading posters: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
-
         return view;
     }
 
     /**
-     * Loads the list of events from Firestore, filtering to include only events with posters.
+     * Called when the fragment becomes visible to the user.
+     * Reloads all event data to ensure the display is up-to-date.
      *
-     * <p>This method:</p>
-     * <ol>
-     *   <li>Shows a progress bar while loading</li>
-     *   <li>Uses EventsList to fetch data asynchronously</li>
-     *   <li>Filters events to include only those with non-null Poster objects</li>
-     *   <li>Updates the RecyclerView adapter with filtered results</li>
-     *   <li>Hides the progress bar when complete</li>
-     * </ol>
-     *
-     * <p>If an error occurs during loading, a Toast message is displayed to the user.</p>
+     * <p>This ensures that any changes made to events (such as poster removal
+     * or event deletion) are reflected when returning to this fragment.</p>
      */
-    private void loadEventsWithPosters() {
-        progressBar.setVisibility(View.VISIBLE);
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Reload data whenever fragment becomes visible
+        loadAllEvents();
+    }
 
-        // Use EventsList to load data asynchronously
+    /**
+     * Loads ALL events from Firestore and displays them.
+     *
+     * <p>This method loads every event in the system, regardless of whether they
+     * have a poster image. Events without posters will display a placeholder image
+     * in the adapter, ensuring administrators can still see and manage all events.</p>
+     *
+     * <p>Shows a progress bar during loading and handles errors appropriately by
+     * logging them and displaying user-friendly error messages.</p>
+     */
+    private void loadAllEvents() {
+        if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
+
         eventsListManager.loadEventsList(new EventsList.OnEventsLoadedListener() {
             @Override
             public void onEventsLoaded() {
-                // 1. Clear the current list
                 eventList.clear();
 
-                // 2. Iterate over all events loaded from Firestore
+                // CHANGED: We now add ALL events, regardless of whether they have a poster.
+                // This ensures events remain visible (with a placeholder) after their poster is removed.
                 for (Event event : eventsListManager.getEventsList()) {
-                    // 3. Filter logic: Only add events that have a Poster object (not null).
-                    if (event.getPoster() != null) {
+                    if (event != null) {
                         eventList.add(event);
                     }
                 }
 
-                // 4. Update UI
-                adapter.notifyDataSetChanged();
-                progressBar.setVisibility(View.GONE);
-                Log.d(TAG, "Events with Posters loaded: " + eventList.size());
+                if (adapter != null) adapter.notifyDataSetChanged();
+                if (progressBar != null) progressBar.setVisibility(View.GONE);
+                Log.d(TAG, "Total events loaded: " + eventList.size());
             }
 
             @Override
             public void onError(Exception e) {
-                progressBar.setVisibility(View.GONE);
+                if (progressBar != null) progressBar.setVisibility(View.GONE);
                 Log.e(TAG, "Error loading events: " + e.getMessage());
-                Toast.makeText(getContext(), "Error loading posters.", Toast.LENGTH_SHORT).show();
+                if (getContext() != null) {
+                    Toast.makeText(getContext(), "Error loading events.", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
 
     /**
-     * Handles click events on individual poster cards.
+     * Called when a poster card is clicked.
+     * Navigates to the detailed view for the selected event.
      *
-     * <p>When a poster is clicked, this method:</p>
-     * <ul>
-     *   <li>Displays a Toast with the event title</li>
-     *   <li>Logs the navigation attempt</li>
-     *   <li>Prepares a Bundle with the event ID</li>
-     *   <li>Would navigate to detail view (currently commented out)</li>
-     * </ul>
+     * <p>Passes the event ID as a navigation argument so the detail fragment
+     * can load and display complete information about the event.</p>
      *
      * @param event The Event object whose poster was clicked
-     * :TODO Uncomment navigation code to enable detail view navigation
      */
     @Override
     public void onPosterClick(Event event) {
         String eventId = event.getEventID();
+        if (eventId == null) return;
 
-        Toast.makeText(getContext(), "Reviewing Poster for Event: " + event.getEventTitle(), Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "Navigating to detail for Event ID: " + eventId);
 
-        // Navigation logic to the detail fragment
         Bundle bundle = new Bundle();
         bundle.putString("poster_id", eventId);
 
-        // NavHostFragment.findNavController(this).navigate(R.id.navigation_admin_poster_detail, bundle);
-
-        Log.d(TAG, "Attempting to navigate to detail for Event ID: " + eventId);
+        NavHostFragment.findNavController(this)
+                .navigate(R.id.navigation_admin_poster_detail, bundle);
     }
 }

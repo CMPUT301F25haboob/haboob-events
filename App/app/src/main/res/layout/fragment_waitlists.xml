@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <!-- Results -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+    <!-- Search -->
+    <SearchView
+        android:id="@+id/searchView"
+        android:layout_width="261dp"
+        android:layout_height="wrap_content"
+        android:iconifiedByDefault="false"
+        android:paddingTop="12dp"
+        android:queryHint="Search waitlists" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/back_button"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginStart="12dp"
+            android:minWidth="0dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:text="Back"
+            android:textStyle="bold"
+            android:textSize="12sp"
+            android:textColor="@android:color/white"
+            app:backgroundTint="@color/purple_500"
+            app:cornerRadius="8dp"/>
+
+
+    </LinearLayout>
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:scrollbars="none"
+        android:overScrollMode="never">
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/tag_filter_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:singleSelection="true"
+            app:checkedButton="@id/filter_all">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/filter_all"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="72dp"
+                android:paddingHorizontal="16dp"
+                android:text="All"
+                android:checked="true"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/filter_sports"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="72dp"
+                android:paddingHorizontal="16dp"
+                android:text="Sports"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/filter_fitness"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="72dp"
+                android:paddingHorizontal="16dp"
+                android:text="Fitness"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/filter_adults"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="72dp"
+                android:paddingHorizontal="16dp"
+                android:text="Adults"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/filter_kids"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="72dp"
+                android:paddingHorizontal="16dp"
+                android:text="Kids"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/filter_gaming"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="72dp"
+                android:paddingHorizontal="16dp"
+                android:text="Gaming"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/filter_family"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="72dp"
+                android:paddingHorizontal="16dp"
+                android:text="Family"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/filter_seniors"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="72dp"
+                android:paddingHorizontal="16dp"
+                android:text="Seniors"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/filter_art"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="72dp"
+                android:paddingHorizontal="16dp"
+                android:text="Art"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/filter_music"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="72dp"
+                android:paddingHorizontal="16dp"
+                android:text="Music"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/filter_indoor"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="72dp"
+                android:paddingHorizontal="16dp"
+                android:text="Indoor"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/filter_outdoor"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="72dp"
+                android:paddingHorizontal="16dp"
+                android:text="Outdoor"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/filter_free"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="72dp"
+                android:paddingHorizontal="16dp"
+                android:text="Free"/>
+
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+    </HorizontalScrollView>
+
+    <ListView
+        android:id="@+id/waitlistsListView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="16dp"
+        android:dividerHeight="0dp"
+        android:divider="@null"
+        android:fastScrollEnabled="true"
+        android:paddingBottom="0dp"/>
+
+
+</LinearLayout>

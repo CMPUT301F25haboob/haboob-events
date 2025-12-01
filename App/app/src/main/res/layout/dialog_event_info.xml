@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="24dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/event_info_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="How Event Selection Works"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:paddingBottom="8dp" />
+
+        <!-- Short intro -->
+        <TextView
+            android:id="@+id/event_info_intro"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="All Events use a lottery system. Joining a waitlist means you’re entering that lottery for a chance to get an invitation. Everyone in the waitlist has equal opportunity to be selected from the lottery."
+            android:textSize="14sp"
+            android:paddingBottom="16dp" />
+
+        <!-- General flow -->
+        <TextView
+            android:id="@+id/event_info_general_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="General flow"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:id="@+id/event_info_general_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="1. You join the waitlist for an event.\n\n2. When the organizer runs the lottery, some entrants are randomly selected for available spots."
+            android:textSize="14sp"
+            android:paddingBottom="16dp" />
+
+        <!-- If selected -->
+        <TextView
+            android:id="@+id/event_info_selected_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="If you are selected"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:id="@+id/event_info_selected_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="• You receive an invitation to the event.\n• You can choose to accept or cancel the invitation.\n• If you accept, you’re added to the enrolled list and your spot is reserved.\n• If you cancel (or don’t respond in time, if the organizer sets a deadline), your spot may be offered to someone else on the waitlist."
+            android:textSize="14sp"
+            android:paddingBottom="16dp" />
+
+        <!-- If not selected -->
+        <TextView
+            android:id="@+id/event_info_not_selected_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="If you are not selected"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:id="@+id/event_info_not_selected_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="• You stay on the waitlist for future lotteries (if the organizer runs another round).\n• You may still get invited later if someone cancels and a new spot opens."
+            android:textSize="14sp"
+            android:paddingBottom="16dp" />
+
+        <!-- Small footer -->
+        <TextView
+            android:id="@+id/event_info_footer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tip: Make sure your notifications are enabled so you don’t miss an invitation."
+            android:textSize="12sp"
+            android:textStyle="italic" />
+
+    </LinearLayout>
+</ScrollView>

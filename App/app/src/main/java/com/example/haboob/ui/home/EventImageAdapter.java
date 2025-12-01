@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -44,6 +45,8 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
     public interface OnItemClick { void onClick(String eventId); }     // setting up the callback
     private final List<String> imageUrls = new ArrayList<>(); // always mutable
     private List<String> eventIDs = new ArrayList<>();
+    private List<String> eventTitles = new ArrayList<>(); // Titles of events to display
+    private List<String> invitedEventIDs = new ArrayList<>(); // IDs of events that should show red dot
     private OnItemClick onItemClick;
     public EventImageAdapter(OnItemClick onItemClick) {     // Primary actor: caller supplies the click callback
         this.onItemClick = onItemClick;
@@ -82,15 +85,19 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
     }
 
     /**
-     * ViewHolder holding the poster {@link ImageView}.
+     * ViewHolder holding the poster {@link ImageView}, event title {@link TextView}, and red dot indicator.
      *
      * <p>Acts as a lightweight cache of child views to support smooth scrolling.</p>
      */
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView imageView;
+        TextView eventTitle;
+        View redDotIndicator;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.image_event);
+            eventTitle = itemView.findViewById(R.id.eventTitle);
+            redDotIndicator = itemView.findViewById(R.id.red_dot_indicator);
         }
 
     }
@@ -113,6 +120,34 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
         this.eventIDs.addAll(eventIDs);
         notifyDataSetChanged();
         Log.d("TAG", "InputIDs ran, size: " + eventIDs.size() + " EventIDs: " + eventIDs.toString());
+    }
+
+    /**
+     * Supplies the parallel list of event titles corresponding to the current {@link #imageUrls}.
+     * The order must match the image list for displaying the correct title.
+     *
+     * @param eventTitles event titles aligned by index with {@link #imageUrls}
+     */
+    public void inputTitles(List<String> eventTitles) {
+        this.eventTitles.clear();
+        if (eventTitles != null) {
+            this.eventTitles.addAll(eventTitles);
+        }
+        notifyDataSetChanged();
+        Log.d("TAG", "InputTitles ran, size: " + this.eventTitles.size());
+    }
+
+    /**
+     * Sets which event IDs should display a red dot indicator (user has been invited).
+     *
+     * @param invitedEventIDs list of event IDs that should show the red dot
+     */
+    public void setInvitedEventIDs(List<String> invitedEventIDs) {
+        this.invitedEventIDs.clear();
+        if (invitedEventIDs != null) {
+            this.invitedEventIDs.addAll(invitedEventIDs);
+        }
+        notifyDataSetChanged();
     }
 
     /**
@@ -146,9 +181,6 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
     // recyclerView binding data to each viewHolder
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
-        // TODO: OPTIONAL: the fact that it has to load the images each time is a bit inefficient, maybe its a good idea
-        // TODO: to somehow save the photos on first load and then use those?
-
         // Bind image resource to ImageView
 //        holder.imageView.setImageResource(images.get(position));
 
@@ -159,11 +191,27 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Vi
                 .error(R.drawable.shrug )
                 .into(holder.imageView);
 
+        // Set event title
+        if (position < eventTitles.size() && eventTitles.get(position) != null) {
+            holder.eventTitle.setText(eventTitles.get(position));
+        } else {
+            holder.eventTitle.setText("Event"); // Default text if title not available
+        }
+
+        // Show/hide red dot indicator based on whether user is invited to this event
+        if (position < eventIDs.size()) {
+            String eventId = eventIDs.get(position);
+            boolean isInvited = invitedEventIDs.contains(eventId);
+            holder.redDotIndicator.setVisibility(isInvited ? View.VISIBLE : View.GONE);
+        } else {
+            holder.redDotIndicator.setVisibility(View.GONE);
+        }
+
         // set an onClicklistener callback:
         holder.itemView.setOnClickListener(v -> {
             Log.d("TAG", "eventIDS size: " + eventIDs.size());
 
-            Toast.makeText(v.getContext(), "Clicked " + position, Toast.LENGTH_SHORT).show();
+//            Toast.makeText(v.getContext(), "Clicked " + position, Toast.LENGTH_SHORT).show();
 
             // navigate using an action
 //            Navigation.findNavController(v).navigate(R.id.action_mainEntrantView___to___EventView);

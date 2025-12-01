@@ -17,7 +17,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.example.haboob.Event;
 import com.example.haboob.EventsList;
 import com.example.haboob.MainActivity;
@@ -26,12 +29,12 @@ import com.example.haboob.QRCode;
 import com.example.haboob.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -84,6 +87,13 @@ public class EntrantMainFragment extends Fragment {
     }
 
     private EventsList eventsList3; // declare the eventsList object
+    private Button myWaitlists;
+    private ImageView heroImage;
+
+    // Cache for hero image to prevent flickering
+    private String cachedHeroImageUrl = null;
+    private String cachedHeroEventId = null;
+    ImageButton infoButton;
 
     public EntrantMainFragment() {
         // Required empty public constructor
@@ -147,52 +157,65 @@ public class EntrantMainFragment extends Fragment {
             public void onEventsLoaded() { // the callback function calls this when eventsList3 are loaded
 
                 waitListEvents = eventsList3.getEventsList();
-
                 waitListEvents = eventsList3.getEntrantWaitlistEvents(deviceId);
                 enrolledEventsList = eventsList3.getEntrantEnrolledEvents(deviceId);
 
+                // Sort waitListEvents: events where user is invited appear first
+                waitListEvents.sort((e1, e2) -> {
+                    boolean e1HasInvite = e1.getInvitedEntrants() != null && e1.getInvitedEntrants().contains(deviceId);
+                    boolean e2HasInvite = e2.getInvitedEntrants() != null && e2.getInvitedEntrants().contains(deviceId);
 
-                // add to list
-//                for (Event event: waitListEvents){
-//                    if ((event.getEntrant_ids_for_lottery() != null) && (!event.getEntrant_ids_for_lottery().isEmpty()) && (event != null)) {
-//                        if (event.getEnrolledEntrants() != null) {
-//                            if (event.getEnrolledEntrants().contains(deviceId)) {
-//                                enrolledEventsList.add(event);
-//                            }
-//                        } else {
-//                            Log.d("TAG", "event.getEnrolledEntrants IS NULL, device id: "+ deviceId);
-//                        }
-//                    }
-//                }
+                    if (e1HasInvite && !e2HasInvite) return -1;  // e1 first
+                    if (!e1HasInvite && e2HasInvite) return 1;   // e2 first
+                    return 0;  // maintain order
+                });
 
-//                for (Event event: enrolledEventsList){
-//                   Log.d("TAG", "Device ID: "+  event.getEntrant_ids_for_lottery().toString());
-//                }
-                Log.d("TAG", "FILTERED EVENTSLIST SIZE: " + enrolledEventsList.size());
+                Log.d("TAG", "Enrolled EVENTSLIST SIZE: " + enrolledEventsList.size());
 
                 // runs AFTER the database is done querying:
 //                Log.d("TAG", "EVENTSLIST 4 SIZE: " + listOfEvents.size());
                 List<String> imageURLs = new ArrayList<>();
                 List<String> eventIDs = new ArrayList<>();
+                List<String> eventTitles = new ArrayList<>();
 
                 addEventImagesLocally(enrolledEventsList, imageURLs); // imageURLS <- list of imageURLs from query
                 addEventIDsLocally(enrolledEventsList, eventIDs); // eventIDs <- list of eventIDs from query
+                addEventTitlesLocally(enrolledEventsList, eventTitles); // eventTitles <- list of eventTitles from query
 
                 // ********** Enrolled events image adapter: ****************
                 // replace the placeholder images after query is done:
                 enrolledEventsAdapter.replaceItems(imageURLs);
                 // input the IDs of the same images into the imageAdapter
                 enrolledEventsAdapter.inputIDs(eventIDs);
+                // input the titles of the same events into the imageAdapter
+                enrolledEventsAdapter.inputTitles(eventTitles);
                 Log.d("TAG", "ImageAdapter images Replaced");
+
+                // ********** Hero Image: Next Upcoming Event ****************
+                updateHeroImage(enrolledEventsList);
 
                 // ********** waitlist Events image adapter: ****************
                 // to see ALL events for testing:
                 addEventImagesLocally(waitListEvents, imageURLs); // imageURLS <- list of imageURLs from query
                 addEventIDsLocally(waitListEvents, eventIDs); // eventIDs <- list of eventIDs from query
+                addEventTitlesLocally(waitListEvents, eventTitles); // eventTitles <- list of eventTitles from query
+
+                // Track which events should show red dot (user is invited)
+                List<String> invitedEventIDs = new ArrayList<>();
+                for (Event event : waitListEvents) {
+                    if (event.getInvitedEntrants() != null && event.getInvitedEntrants().contains(deviceId)) {
+                        invitedEventIDs.add(event.getEventID());
+                    }
+                }
+
                 // replace the placeholder images
                 waitListsAdapter.replaceItems(imageURLs);
                 // input the IDs of the same images into the imageAdapter
                 waitListsAdapter.inputIDs(eventIDs);
+                // input the titles of the same events into the imageAdapter
+                waitListsAdapter.inputTitles(eventTitles);
+                // Set which events should show the red dot indicator
+                waitListsAdapter.setInvitedEventIDs(invitedEventIDs);
                 Log.d("TAG", "ImageAdapter images Replaced");
 
             }
@@ -214,6 +237,19 @@ public class EntrantMainFragment extends Fragment {
      */ @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        // Refresh MainActivity's EventsList so EventViewerFragment gets fresh data
+        if (getActivity() != null) {
+            ((MainActivity) getActivity()).refreshEventsList();
+        }
+
+        // Turns the XML file entrant_main.xml into actual View objects in memory.
+        View view = inflater.inflate(R.layout.entrant_main, container, false);
+
+        // Initialize hero image
+        heroImage = view.findViewById(R.id.entrant_hero_image);
+
+        heroImage.setImageResource(R.drawable.haboob);
 
         loadEventsForUser(userID);
 
@@ -239,9 +275,26 @@ public class EntrantMainFragment extends Fragment {
 
         Log.d("TAG", "ListOf events size: " + waitListEvents.size());
 
-       // Turns the XML file entrant_main.xml into actual View objects in memory.
-        View view = inflater.inflate(R.layout.entrant_main, container, false);
+        // Load cached hero image immediately to prevent flicker
+        if (cachedHeroImageUrl != null && cachedHeroEventId != null) {
+            Glide.with(this)
+                    .load(cachedHeroImageUrl)
+                    .placeholder(R.drawable.haboob)
+                    .error(R.drawable.haboob)
+                    .into(heroImage);
 
+            // Set up click listener with cached event ID
+            final String eventId = cachedHeroEventId;
+            heroImage.setOnClickListener(v -> {
+                Bundle args = new Bundle();
+                args.putString(EventViewerFragment.ARG_EVENT_ID, eventId);
+                args.putString("device_id", deviceId);
+                args.putBoolean("from_enrolledEvents", true);
+
+                NavHostFragment.findNavController(this)
+                        .navigate(R.id.entrant_event_view, args);
+            });
+        }
 
         // Dan
         // ***** Profile Button Navigation *****
@@ -251,11 +304,16 @@ public class EntrantMainFragment extends Fragment {
                     .navigate(R.id.action_entrantMain_to_profile);
         });
 
+        // info button popup:
+        infoButton = view.findViewById(R.id.infoButton);
+
+
+
+
         // *****  ***** ***** ***** First carousel - My upcoming events ***** ***** ***** ***** ***** ***** *****
         // Find RecyclerView by ID
         RecyclerView recyclerView = view.findViewById(R.id.entrant_rv_upcoming);
         // Prepare a list of example images from drawable
-//        List<Integer> images = Arrays.asList(R.drawable.hockey_ex, R.drawable.bob_ross, R.drawable.clash_royale, R.drawable.swimming_lessons);
 
         // Set up LayoutManager for horizontal scrolling, tells the RecyclerView how to position items, essential for actual rendering
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
@@ -269,13 +327,11 @@ public class EntrantMainFragment extends Fragment {
             Log.d("TAG", "The callback worked, event ID = " + eventId);
 //            Log.d("TAG", "ListOf events size: " + listOfEvents.size());
 
-//            EventsList eventsList = new EventsList(dummyString);
             // find the event clicked(the new events list should be updated with the database data):
             for (Event event : enrolledEventsList) {
                 if (event.getEventID().equals(eventId)) {
 
-                    Log.d("TAG", "GOT PAST IF ");
-                    Log.d("TAG", "Event clicked: " + event.getEventTitle());
+                    Log.d("TAG", "Event clicked equalled event ID, Event clicked: " + event.getEventTitle());
 
                     // Create a Bundle to pass data to the EventViewerFragment
                     Bundle args = new Bundle();
@@ -295,24 +351,16 @@ public class EntrantMainFragment extends Fragment {
         RecyclerView rvWaitlists = view.findViewById(R.id.entrant_rv_waitlists);
         rvWaitlists.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         rvWaitlists.setNestedScrollingEnabled(false);
-        List<Integer> waitlistImages = Arrays.asList(
-                R.drawable.clash_royale, R.drawable.clash_royale, R.drawable.clash_royale
-        );
         rvWaitlists.setAdapter(waitListsAdapter);
-//
-//        // set the onClickListener for the second carousel:
+
+        // set the onClickListener for the second carousel:
         waitListsAdapter.setOnItemClick(eventId -> {
 
-            Log.d("TAG", "The callback worked, event ID = " + eventId + "Event title: " + eventsList3.getEventByID(eventId).getEventTitle());
-//            Log.d("TAG", "ListOf events size: " + listOfEvents.size());
-
-//            EventsList eventsList = new EventsList(dummyString);
             // find the event clicked(the new events list should be updated with the database data):
             for (Event event : waitListEvents) {
                 if (event.getEventID().equals(eventId)) {
 
-                    Log.d("TAG", "GOT PAST IF ");
-                    Log.d("TAG", "Event clicked: " + event.getEventTitle());
+                    Log.d("TAG", "Callback for open waitlists carousel worked:  " + eventId + "Event title: " + eventsList3.getEventByID(eventId).getEventTitle());
 
                     // Create a Bundle to pass data to the EventViewerFragment
                     Bundle args = new Bundle();
@@ -330,8 +378,9 @@ public class EntrantMainFragment extends Fragment {
                 }
             }
         });
-//
-//        // Return the inflated view
+
+//     // Return the inflated view
+        Log.d("Debug", "EntrantMainFragment navigated to");
         return view;
     }
 
@@ -347,21 +396,47 @@ public class EntrantMainFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
 
-        // set a listener that listens to EventViewerFragment, if a user ID got added to an event entrant_ids_for_lottery, update the image carousels
+        // I'm not sure all this is code is needed, I think that whenever we nav back to eventViewer fragment the arrayAdapters are updated
+//        // set a listener that listens to EventViewerFragment, if a user ID got added to an event entrant_ids_for_lottery, update the image carousels
+//        getParentFragmentManager().setFragmentResultListener(
+//                "USER_JOINED_WAITLIST", this, (reqKey, bundle) -> loadEventsForUser(userID)
+//        );
+//
+//        // set a listener that listens to EventViewerFragment, if a user ID got added to an event entrant_ids_for_lottery, update the image carousels
+//        getParentFragmentManager().setFragmentResultListener(
+//                "USER_LEFT_WAITLIST", this, (reqKey, bundle) -> loadEventsForUser(userID)
+//        );
+//
+//        // set a listener that listens to EventViewerFragment, if a user ID got deleted from enrolledEvents, update image carousels
+//        getParentFragmentManager().setFragmentResultListener(
+//                "USER_LEFT_EVENT", this, (reqKey, bundle) -> loadEventsForUser(userID)
+//        );
+//        // set a listener that listens to EventViewerFragment, if a user ID got added to enrolledEvents, update image carousels
         getParentFragmentManager().setFragmentResultListener(
-                "USER_JOINED_WAITLIST", this, (reqKey, bundle) -> loadEventsForUser(userID)
+                "USER_JOINED_EVENT", this, (reqKey, bundle) -> loadEventsForUser(userID)
         );
 
-        // set a listener that listens to EventViewerFragment, if a user ID got added to an event entrant_ids_for_lottery, update the image carousels
-        getParentFragmentManager().setFragmentResultListener(
-                "USER_LEFT_WAITLIST", this, (reqKey, bundle) -> loadEventsForUser(userID)
-        );
+        // Info button onclickListener:
+        assert infoButton != null;
+        infoButton.setOnClickListener(v -> {
+            Log.d("TAG", "Info button clicked");
+            View dialogView = getLayoutInflater().inflate(R.layout.dialog_event_info, null);
 
-        // set a listener that listens to EventViewerFragment, if a user ID got deleted from enrolledEvents, update image carousels
-        getParentFragmentManager().setFragmentResultListener(
-                "USER_LEFT_EVENT", this, (reqKey, bundle) -> loadEventsForUser(userID)
-        );
+            new MaterialAlertDialogBuilder(requireContext())
+                    .setView(dialogView)
+                    .setPositiveButton("Got it", null)
+                    .show();
+        });
 
+        // set a listener that listens for myWaitlists button click, on navigate, it navigates there
+        myWaitlists = view.findViewById(R.id.btn_browse_waitlists);
+        Bundle args = new Bundle();
+        args.putString("device_id", deviceId); // args <- deviceID
+
+        myWaitlists.setOnClickListener(v ->
+                NavHostFragment.findNavController(this)
+                        .navigate(R.id.waitlists_view_fragment, args)
+        );
 
     }
 
@@ -373,8 +448,10 @@ public class EntrantMainFragment extends Fragment {
      */
     public void createDummyEvent() {
         // *********** create a new dummy event: ********************************************************************
-        MainActivity mainAct = (MainActivity) getActivity(); // find the instance of mainActivity thats currently running
-        EventsList eventsList = mainAct.getEventsList();
+//        MainActivity mainAct = (MainActivity) getActivity(); // find the instance of mainActivity thats currently running
+//        EventsList eventsList = mainAct.getEventsList();
+
+        EventsList eventsList = new EventsList();
         if (eventsList == null) {
             Log.w("EntrantMainFragment", "eventsList was null");
             return;
@@ -384,26 +461,18 @@ public class EntrantMainFragment extends Fragment {
         Date regStart = new GregorianCalendar(2025, Calendar.NOVEMBER, 1).getTime();
         Date regEnd   = new GregorianCalendar(2025, Calendar.NOVEMBER, 15).getTime();
 
+        String url = "https://play-lh.googleusercontent.com/gnSC6s8-6Tjc4uhvDW7nfrSJxpbhllzYhgX8y374N1LYvWBStn2YhozS9XXaz1T_Pi2q";
+
         // Create supporting objects
         QRCode qrCode = new QRCode("idk lol");
-        Poster poster = new Poster("https://www.seriouseats.com/thmb/LoXQL7Yp_uXxtipH8cCp_LGVg5E=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/__opt__aboutcom__coeus__resources__content_migration__serious_eats__seriouseats.com__recipes__images__2014__08__20140810-workhorse-bread-vicky-wasik-3-3a86ee51da2e4a7b8239ceb62d8d8d17.jpg");
+        Poster poster = new Poster(url);
 
-        // Create a list of tags for this event
-        List<String> tagStrings = new ArrayList<>();
-        tagStrings.add("festival");
-        tagStrings.add("outdoor");
-        tagStrings.add("family");
-//        EventTagList tags = new EventTagList(tagStrings);
 
+        // create list of tags
         ArrayList<String> tagslist2 = new ArrayList<>();
-        tagslist2.add("Spongebob");
-        tagslist2.add("lol");
-        tagslist2.add("Guy");
-
-        // create a list of dummy entrant Ids for this event:
-        ArrayList<String> event_entrant_ids = new ArrayList<>();
-
-        event_entrant_ids.add(deviceId);
+        tagslist2.add("clash");
+        tagslist2.add("royale");
+        tagslist2.add("git gud");
 
 
         // Finally, create your dummy Event using your constructor
@@ -411,42 +480,31 @@ public class EntrantMainFragment extends Fragment {
                 "org12345",                                  // organizer
                 regStart,                                    // registrationStartDate
                 regEnd,                                      // registrationEndDate
-                "bread making",                          // eventTitle
-                "dough",             // eventDescription
+                "Clash Royale Tournament",                          // eventTitle
+                "git gud scrub",             // eventDescription
                 true,                                        // geoLocationRequired
                 100,                                         // lotterySampleSize
                 200,                                            // optionalWaitingListSize
-                qrCode,                                      // QRCode object
                 poster,                                      // Poster object
                 tagslist2                // tagsList<String
         );
 
-//         public Event( QRCode qrCode, Poster poster, ArrayList<String> tags) {
-//            this.db = FirebaseFirestore.getInstance();
-//            this.organizerID = organizer;
-//            this.registrationStartDate = registrationStartDate;
-//            this.registrationEndDate = registrationEndDate;
-//            this.eventTitle = eventTitle;
-//            this.eventDescription = eventDescription;
-//            this.geoLocationRequired = geoLocationRequired;
-//            this.lotterySampleSize = lotterySampleSize;
-//            this.optionalWaitingListSize = optionalWaitingListSize;
-//            this.qrCode = qrCode;
-//            this.poster = poster;
-//            this.tags = tags;
-//            this.initLists();
-//        }
+//        dummyEvent.addEntrantToWaitingEntrants(deviceId);
+        eventsList.loadEventsList();
 
-//        Event(String organizer, Date registrationStartDate, Date registrationEndDate, String eventTitle, String eventDescription, boolean geoLocationRequired, int lotterySampleSize, QRCode qrCode, Poster poster, ArrayList<String> tags, ArrayList<String> entrant_ids_for_lottery) {
+        // update carousels
+        loadEventsForUser(deviceId);
 
-        if (eventsList != null){
-            eventsList.addEvent(dummyEvent);
-            Log.d("TAG", "eventsList is not null");
-        }
-        else{
-            Log.d("TAG", "eventsList is null");
-        }
-
+        eventsList3 = new EventsList(new EventsList.OnEventsLoadedListener() {
+            @Override
+            public void onEventsLoaded() { // the callback function calls this when eventsList3 are loaded
+                eventsList3.addEvent(dummyEvent);
+            }
+            @Override
+            public void onError(Exception err) {
+                Log.e("TAG", "Failed loading events", err);
+            }
+        });
     }
 
     /**
@@ -490,6 +548,90 @@ public class EntrantMainFragment extends Fragment {
         for (Event event : eventsList2) {
             eventIDs.add(event.getEventID());
 //            Log.d("TAG", "Event: " + event.getEventTitle() + " ID string: " + event.getEventID());
+        }
+    }
+
+    /**
+     * Extracts {@link Event#getEventTitle()} from each event into {@code eventTitles}, preserving order.
+     *
+     * @param eventsList2 source events
+     * @param eventTitles destination list; cleared before population
+     */
+    public void addEventTitlesLocally(List<Event> eventsList2, List<String> eventTitles) {
+        eventTitles.clear();
+        for (Event event : eventsList2) {
+            String title = event.getEventTitle();
+            eventTitles.add(title != null ? title : "Untitled Event");
+        }
+    }
+
+    /**
+     * Updates the hero image with the next upcoming event (event with soonest registration end date that hasn't passed).
+     * Sets up click listener to navigate to EventViewerFragment.
+     *
+     * @param events list of enrolled events to search through
+     */
+    private void updateHeroImage(List<Event> events) {
+        if (heroImage == null || events == null || events.isEmpty()) {
+            return;
+        }
+
+        // Get current date
+        Date currentDate = new Date();
+
+        // Find the next upcoming event (registration end date is soonest but hasn't passed)
+        Event nextEvent = null;
+        Date soonestDate = null;
+
+        for (Event event : events) {
+            Date regEndDate = event.getRegistrationEndDate();
+
+            // Check if registration end date exists and hasn't passed
+            if (regEndDate != null && regEndDate.after(currentDate)) {
+                // If this is the first valid event or has a sooner date
+                if (soonestDate == null || regEndDate.before(soonestDate)) {
+                    soonestDate = regEndDate;
+                    nextEvent = event;
+                }
+            }
+        }
+
+        // If we found a next event, display it
+        if (nextEvent != null) {
+            final Event finalNextEvent = nextEvent; // For use in lambda
+
+            // Load event poster into hero image
+            Poster poster = nextEvent.getPoster();
+            if (poster != null && poster.getData() != null && !poster.getData().isEmpty()) {
+                // Cache the hero image URL and event ID
+                cachedHeroImageUrl = poster.getData();
+                cachedHeroEventId = nextEvent.getEventID();
+
+                Glide.with(this)
+                        .load(poster.getData())
+                        .placeholder(R.drawable.haboob)
+                        .error(R.drawable.haboob)
+                        .into(heroImage);
+            } else {
+                // No poster Show haboob explicitly
+                heroImage.setImageResource(R.drawable.haboob);
+            }
+
+
+            // Set up click listener to navigate to EventViewerFragment
+            heroImage.setOnClickListener(v -> {
+                Bundle args = new Bundle();
+                args.putString(EventViewerFragment.ARG_EVENT_ID, finalNextEvent.getEventID());
+                args.putString("device_id", deviceId);
+                args.putBoolean("from_enrolledEvents", true);
+
+                NavHostFragment.findNavController(this)
+                        .navigate(R.id.entrant_event_view, args);
+            });
+
+            Log.d("TAG", "Hero image set to next upcoming event: " + nextEvent.getEventTitle());
+        } else {
+            Log.d("TAG", "No upcoming events found for hero image");
         }
     }
 }

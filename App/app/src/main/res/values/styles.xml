@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+        <style name="ConfirmDialogTheme"
+            parent="ThemeOverlay.Material3.MaterialAlertDialog">
+
+            <!-- Background for the dialog card -->
+            <item name="colorSurface">@color/white</item>
+
+            <!-- Title + body text styles -->
+            <item name="materialAlertDialogTitleTextStyle">@style/ConfirmDialogTitleText</item>
+            <item name="materialAlertDialogBodyTextStyle">@style/ConfirmDialogBodyText</item>
+
+            <!-- Button styles -->
+            <item name="buttonBarPositiveButtonStyle">@style/ConfirmDialogPositiveButton</item>
+            <item name="buttonBarNegativeButtonStyle">@style/ConfirmDialogNegativeButton</item>
+
+            <!-- 🔴 Important: DO NOT set shapeAppearance* here for now -->
+        </style>
+
+        <style name="ConfirmDialogTitleText"
+            parent="@style/TextAppearance.Material3.TitleLarge">
+            <item name="android:textStyle">bold</item>
+        </style>
+
+        <style name="ConfirmDialogBodyText"
+            parent="@style/TextAppearance.Material3.BodyMedium">
+            <item name="android:lineSpacingExtra">2dp</item>
+        </style>
+
+        <style name="ConfirmDialogPositiveButton"
+            parent="@style/Widget.Material3.Button.TextButton.Dialog">
+            <item name="android:textAllCaps">false</item>
+<!--            &lt;!&ndash; use non-android prefix so Material can tint it &ndash;&gt;-->
+<!--            <item name="textColor2">@color/error</item>-->
+        </style>
+
+        <style name="ConfirmDialogNegativeButton"
+            parent="@style/Widget.Material3.Button.TextButton.Dialog">
+            <item name="android:textAllCaps">false</item>
+        </style>
+
+</resources>

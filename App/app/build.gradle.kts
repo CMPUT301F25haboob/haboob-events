@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     id("com.google.gms.google-services")
+    alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
 }
 
 android {
@@ -36,9 +37,12 @@ android {
 }
 
 dependencies {
+    // Maps SDK for Android
+    implementation(libs.play.services.maps)
+    implementation(libs.play.services.location)
     // Testing
     // For FragmentScenario
-    androidTestImplementation("androidx.fragment:fragment-testing:1.7.1")
+    debugImplementation("androidx.fragment:fragment-testing:1.7.1")
     // For TestNavHostController (using the same version as your other navigation libraries)
     androidTestImplementation("androidx.navigation:navigation-testing:2.9.4")
 
@@ -66,10 +70,34 @@ dependencies {
     implementation("com.google.zxing:core:3.5.3")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 
+    // For storing images in Firebase storage (cloud storage)
+    implementation("com.google.firebase:firebase-storage:20.3.0")
+
     // JUnit 4 for local unit tests
     //testImplementation("junit:junit:4.13.2")
     //androidTestImplementation("androidx.test.ext:junit:1.1.5")
     //androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+
+
     // JavaDocs
     // implementation(files("/home/user/Android/Sdk/platforms/android-36/android.jar"))
+
+
+    // mockito testing dependencies - david
+    testImplementation("org.mockito:mockito-core:5.+")         // unit tests (JVM)
+    androidTestImplementation("org.mockito:mockito-android:5.+")
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation("com.google.android.gms:play-services-tasks:18.0.2")
+
+    // flexbox for event filters:
+    // implementation("com.google.android.flexbox:flexbox:3.0.0")
+
+    // Cloudinary dependencies for storing images
+    implementation("com.cloudinary:cloudinary-android:3.0.2")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.navigation:navigation-fragment:2.7.7")
+    implementation("androidx.navigation:navigation-ui:2.7.7")
 }

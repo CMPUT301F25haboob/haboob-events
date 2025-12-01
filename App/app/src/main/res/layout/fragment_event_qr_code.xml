@@ -2,7 +2,6 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/white">
@@ -12,73 +11,132 @@
         android:id="@+id/topAppBar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorSurface"
+        android:background="@android:color/white"
+        android:elevation="4dp"
         app:menu="@menu/menu_event_detail"
         app:title="Event QR Code"
         app:titleCentered="false"
-        app:titleTextColor="@android:color/black"
-        android:paddingTop="24dp"/>
+        app:titleTextColor="@android:color/black"/>
 
-    <!-- QR Code Content -->
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize"
-        android:padding="24dp">
+        android:fillViewport="true">
 
-        <!-- QR Code Title -->
-        <TextView
-            android:id="@+id/labelQRCode"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:text="Scan to Join Event"
-            android:textStyle="bold"
-            android:textSize="20sp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            android:orientation="vertical"
+            android:padding="24dp">
 
-        <!-- QR Code Image -->
-        <ImageView
-            android:id="@+id/qrCodeImage"
-            android:layout_width="300dp"
-            android:layout_height="300dp"
-            android:layout_marginTop="24dp"
-            android:scaleType="fitCenter"
-            android:contentDescription="QR Code for event registration"
-            app:layout_constraintTop_toBottomOf="@id/labelQRCode"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            <!-- Header -->
+            <TextView
+                android:id="@+id/qr_code_subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Share this code for event registration"
+                android:textSize="14sp"
+                android:layout_marginBottom="32dp"
+                android:textColor="@android:color/darker_gray" />
 
-        <!-- Event Name Display -->
-        <TextView
-            android:id="@+id/eventIdLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Event ID:"
-            android:textStyle="bold"
-            android:textSize="14sp"
-            app:layout_constraintTop_toBottomOf="@id/qrCodeImage"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            <!-- QR Code Section -->
+            <TextView
+                android:id="@+id/labelQRCode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Scan to Join Event"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginBottom="16dp"
+                android:textColor="@android:color/black" />
 
-        <TextView
-            android:id="@+id/eventIdValue"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Loading..."
-            android:textSize="12sp"
-            android:gravity="center"
-            android:fontFamily="monospace"
-            app:layout_constraintTop_toBottomOf="@id/eventIdLabel"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            <!-- QR Code Container with Card-like appearance -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardElevation="4dp"
+                app:cardCornerRadius="12dp"
+                app:cardBackgroundColor="@android:color/white">
 
-        <!-- Share Button -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp"
+                    android:gravity="center">
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+                    <ImageView
+                        android:id="@+id/qrCodeImage"
+                        android:layout_width="280dp"
+                        android:layout_height="280dp"
+                        android:scaleType="fitCenter"
+                        android:contentDescription="QR Code for event registration" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- Event Information Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Event Details"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp"
+                android:textColor="@android:color/black" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@android:color/white"
+                android:elevation="2dp"
+                android:padding="16dp"
+                android:layout_marginBottom="32dp">
+
+                <TextView
+                    android:id="@+id/eventIdLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Event ID"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="4dp"
+                    android:textColor="@android:color/black"/>
+
+                <TextView
+                    android:id="@+id/eventIdValue"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Loading..."
+                    android:textSize="14sp"
+                    android:fontFamily="monospace"
+                    android:textColor="@android:color/darker_gray"/>
+
+            </LinearLayout>
+
+            <!-- Spacer to push button to bottom -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:minHeight="24dp" />
+
+            <!-- Save Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/saveButton"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Save QR Code"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="8dp"
+                android:backgroundTint="@color/purple_500" />
+
+        </LinearLayout>
+    </ScrollView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

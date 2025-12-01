@@ -1,3 +1,21 @@
+/**
+        Adapter to displays all events for an admin
+        Copyright (C) 2025  jeff
+
+        This program is free software: you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version.
+
+        This program is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.
+
+        You should have received a copy of the GNU General Public License
+        along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 package com.example.haboob;
 
 import android.view.LayoutInflater;
@@ -87,8 +105,6 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Vi
         // Update to use Event getters
         holder.posterTitle.setText(event.getEventTitle()); // Uses getEventTitle()
 
-        // Placeholder Status: Assuming getEventID() can serve as a temporary status/detail
-        holder.posterStatus.setText("ID: " + event.getEventID());
 
         // Placeholder for image loading: Event is assumed to have a getPoster() method
         // which contains the image data (based on Event.class bytecode)
@@ -118,14 +134,18 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Vi
      * This improves scrolling performance by avoiding repeated findViewById calls.
      */
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        /** The card view containing all event information */
+        /**
+         * The card view containing all event information
+         */
         public final MaterialCardView posterCard;
-        /** ImageView for displaying the event's poster image */
+        /**
+         * ImageView for displaying the event's poster image
+         */
         public final ImageView posterImage;
-        /** TextView for displaying the event title */
+        /**
+         * TextView for displaying the event title
+         */
         public final TextView posterTitle;
-        /** TextView for displaying event status or ID information */
-        public final TextView posterStatus;
 
         /**
          * Constructs a ViewHolder and caches all child view references.
@@ -137,7 +157,6 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Vi
             posterCard = view.findViewById(R.id.card_admin_poster);
             posterImage = view.findViewById(R.id.poster_image_view);
             posterTitle = view.findViewById(R.id.event_title);
-            posterStatus = view.findViewById(R.id.poster_select_checkbox);
         }
     }
 }

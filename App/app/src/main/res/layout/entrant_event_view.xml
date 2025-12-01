@@ -9,7 +9,6 @@
     android:background="@android:color/white"
     tools:context=".ui.home.EntrantMainFragment">
 
-    <!-- Scrollable content -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topAppBar"
         android:layout_width="match_parent"
@@ -38,182 +37,228 @@
             android:paddingBottom="16dp"
             android:paddingTop="24dp">
 
-            <!-- Hero image -->
             <ImageView
                 android:id="@+id/heroImage"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:scaleType="centerCrop"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintDimensionRatio="16:9"
                 android:contentDescription="@string/title_home"
-                android:src="@drawable/bob_ross" />
+                android:scaleType="centerCrop"
+                android:src="@drawable/bob_ross"
+                app:layout_constraintDimensionRatio="16:9"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Date + Time -->
             <TextView
                 android:id="@+id/registrationStart"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="28dp"
-                android:text="Registration Start:"
+                android:layout_marginTop="12dp"
+                android:text="Registration Start Date:"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                app:layout_constraintEnd_toStartOf="@id/valueDateTime"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/heroImage"
-                app:layout_goneMarginEnd="8dp" />
+                app:layout_constraintStart_toStartOf="parent" />
 
             <TextView
-                android:id="@+id/valueregistrationStart"
-                android:layout_width="wrap_content"
+                android:id="@+id/valueRegistrationStart"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Oct 29, 3:30—3:30PM"
+                android:layout_marginStart="8dp"
+                android:text="Placeholder Start"
                 android:textSize="14sp"
+                android:gravity="end"
                 app:layout_constraintBaseline_toBaselineOf="@id/registrationStart"
+                app:layout_constraintStart_toEndOf="@id/registrationStart"
                 app:layout_constraintEnd_toEndOf="parent" />
-
-            <TextView
-                android:id="@+id/valueregistrationEnd"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Oct 29, 3:30—3:30PM"
-                android:textSize="14sp"
-                app:layout_constraintBaseline_toBaselineOf="@id/registrationEnd"
-                app:layout_constraintEnd_toEndOf="parent" />
-
-            <TextView
-                android:id="@+id/valueDateTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Oct 29, 3:30—3:30PM"
-                android:textSize="14sp"
-                app:layout_constraintBaseline_toBaselineOf="@id/eventDate"
-                app:layout_constraintEnd_toEndOf="parent" />
-
-            <!-- Lottery Draw Date -->
-            <TextView
-                android:id="@+id/valueDrawDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Oct 17, 3:30PM"
-                android:textSize="14sp"
-                app:layout_constraintBaseline_toBaselineOf="@id/labelDrawDate"
-                app:layout_constraintEnd_toEndOf="parent"/>
-
-            <!-- Amount in Lottery -->
-            <TextView
-                android:id="@+id/valueAmount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="23 currently in lottery"
-                android:textSize="14sp"
-                app:layout_constraintBaseline_toBaselineOf="@id/labelAmount"
-                app:layout_constraintEnd_toEndOf="parent"
-                tools:ignore="SmallSp" />
 
             <TextView
                 android:id="@+id/registrationEnd"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="52dp"
-                android:text="Registration End:"
+                android:layout_marginTop="12dp"
+                android:text="Registration End Date:"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                app:layout_constraintEnd_toStartOf="@id/valueDateTime"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/heroImage"
-                app:layout_goneMarginEnd="8dp" />
+                app:layout_constraintTop_toBottomOf="@id/valueRegistrationStart"
+                app:layout_constraintStart_toStartOf="parent" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnAccept"
-                style="?attr/materialButtonOutlinedStyle"
+            <TextView
+                android:id="@+id/valueRegistrationEnd"
                 android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_marginTop="56dp"
-                android:text="Accept Invitation"
-                android:textAllCaps="false"
-                android:textStyle="bold"
-                app:backgroundTint="@color/white"
-                app:cornerRadius="16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/labelAmount"
-                tools:backgroundTint="#35C759" />
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Placeholder End"
+                android:textSize="14sp"
+                android:gravity="end"
+                app:layout_constraintBaseline_toBaselineOf="@id/registrationEnd"
+                app:layout_constraintStart_toEndOf="@id/registrationEnd"
+                app:layout_constraintEnd_toEndOf="parent" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnLeaveWaitlist"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
+            <TextView
+                android:id="@+id/eventDetails"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:text="Leave Waitlist"
-                android:textAllCaps="false"
-                android:textColor="@android:color/white"
+                android:text="Event Details:"
+                android:textSize="14sp"
                 android:textStyle="bold"
-                app:backgroundTint="#BF1D2A"
-                app:cornerRadius="16dp"
-                app:iconTint="@android:color/white"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="1.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/btnAccept" />
+                app:layout_constraintTop_toBottomOf="@id/valueRegistrationEnd"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <TextView
+                android:id="@+id/valueEventDetails"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Placeholder Details — this is a long description example to demonstrate wrapping."
+                android:textSize="14sp"
+                android:gravity="end"
+                app:layout_constraintBaseline_toBaselineOf="@id/eventDetails"
+                app:layout_constraintStart_toEndOf="@id/eventDetails"
+                app:layout_constraintEnd_toEndOf="parent" />
 
             <TextView
                 android:id="@+id/labelAmount"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:text="Amount in Lottery:"
+                android:text="Current Waitlist Size:"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                app:layout_constraintEnd_toStartOf="@id/valueAmount"
-                app:layout_constraintHorizontal_bias="1.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/labelDrawDate" />
+                app:layout_constraintTop_toBottomOf="@id/valueEventDetails"
+                app:layout_constraintStart_toStartOf="parent" />
 
-            <!-- NEW ROW INSERTED BETWEEN labelAmount AND userWaitListStatus -->
+            <TextView
+                android:id="@+id/valueAmount"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Placeholder Lottery Amount"
+                android:textSize="14sp"
+                android:gravity="end"
+                app:layout_constraintBaseline_toBaselineOf="@id/labelAmount"
+                app:layout_constraintStart_toEndOf="@id/labelAmount"
+                app:layout_constraintEnd_toEndOf="parent" />
+
             <TextView
                 android:id="@+id/labelNewInfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:text="Registration Limit:"
+                android:text="Waitlist Capacity:"
+                android:textSize="14sp"
                 android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/labelAmount" />
+                app:layout_constraintTop_toBottomOf="@id/valueAmount"
+                app:layout_constraintStart_toStartOf="parent" />
 
             <TextView
                 android:id="@+id/textNewInfo"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:text=""
+                android:text="Placeholder Limit"
+                android:textSize="14sp"
+                android:gravity="end"
+                app:layout_constraintBaseline_toBaselineOf="@id/labelNewInfo"
                 app:layout_constraintStart_toEndOf="@id/labelNewInfo"
-                app:layout_constraintBaseline_toBaselineOf="@id/labelNewInfo" />
-            <!-- END OF NEW ROW -->
+                app:layout_constraintEnd_toEndOf="parent" />
 
             <TextView
                 android:id="@+id/userWaitListStatus"
-                android:layout_width="388dp"
-                android:layout_height="54dp"
-                android:layout_marginTop="16dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
                 android:text="Waitlist Status"
                 android:textSize="14sp"
                 android:textStyle="italic"
-                app:layout_constraintEnd_toStartOf="@id/valueAmount"
-                app:layout_constraintHorizontal_bias="0.0"
+                android:gravity="center"
+                app:layout_constraintTop_toBottomOf="@id/textNewInfo"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/labelNewInfo" />
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- Buttons remain untouched -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAcceptEventInvite"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:text="Accept Invitation"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                app:cornerRadius="16dp"
+                app:backgroundTint="@color/accept_green"
+                android:textColor="@android:color/white"
+                app:layout_constraintTop_toBottomOf="@id/userWaitListStatus"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                tools:backgroundTint="#35C759" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDeclineEventInvite"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:text="Decline Invitation"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                app:backgroundTint="@color/leaving_red"
+                android:textColor="@android:color/white"
+                android:visibility="gone"
+                app:cornerRadius="16dp"
+                app:layout_constraintTop_toBottomOf="@id/btnAcceptEventInvite"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAcceptWaitlistInvite"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:text="Join Waitlist"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                app:cornerRadius="16dp"
+                app:layout_constraintTop_toBottomOf="@id/btnDeclineEventInvite"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnLeaveEvent"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:text="Leave Event"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                app:backgroundTint="#BF1D2A"
+                app:cornerRadius="16dp"
+                app:layout_constraintTop_toBottomOf="@id/btnAcceptWaitlistInvite"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnLeaveWaitlist"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:text="Leave Waitlist"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                app:backgroundTint="#BF1D2A"
+                app:cornerRadius="16dp"
+                app:layout_constraintTop_toBottomOf="@id/btnLeaveEvent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnViewQRCode"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
-                android:layout_marginTop="52dp"
+                android:layout_marginTop="32dp"
                 android:text="Share This Event!"
                 android:textAllCaps="false"
                 android:textStyle="bold"
@@ -222,34 +267,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:backgroundTint="@android:color/black"
-                android:textColor="@android:color/white"/>
-
-            <TextView
-                android:id="@+id/eventDate"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="80dp"
-                android:text="Event Date:"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toStartOf="@id/valueDateTime"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/heroImage"
-                app:layout_goneMarginEnd="8dp" />
-
-            <TextView
-                android:id="@+id/labelDrawDate"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Lottery Draw Date:"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toStartOf="@id/valueDrawDate"
-                app:layout_constraintHorizontal_bias="1.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/eventDate" />
+                android:textColor="@android:color/white" />
 
             <Space
                 android:layout_width="0dp"
@@ -257,7 +275,7 @@
                 app:layout_constraintTop_toBottomOf="@id/btnViewQRCode"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"/>
+                app:layout_constraintBottom_toBottomOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>

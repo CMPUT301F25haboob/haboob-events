@@ -1,59 +1,77 @@
 package com.example.haboob.ui.home;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
+import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.haboob.LotterySampler;
+import com.example.haboob.Notification;
+import com.example.haboob.NotificationManager;
+
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
-import androidx.core.view.MenuProvider;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Lifecycle;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.NavigationUI;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.haboob.Event;
 import com.example.haboob.EventQRCodeFragment;
 import com.example.haboob.EventsList;
 import com.example.haboob.MainActivity;
-import com.example.haboob.Poster;
 import com.example.haboob.R;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Objects;
 
-// Author: David Tyrrell on Oct 28, 2025
-// this fragment hold the functionality for viewing the events
+/**
+ * Displays the details of a single event, including title, hero image, and actions
+ * (join/leave waitlist, leave event, view QR code). Pulls data either from the in-memory
+ * {@link EventsList} or, if missing, loads directly from Firebase.
+ *
+ * <p><b>Lifecycle & data flow:</b>
+ * <ol>
+ *   <li>{@link #onAttach(Context)} resolves {@code deviceId} (ANDROID_ID).</li>
+ *   <li>{@link #onCreateView(LayoutInflater, ViewGroup, Bundle)} inflates layout, extracts
+ *       {@link #ARG_EVENT_ID}, configures buttons via {@link #setButtons(Bundle)}, and either
+ *       displays the event or loads it from Firebase with {@link #loadEventFromFirebase(String, View)}.</li>
+ *   <li>{@link #displayEvent(Event, View, String)} binds UI, wires actions and navigation.</li>
+ * </ol>
+ *
+ * <p><b>Arguments:</b> Requires a non-null {@link #ARG_EVENT_ID} passed via fragment arguments.</p>
+ *
+ * <p><b>Author:</b> David Tyrrell — Oct 28, 2025.</p>
+ */
 public class EventViewerFragment extends Fragment {
 
     private String eventID;
@@ -63,15 +81,37 @@ public class EventViewerFragment extends Fragment {
     private MaterialToolbar toolbar;
     private FirebaseFirestore db;
     private String deviceId;
-    MaterialButton acceptInvitationButton, leaveWaitlistButton;
-    TextView userWaitListStatus;
-    private String currentWaitListStatus;
+    MaterialButton acceptWaitListInvitationButton, leaveWaitlistButton, leaveEventButton, joinEventButton,
+    declineInvitationButton, shareButton;
+    TextView userWaitListStatus, waitListCapBtn, waitListSizeBtn, waitlistSizeText, waitListCapText;
+    private NotificationManager notificationManager;
+    EventsList eventsList;
+    Event eventToDisplay;
+    private FusedLocationProviderClient fusedLocationClient;
+    private LocationCallback locationCallback;
+    private static final int LOCATION_PERMISSION_REQUEST = 1001;
+
+    private void styleButtonColored(MaterialButton btn, int colorRes) {
+        btn.setBackgroundTintList(getResources().getColorStateList(colorRes));
+        btn.setTextColor(getResources().getColor(android.R.color.white));
+    }
+
+    private void styleButtonWhite(MaterialButton btn) {
+        btn.setBackgroundTintList(getResources().getColorStateList(android.R.color.white));
+        btn.setTextColor(getResources().getColor(android.R.color.black));
+    }
 
     public EventViewerFragment() {
         // Required empty public constructor
     }
 
-    // queries for the DeviceID, runs BEFORE onCreate and onCreateView
+    /**
+     * Resolves the device's ANDROID_ID for use in join/leave actions.
+     *
+     * <p><b>Lifecycle:</b> Runs before {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.</p>
+     *
+     * @param ctx host context
+     */
     @SuppressLint("HardwareIds")
     @Override
     public void onAttach(@NonNull Context ctx) {
@@ -84,34 +124,64 @@ public class EventViewerFragment extends Fragment {
         if (deviceId == null) deviceId = "unknown";
     }
 
+    /**
+     * Inflates the event view, initializes UI, reads the required {@link #ARG_EVENT_ID},
+     * configures buttons based on status, and displays the event (from {@link EventsList} if present,
+     * otherwise via a Firebase fetch).
+     *
+     * @param inflater  layout inflater
+     * @param container parent container
+     * @param savedInstanceState saved state (unused)
+     * @return inflated root view
+     * @throws AssertionError if {@link #ARG_EVENT_ID} is missing in arguments
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.entrant_event_view, container, false);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
         db = FirebaseFirestore.getInstance();
+
+        FirebaseApp app = FirebaseApp.getInstance();
+        FirebaseOptions opts = app.getOptions();
+        Log.d("FirebaseProject", "projectId = " + opts.getProjectId());
 
         // Initialize views
         toolbar = view.findViewById(R.id.topAppBar);
         event_image = view.findViewById(R.id.heroImage);
-        acceptInvitationButton = view.findViewById(R.id.btnAccept);
+        acceptWaitListInvitationButton = view.findViewById(R.id.btnAcceptWaitlistInvite);
         leaveWaitlistButton = view.findViewById(R.id.btnLeaveWaitlist);
         userWaitListStatus = view.findViewById(R.id.userWaitListStatus);
+        leaveEventButton = view.findViewById(R.id.btnLeaveEvent);
+        joinEventButton = view.findViewById(R.id.btnAcceptEventInvite);
+        declineInvitationButton = view.findViewById(R.id.btnDeclineEventInvite);
+        shareButton = view.findViewById(R.id.btnViewQRCode);
+
+        waitlistSizeText = view.findViewById(R.id.labelAmount);
+        waitListCapText = view.findViewById(R.id.labelNewInfo);
+        waitListCapBtn = view.findViewById(R.id.valueAmount);
+        waitListSizeBtn = view.findViewById(R.id.textNewInfo);
 
 
-
-        assert getArguments() != null;
-        Bundle args = getArguments();
-
-        setButtons(args); // sets buttons based on the current waitlist status
+        db = FirebaseFirestore.getInstance();
+        notificationManager = new NotificationManager();
 
         // unpack the bundle:
         String eventId = requireArguments().getString(ARG_EVENT_ID);
 
         // grab the details of event:
-        EventsList eventsList = ((MainActivity) getActivity()).getEventsList();
-        Event eventToDisplay = eventsList.getEventByID(eventId);
-
+        assert getActivity() != null;
         assert eventId != null;
+
+        // TODO: The below lines are whats causing the button updates issues
+        // We are using an events list from MainActivity which is outdated
+        // TODO: Instead, we should pass an events list from EntrantMainFragment is possible
+        // This will make it so that everytime you go back to entrant main fragment,
+        // we refresh the data
+        // That way, we don't do it every time we click on an event, since this causes
+        // hitches and flickers
+        eventsList = ((MainActivity) getActivity()).getEventsList();
+        eventToDisplay = eventsList.getEventByID(eventId);
 
         // Dan
         // If event is not in EventsList yet, load from Firebase
@@ -124,48 +194,146 @@ public class EventViewerFragment extends Fragment {
             displayEvent(eventToDisplay, view, eventId);
         }
 
+//        assert getArguments() != null;
+//        Bundle args = getArguments();
+//        setButtons(args); // sets fragment buttons based on the current waitlist status
+
+        // ---- DISPLAY EVENT DETAILS DYNAMICALLY HERE ----
+        TextView regStartText = view.findViewById(R.id.valueRegistrationStart);
+        regStartText.setText(eventToDisplay.getRegistrationStartDate().toString());
+
+        TextView regEndText = view.findViewById(R.id.valueRegistrationEnd);
+        regEndText.setText(eventToDisplay.getRegistrationEndDate().toString());
+
+        TextView detailsText = view.findViewById(R.id.valueEventDetails);
+        detailsText.setText(eventToDisplay.getEventDescription());
+
         TextView limitText = view.findViewById(R.id.textNewInfo);
-        if (eventToDisplay.getOptionalWaitingListSize() == 0) {
+        if (eventToDisplay.getOptionalWaitingListSize() < 0) {
             limitText.setText("Uncapped");
         } else {
-            limitText.setText(eventToDisplay.getOptionalWaitingListSize());
+            limitText.setText(String.valueOf(eventToDisplay.getOptionalWaitingListSize()));
         }
+
+        TextView lotteryAmountText = view.findViewById(R.id.valueAmount);
+        lotteryAmountText.setText(String.valueOf(eventToDisplay.getWaitingEntrants().size()));
 
         return view;
     }
 
     /**
-     * Author: David
-     * Sets the accepted or leave buttons for the open waitlist carousel, sets current status
-     * @param args the bundle containing the event ID
+     * (Author: <b>David Tyrrell</b> — Oct 28, 2025)
+     * Sets button visibility/labels based on the user's current relationship to the event.
+     *
+     * <p>Looks for optional flags in {@code args}:</p>
+     * <ul>
+     *   <li>{@code in_waitlist} – user currently on waitlist</li>
+     *   <li>{@code from_enrolledEvents} – user is enrolled (came from enrolled carousel)</li>
+     * </ul>
+     *
+//     * @param args the fragment arguments bundle (must include {@link #ARG_EVENT_ID})
      */
-    public void setButtons(Bundle args){
-        //TODO: set the buttons based on the current waitlist status
-        assert args != null;
-        String eventId = args.getString(ARG_EVENT_ID);
+    private void setButtons(Event event) {
+        eventToDisplay = event; // update the fragment field
 
-        EventsList eventsList = new EventsList();
-        Event eventToDisplay = eventsList.getEventByID(eventId);
+        // Determine user status
+        String userStatus = findUserStatus(deviceId, eventToDisplay);
 
-        boolean currentlyInWaitlist = args.getBoolean("in_waitlist", false);
-        if (currentlyInWaitlist) {
-            leaveWaitlistButton.setVisibility(View.VISIBLE);
-            acceptInvitationButton.setText("Joined!");
-            acceptInvitationButton.setBackgroundColor(getResources().getColor(R.color.accept_green));
-            userWaitListStatus.setText(R.string.waitlist_status_registered);
+        // Default: hide most buttons
+        acceptWaitListInvitationButton.setVisibility(View.GONE);
+        leaveWaitlistButton.setVisibility(View.GONE);
+        joinEventButton.setVisibility(View.GONE);
+        declineInvitationButton.setVisibility(View.GONE);
+        leaveEventButton.setVisibility(View.GONE);
+        userWaitListStatus.setVisibility(View.VISIBLE);
+
+        switch (userStatus) {
+            case "in_waitlist":
+                userWaitListStatus.setText(R.string.waitlist_status_registered);
+
+                // If invited, show accept/decline buttons
+                boolean isInvited = eventToDisplay.getInvitedEntrants() != null &&
+                        eventToDisplay.getInvitedEntrants().contains(deviceId);
+
+                if (isInvited) {
+                    joinEventButton.setVisibility(View.VISIBLE);      // Accept invitation
+                    declineInvitationButton.setVisibility(View.VISIBLE); // Decline invitation
+                    userWaitListStatus.setText(R.string.active_invite_status);
+                } else {
+                    acceptWaitListInvitationButton.setVisibility(View.VISIBLE);
+                    acceptWaitListInvitationButton.setText("Joined!");
+                    styleButtonColored(acceptWaitListInvitationButton, R.color.accept_green);
+                    leaveWaitlistButton.setVisibility(View.VISIBLE);
+                }
+                break;
+
+            case "enrolled_in_event":
+                userWaitListStatus.setText(R.string.enrolledInEvent);
+                leaveEventButton.setVisibility(View.VISIBLE);
+                break;
+
+            case "won_lottery":
+                joinEventButton.setVisibility(View.VISIBLE);
+                declineInvitationButton.setVisibility(View.VISIBLE);
+                userWaitListStatus.setText(R.string.active_invite_status);
+                break;
+
+            case "registration_closed":
+                joinEventButton.setVisibility(View.GONE);
+                declineInvitationButton.setVisibility(View.GONE);
+                userWaitListStatus.setText("The registration date for this event has passed. You can no longer sign up for this event.");
+                acceptWaitListInvitationButton.setVisibility(View.GONE);
+                shareButton.setVisibility(View.GONE);
+                waitListCapBtn.setVisibility(View.INVISIBLE);
+                waitListSizeBtn.setVisibility(View.INVISIBLE);
+                waitlistSizeText.setVisibility(View.INVISIBLE);
+                waitListCapText.setVisibility(View.INVISIBLE);
+                break;
+
+            case "not_in_waitlist_or_event":
+            default:
+                acceptWaitListInvitationButton.setVisibility(View.VISIBLE);
+                styleButtonWhite(acceptWaitListInvitationButton);
+                userWaitListStatus.setVisibility(View.INVISIBLE);
+                break;
         }
-        else{
-            leaveWaitlistButton.setVisibility(View.INVISIBLE);
-            userWaitListStatus.setVisibility(View.INVISIBLE);
-        }
-
-//        acceptInvitationButton.setVisibility(fromWaitListCarousel ? View.GONE : View.VISIBLE);
-//        boolean currentlyInWaitlist = args.getBoolean("in_waitlist", false);
-
-
-//        currentWaitListStatus = eventToDisplay.getWaitlist_status();
-
     }
+
+
+    /**
+     * (Author: <b>David Tyrrell</b> — Nov 20, 2025)
+     * Finds user status of the event, ex) currently in waitlist, enrolled in event, etc
+     * @param deviceId The device ID of the user
+     * @param eventToDisplay The event to display
+     * @return String: The user's status in the event
+     *
+     */
+    public String findUserStatus(String deviceId, Event eventToDisplay){
+        eventToDisplay = eventsList.getEventByID(eventToDisplay.getEventID()); // update eventToDisplay, it may not have been updated by this point?
+        assert (eventToDisplay != null);
+
+        Date regEnd = eventToDisplay.getRegistrationEndDate();
+        long now = System.currentTimeMillis();
+
+        if (eventToDisplay.getWaitingEntrants().contains(deviceId)) {
+            return "in_waitlist";
+        }
+        else if (eventToDisplay.getEnrolledEntrants().contains(deviceId)) {
+            return "enrolled_in_event";
+        }
+
+        else if (eventToDisplay.getInvitedEntrants().contains(deviceId)){
+            return "won_lottery";
+        }
+//        // TODO: if past the registration date for joining an event, display no details, then the last if statement should be join waitlist
+        else if (regEnd.getTime() < now){ // registration is closed
+            return "registration_closed";
+        }
+        else {
+            return "not_in_waitlist_or_event";
+        }
+    }
+
 
     /**
      * Author: Dan
@@ -206,6 +374,9 @@ public class EventViewerFragment extends Fragment {
      * @param eventId The event ID
      */
     private void displayEvent(Event event, View view, String eventId) {
+
+        setButtons(event); // set the buttons based on the current status of the user
+
         // set title:
         toolbar.setTitle(event.getEventTitle());
 
@@ -226,8 +397,7 @@ public class EventViewerFragment extends Fragment {
             int id = item.getItemId();
 
             if (id == R.id.action_goBack) {
-                NavHostFragment.findNavController(this)
-                        .navigate(R.id.navigation_home);
+                NavHostFragment.findNavController(this).popBackStack();
                 return true;
             }
             return false;
@@ -239,75 +409,197 @@ public class EventViewerFragment extends Fragment {
             // Navigate to EventQRCodeFragment with event ID
             Bundle args = new Bundle();
             args.putString(EventQRCodeFragment.ARG_EVENT_ID, eventId);
+            args.putString("source", "entrant");
+
             NavHostFragment.findNavController(this)
                     .navigate(R.id.action_eventViewer_to_eventQRCode, args);
         });
 
-        // set an onClicklistener for accepting joining the waitlist
-        assert acceptInvitationButton != null;
-        acceptInvitationButton.setOnClickListener(v -> {
+        // Join WAITLIST OnclickListener
+        assert acceptWaitListInvitationButton != null;
+        acceptWaitListInvitationButton.setOnClickListener(v -> {
+
+            // First check that the user is allowed to join the waitlist
+            if (eventToDisplay.getWaitingEntrants().size() == eventToDisplay.getOptionalWaitingListSize()) {
+                Toast.makeText(v.getContext(), "Waitlist is full! ", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Check if location data is required
+            if (eventToDisplay.getGeoLocationRequired()) {
+                startLocationLoggingOnce();
+            }
+
             Toast.makeText(v.getContext(), "Accepted invitation! ", Toast.LENGTH_SHORT).show();
             Toast.makeText(v.getContext(), "Joined waitlist! ", Toast.LENGTH_SHORT).show();
 
-            acceptInvitationButton.setText("Joined!");
-            acceptInvitationButton.setBackgroundColor(getResources().getColor(R.color.accept_green));
+            acceptWaitListInvitationButton.setText("Joined!");
+            styleButtonColored(acceptWaitListInvitationButton, R.color.accept_green);
+
             leaveWaitlistButton.setVisibility(View.VISIBLE);
-            leaveWaitlistButton.setText("Leave waitlist");
-            leaveWaitlistButton.setBackgroundColor(getResources().getColor(R.color.leaving_red));
+            leaveWaitlistButton.setText("Leave Waitlist");
+            styleButtonColored(leaveWaitlistButton, R.color.leaving_red);
             userWaitListStatus.setVisibility(View.VISIBLE);
             userWaitListStatus.setText(R.string.waitlist_status_registered);
 
+            eventToDisplay.addEntrantToWaitingEntrants(deviceId); // add the device ID to the waitingEntrantsList for the lottery
+            getParentFragmentManager().setFragmentResult("USER_JOINED_WAITLIST", new Bundle());
 
-            assert eventId != null;
-            DocumentReference ref = FirebaseFirestore.getInstance()
-                    .collection("events")
-                    .document(eventId);
+            Notification notification = new Notification(
+                    eventToDisplay.getEventID(),
+                    eventToDisplay.getOrganizer(),
+                    deviceId,
+                    "You joined the waitlist for: " + eventToDisplay.getEventTitle(),
+                    "waitlist_joined"
+            );
 
-            // add the device ID to the  Event entrant_ids_for_lottery list in the database:
-            ref.update("entrant_ids_for_lottery", FieldValue.arrayUnion(deviceId))
-                    .addOnSuccessListener(unused -> {
-                        // NOTE: It's okay if it the deviceID is already in the list, firebase won't add another, but the toast still runs
-                        Toast.makeText(v.getContext(), "Joined lottery!", Toast.LENGTH_SHORT).show();
-                        getParentFragmentManager().setFragmentResult("USER_JOINED_WAITLIST", new Bundle());
-                    })
-                    .addOnFailureListener(e -> {
-                        acceptInvitationButton.setEnabled(true);
-                        Toast.makeText(v.getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
+            Log.d("EventViewerFragment", "ORG ID: " + eventToDisplay.getOrganizer());
+
+            notificationManager.sendToUser(notification);
         });
 
-        // set an onClicklistener for leaving the waitlist
+        // Leave WAITLIST OnclickListener
         assert leaveWaitlistButton != null;
         leaveWaitlistButton.setOnClickListener(v -> {
-            Toast.makeText(v.getContext(), "Left waitlist! ", Toast.LENGTH_SHORT).show();
+            Toast.makeText(v.getContext(), "Left waitlist!", Toast.LENGTH_SHORT).show();
 
-            assert eventId != null;
-            DocumentReference ref = FirebaseFirestore.getInstance()
-                    .collection("events")
-                    .document(eventId);
+            eventToDisplay.removeEntrantFromWaitingEntrants(deviceId); // remove the device ID from the waitingEntrantsList for the lottery
 
-            // add the device ID to the  Event entrant_ids_for_lottery list in the database:
-            ref.update("entrant_ids_for_lottery", FieldValue.arrayRemove(deviceId))
-                    .addOnSuccessListener(unused -> {
-                        // NOTE: It's okay if it the deviceID is not in the list, firebase wont error, but the toast still runs
-                        Toast.makeText(v.getContext(), "Left waitlist!", Toast.LENGTH_SHORT).show();
-                        acceptInvitationButton.setText("Join Waitlist");
-                        acceptInvitationButton.setBackgroundColor(
-                                ContextCompat.getColor(v.getContext(), R.color.accept_green)
-                        );
+            // If user was also invited, remove them from invited list (declining invitation)
+            if (eventToDisplay.getInvitedEntrants() != null &&
+                eventToDisplay.getInvitedEntrants().contains(deviceId)) {
+                eventToDisplay.removeEntrantFromInvitedEntrants(deviceId);
+                Log.d("EventViewerFragment", "User left waitlist and declined invitation");
+            }
 
-                        leaveWaitlistButton.setText("Left Waitlist!");
-                        leaveWaitlistButton.setBackgroundColor(getResources().getColor(R.color.black));
+            leaveWaitlistButton.setText("Left Waitlist!");
+            styleButtonColored(leaveWaitlistButton, R.color.black); // black bg, white text
+
+            userWaitListStatus.setVisibility(View.INVISIBLE);
+            acceptWaitListInvitationButton.setVisibility(View.VISIBLE);
+            acceptWaitListInvitationButton.setText("Join Waitlist");
+            styleButtonWhite(acceptWaitListInvitationButton);       // white bg, black text
+
+            joinEventButton.setVisibility(View.GONE);
+            declineInvitationButton.setVisibility(View.GONE);
+
+
+//             notify EntrantMainFragment to update carousels, as the user left the list
+            getParentFragmentManager().setFragmentResult("USER_LEFT_WAITLIST", new Bundle());
+
+            Notification notification = new Notification(
+                    eventToDisplay.getEventID(),
+                    eventToDisplay.getOrganizer(),
+                    deviceId,
+                    "You left the waitlist for: " + eventToDisplay.getEventTitle(),
+                    "waitlist_left"
+            );
+
+            notificationManager.sendToUser(notification);
+        });
+
+        // join EVENT OnclickListener
+        assert joinEventButton != null;
+        joinEventButton.setOnClickListener(v -> {
+
+            // First check that the user is allowed to join the event
+            // TODO: change this check from waitlist to event capacity checker
+//            if (eventToDisplay.getWaitingEntrants().size() == eventToDisplay.getOptionalWaitingListSize()) {
+//                Toast.makeText(v.getContext(), "Waitlist is full! ", Toast.LENGTH_SHORT).show();
+//                return;
+//            }
+            
+            Toast.makeText(v.getContext(), "Joined Event!", Toast.LENGTH_SHORT).show();
+
+            joinEventButton.setText("Joined!");
+            styleButtonColored(joinEventButton, R.color.accept_green);
+
+            leaveEventButton.setVisibility(View.VISIBLE);
+            leaveWaitlistButton.setVisibility(View.GONE); // Hide leave waitlist button after accepting
+            declineInvitationButton.setVisibility(View.GONE);
+            userWaitListStatus.setText(R.string.enrolledInEvent);
+
+
+
+            // Move user from invited to enrolled (does NOT trigger vacancy filling)
+            eventToDisplay.moveEntrantFromInvitedToEnrolled(deviceId);
+
+            getParentFragmentManager().setFragmentResult("USER_JOINED_EVENT", new Bundle());
+
+            Notification notification = new Notification(
+                    eventToDisplay.getEventID(),
+                    eventToDisplay.getOrganizer(),
+                    deviceId,
+                    "You joined the event: " + eventToDisplay.getEventTitle()
+            );
+
+            notificationManager.sendToUser(notification);
+        });
+        // Leave EVENT OnclickListener
+        assert leaveEventButton != null;
+        leaveEventButton.setOnClickListener(v -> {
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Are you sure?")
+                    .setMessage("Once you leave the event, you will not be able to rejoin.")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        Toast.makeText(v.getContext(), "Left Event! ", Toast.LENGTH_SHORT).show();
+
+                        // if user clicks yes, then perform required actions:
+                        eventToDisplay.removeEntrantFromEnrolledEntrants(deviceId); // remove the device ID from the waitingEntrantsList for the lottery
+                        eventToDisplay.addEntrantToCancelledEntrants(deviceId); // add the device ID to the cancelledEntrants
+                        leaveEventButton.setText("Left event!");
                         userWaitListStatus.setVisibility(View.INVISIBLE);
+                        acceptWaitListInvitationButton.setVisibility(View.INVISIBLE);
 
 
-                        // notify EntrantMainFragment to update carousels, as the user left the list
-                        getParentFragmentManager().setFragmentResult("USER_LEFT_WAITLIST", new Bundle());
+                        NavHostFragment.findNavController(this).navigateUp();
+
+                        // Owen Notification stuff
+                        Notification notification = new Notification(
+                                eventToDisplay.getEventID(),
+                                eventToDisplay.getOrganizer(),
+                                deviceId,
+                                "You left the event: " + eventToDisplay.getEventTitle()
+                        );
+                        notificationManager.sendToUser(notification);
+
                     })
-                    .addOnFailureListener(e -> {
-                        acceptInvitationButton.setEnabled(true);
-                        Toast.makeText(v.getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
+                    .setNegativeButton("Cancel", null)
+                    .show();
+
+        });
+
+        // Decline INVITATION OnclickListener
+        assert declineInvitationButton != null;
+        declineInvitationButton.setOnClickListener(v -> {
+            Toast.makeText(v.getContext(), "Declined invitation", Toast.LENGTH_SHORT).show();
+
+            // Remove user from invited list and waiting list
+            eventToDisplay.removeEntrantFromInvitedEntrants(deviceId);
+            eventToDisplay.removeEntrantFromWaitingEntrants(deviceId);
+            eventToDisplay.addEntrantToCancelledEntrants(deviceId);
+
+            // Update UI
+            declineInvitationButton.setVisibility(View.GONE);
+            joinEventButton.setVisibility(View.GONE);
+            leaveWaitlistButton.setVisibility(View.GONE);
+            acceptWaitListInvitationButton.setVisibility(View.VISIBLE);
+            acceptWaitListInvitationButton.setText("Join Waitlist");
+            styleButtonWhite(acceptWaitListInvitationButton);  // back to white bg, black text
+            userWaitListStatus.setVisibility(View.INVISIBLE);
+
+
+            // Notify EntrantMainFragment to update carousels
+            getParentFragmentManager().setFragmentResult("USER_LEFT_WAITLIST", new Bundle());
+
+            Notification notification = new Notification(
+                    eventToDisplay.getEventID(),
+                    eventToDisplay.getOrganizer(),
+                    deviceId,
+                    "You declined the invitation for: " + eventToDisplay.getEventTitle(),
+                    "invitation_declined"
+            );
+            notificationManager.sendToUser(notification);
         });
     }
 
@@ -324,4 +616,67 @@ public class EventViewerFragment extends Fragment {
         }
         toolbar.setTitle("Error");
     }
+
+    @SuppressLint("MissingPermission")
+    private void startLocationLoggingOnce() {
+
+        // 1. Permissions
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 777);
+            return;
+        }
+
+        // Location request
+        LocationRequest request = LocationRequest.create()
+                .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+                .setInterval(1000);  // Doesn't matter; we only take one
+
+        // Callback that fires when a location is received
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult result) {
+                Location location = result.getLastLocation();
+
+                if (location != null) {
+
+                    double lat = location.getLatitude();
+                    double lon = location.getLongitude();
+                    GeoPoint gp = new GeoPoint(lat, lon);
+
+                    // Save once to the event
+                    eventToDisplay.addEntrantLocation(gp);
+
+                    Log.d("LOCATION", "Logged once: " + lat + ", " + lon);
+
+                    // STOP LISTENING - DON'T ADD MORE THAN ONCE
+                    fusedLocationClient.removeLocationUpdates(this);
+                }
+            }
+        };
+
+        fusedLocationClient.requestLocationUpdates(
+                request,
+                locationCallback,
+                Looper.getMainLooper()
+        );
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == 777 &&
+                grantResults.length > 0 &&
+                grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+            startLocationLoggingOnce();
+        }
+    }
+
+
 }

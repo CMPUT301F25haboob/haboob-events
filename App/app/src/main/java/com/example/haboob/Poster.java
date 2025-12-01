@@ -1,46 +1,41 @@
 package com.example.haboob;
 
-import android.graphics.Picture;
-
-// Not sure exactly what Picture does, maybe we can use this though?
+/**
+ * Simple model class representing an event poster, storing a URL or image data string.
+ */
 public class Poster {
-    private Picture imgSource;
     private String data;
 
-//    public Poster(Picture imgSource) {
-//        this.imgSource = imgSource;
-//    }
+    /**
+     * Creates an empty Poster with no data assigned.
+     */
+    public Poster() {}
 
-    public Poster() {
-        // Empty Constructor
-    }
-
+    /**
+     * Creates a Poster containing the given image data or URL.
+     *
+     * @param data poster image data or URL
+     */
     public Poster(String data) {
         this.data = data;
     }
 
-    public Picture draw() {
-        return imgSource;
-    }
-
-    public void updateImgSource(Picture imgSource) {
-        this.imgSource = imgSource;
-    }
-
-    public Picture getImgSource() {
-        return imgSource;
-    }
-
+    /**
+     * Returns the poster’s stored data string.
+     *
+     * @return image data or URL
+     */
     public String getData() {
         return data;
     }
 
+    /**
+     * Updates the poster’s stored image data or URL.
+     *
+     * @param data new poster data
+     */
     public void setData(String data) {
         this.data = data;
-    }
-
-    public void setImgSource(Picture imgSource) {
-        this.imgSource = imgSource;
     }
 }
 

@@ -1,25 +1,43 @@
 package com.example.haboob;
 
+import android.net.Uri;
+import android.util.Log;
+
+import com.bumptech.glide.Glide;
+import com.cloudinary.android.MediaManager;
+import com.cloudinary.android.callback.ErrorInfo;
+import com.cloudinary.android.callback.UploadCallback;
+
+import java.util.Map;
+
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.content.ContentResolver;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.EditText;
+import android.widget.ExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.Switch;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.cloudinary.android.MediaManager;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 
 /**
  * {@code OrganizerMainActivity} is the entry point for organizer workflows.
@@ -54,26 +72,44 @@ public class OrganizerMainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_organizer_activity);
 
+        initCloudinary();
+
         // Set up database and organizer using app
         db = FirebaseFirestore.getInstance();
         Intent intent = getIntent();
-        // SHOULD TRY TO PULL INFO FOR ORGANIZER FROM DB
-        currentOrganizer = new Organizer("TEST_ID", "TEST_FIRST_NAME", "TEST_LAST_NAME", "TEST_EMAIL", "Organizer", "000-000-0000");
 
-        //        if (intent != null) {
-//            // Get the organizerID from intent
-//            String organizerID = intent.getStringExtra("device_id");
-//            String organizerFirstName = intent.getStringExtra("first_name");
-//            String organizerLastName =  intent.getStringExtra("last_name");
-//            String organizerEmail = intent.getStringExtra("email");
-//            String organizerPhone = intent.getStringExtra("phone");
-//            String accountType = intent.getStringExtra("account_type");
-//
-//
-//            // Create a new Organizer object with the organizerID
-//            currentOrganizer = new Organizer(organizerID, organizerFirstName, organizerLastName, organizerEmail, accountType, organizerPhone);
-//        }
+        if (intent != null) {
+            // Get the organizerID from intent
+            String organizerID = intent.getStringExtra("device_id");
+            String organizerFirstName = intent.getStringExtra("first_name");
+            String organizerLastName =  intent.getStringExtra("last_name");
+            String organizerEmail = intent.getStringExtra("email");
+            String organizerPhone = intent.getStringExtra("phone");
+            String accountType = intent.getStringExtra("account_type");
 
+
+            // Create a new Organizer object with the organizerID
+            currentOrganizer = new Organizer(organizerID, organizerFirstName, organizerLastName, organizerEmail, accountType, organizerPhone);
+            goToOrganizerOptions(savedInstanceState);
+        }
+    }
+
+    /**
+     * Initializes Cloudinary for the organizer workflow using a basic config map.
+     * Must be called before any Cloudinary uploads occur.
+     */
+    private void initCloudinary() {
+        Map config = new HashMap();
+        config.put("cloud_name", "dxu3r4bi5");
+        MediaManager.init(this, config);
+    }
+
+    /**
+     * Loads the organizer options screen if this is the first creation of the activity.
+     *
+     * @param savedInstanceState saved state bundle, or null on first load
+     */
+    public void goToOrganizerOptions(Bundle savedInstanceState) {
         // New fragment to show the buttons for organizer
         if (savedInstanceState == null) {
             getSupportFragmentManager()
@@ -88,7 +124,6 @@ public class OrganizerMainActivity extends AppCompatActivity {
      *
      * @return the current organizer
      */
-    // Getter function so that later fragments can still access the app through logged-in user
     public Organizer getCurrentOrganizer() {
         return currentOrganizer;
     }

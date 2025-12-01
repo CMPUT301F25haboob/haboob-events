@@ -1,143 +1,269 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:layout_editor_absoluteX="-7dp"
-    tools:layout_editor_absoluteY="187dp">
+    android:fillViewport="true"
+    android:background="@android:color/white">
 
-    <EditText
-        android:id="@+id/event_title"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="100dp"
-        android:ems="10"
-        android:inputType="text"
-        android:hint="Event Title *"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:orientation="vertical"
+        android:padding="24dp">
 
-    <EditText
-        android:id="@+id/event_details"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:ems="10"
-        android:inputType="text"
-        android:hint="Event Details *"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/event_title" />
+        <!-- Header -->
+        <TextView
+            android:id="@+id/create_event_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create Event"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"
+            android:textColor="@android:color/black" />
 
-    <EditText
-        android:id="@+id/tags"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:ems="10"
-        android:inputType="text"
-        android:hint="Event Tags (Seperated by commas)"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/event_details" />
+        <TextView
+            android:id="@+id/create_event_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Fill in the event details below"
+            android:textSize="14sp"
+            android:layout_marginBottom="32dp"
+            android:textColor="@android:color/darker_gray" />
 
-    <Switch
-        android:id="@+id/geo_data_required"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Geo Data"
-        android:layout_marginTop="100dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/event_details"
-        app:layout_constraintTop_toTopOf="parent" />
+        <!-- Event Title -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/event_title_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:hint="Event Title *"
+            app:boxStrokeColor="@color/purple_500"
+            app:hintTextColor="@color/purple_500">
 
-    <Button
-        android:id="@+id/upload_picture_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Upload Poster"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/event_details"
-        app:layout_constraintTop_toBottomOf="@+id/geo_data_required" />
+            <EditText
+                android:id="@+id/event_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textCapSentences"
+                android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-    <CalendarView
-        android:id="@+id/start_date"
-        android:layout_width="175dp"
-        android:layout_height="300dp"
-        app:layout_constraintEnd_toStartOf="@+id/end_date"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/poster_view" />
+        <!-- Event Details -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/event_details_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:hint="Event Details *"
+            app:boxStrokeColor="@color/purple_500"
+            app:hintTextColor="@color/purple_500">
 
-    <CalendarView
-        android:id="@+id/end_date"
-        android:layout_width="175dp"
-        android:layout_height="300dp"
-        app:layout_constraintBottom_toTopOf="@+id/textView2"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/start_date"
-        app:layout_constraintTop_toBottomOf="@+id/poster_view"
-        app:layout_constraintVertical_bias="0.5" />
+            <EditText
+                android:id="@+id/event_details"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textCapSentences|textMultiLine"
+                android:minLines="3"
+                android:gravity="top" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-    <EditText
-        android:id="@+id/num_selected"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:ems="10"
-        android:inputType="text"
-        android:hint="Event Capacity *"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tags" />
+        <!-- Event Capacity -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/num_selected_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:hint="Event Capacity *"
+            app:boxStrokeColor="@color/purple_500"
+            app:hintTextColor="@color/purple_500">
 
-    <EditText
-        android:id="@+id/num_allowed_signup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:ems="10"
-        android:inputType="text"
-        android:hint="Optional: restrict signup"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/num_selected" />
+            <EditText
+                android:id="@+id/num_selected"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Start Date *"
-        android:textColor="@color/black"
-        app:layout_constraintEnd_toStartOf="@+id/textView2"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/start_date" />
+        <!-- Optional Signup Restriction -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/num_allowed_signup_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:hint="Restrict Signup (Optional)"
+            app:boxStrokeColor="@color/purple_500"
+            app:hintTextColor="@color/purple_500">
 
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="End Date *"
-        android:textColor="@color/black"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/textView"
-        app:layout_constraintTop_toBottomOf="@+id/end_date" />
+            <EditText
+                android:id="@+id/num_allowed_signup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-    <View
-        android:id="@+id/poster_view"
-        android:layout_width="140dp"
-        android:layout_height="159dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/num_selected"
-        app:layout_constraintTop_toBottomOf="@+id/upload_picture_button" />
+        <!-- Date Section Label -->
+        <TextView
+            android:id="@+id/date_section_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Event Dates *"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp"
+            android:textColor="@android:color/black" />
 
-    <Button
-        android:id="@+id/confirm_event"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Create Event"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        <!-- Start Date Calendar -->
+        <TextView
+            android:id="@+id/start_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start Date"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp"
+            android:textColor="@android:color/black" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <CalendarView
+            android:id="@+id/start_date"
+            android:layout_width="match_parent"
+            android:layout_height="350dp"
+            android:layout_marginBottom="24dp" />
+
+        <!-- End Date Calendar -->
+        <TextView
+            android:id="@+id/end_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="End Date"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp"
+            android:textColor="@android:color/black" />
+
+        <CalendarView
+            android:id="@+id/end_date"
+            android:layout_width="match_parent"
+            android:layout_height="350dp"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Geo Data Switch Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingVertical="12dp"
+            android:paddingHorizontal="4dp"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="24dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/geo_data_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Require Geo Data"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black" />
+
+                <TextView
+                    android:id="@+id/geo_data_subtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Only allow sign-ups when location is available."
+                    android:textSize="13sp"
+                    android:textColor="@android:color/darker_gray"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/geo_data_required"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                app:thumbTint="@color/purple_500"
+                app:trackTint="@color/switch_track_tint"
+                app:haloColor="@color/purple_500"
+
+                app:useMaterialThemeColors="false" />
+        </LinearLayout>
+
+
+        <!-- Upload and Tags Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="32dp"
+            android:weightSum="2">
+
+            <Button
+                android:id="@+id/upload_picture_button"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:text="Upload Poster"
+                android:textSize="15sp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                app:strokeColor="@color/purple_500"
+                app:strokeWidth="2dp"
+                app:iconGravity="textStart" />
+
+            <Button
+                android:id="@+id/tags_button"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="Select Tags"
+                android:textSize="15sp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                app:strokeColor="@color/purple_500"
+                app:strokeWidth="2dp"
+                app:iconGravity="textStart" />
+        </LinearLayout>
+
+        <!-- Bottom Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <Button
+                android:id="@+id/back_button"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:text="Back"
+                android:textSize="15sp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                app:strokeColor="@color/purple_500"
+                app:strokeWidth="2dp" />
+
+            <Button
+                android:id="@+id/confirm_event"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="CREATE EVENT"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:cornerRadius="8dp"
+                app:backgroundTint="@color/purple_500"
+                android:textColor="@android:color/white"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

@@ -2,10 +2,12 @@ package com.example.haboob;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -21,6 +23,8 @@ import java.util.HashMap;
  */
 public class OrganizerExpandableListsAdapter extends BaseExpandableListAdapter {
 
+    private OnChildItemClickListener clickListener;
+
     /** Context from the parent fragment or activity. */
     private Context mContext;
 
@@ -30,6 +34,13 @@ public class OrganizerExpandableListsAdapter extends BaseExpandableListAdapter {
     /** Mapping of each group title to its child items (entrant IDs or names). */
     private HashMap<String, ArrayList<String>> expandableListDetail;
 
+    public interface OnChildItemClickListener {
+        void onChildItemClick(int groupPosition, int childPosition, String entrantID);
+    }
+
+    public void setOnChildItemClickListener(OnChildItemClickListener listener) {
+        this.clickListener = listener;
+    }
     /**
      * Constructs an adapter to bind expandable list data to a view.
      *
@@ -88,6 +99,15 @@ public class OrganizerExpandableListsAdapter extends BaseExpandableListAdapter {
 
         TextView expandedListTextView = convertView.findViewById(R.id.expandedListItem);
         expandedListTextView.setText(expandedListText);
+
+        // Make the children clickable
+        expandedListTextView.setOnClickListener(v -> {
+            Log.d("OrganizerExpandableListsAdapter", "TEXTVIEW CLICKED! Group: " + groupPosition + ", Child: " + childPosition);
+            if (clickListener != null) {
+                clickListener.onChildItemClick(groupPosition, childPosition, expandedListText);
+            }
+        });
+
         return convertView;
     }
 
@@ -153,10 +173,19 @@ public class OrganizerExpandableListsAdapter extends BaseExpandableListAdapter {
         }
 
         TextView listTitleTextView = convertView.findViewById(R.id.listTitle);
+        ImageView indicatorView = convertView.findViewById(R.id.group_indicator);
+
         listTitleTextView.setText(listTitle);
+
+        // Rotate the indicator based on expanded state
+        if (isExpanded) {
+            indicatorView.setRotation(0f); // Point up when expanded
+        } else {
+            indicatorView.setRotation(180f); // Point down when collapsed
+        }
+
         return convertView;
     }
-
     /**
      * Indicates whether IDs are stable across changes to the underlying data.
      *
@@ -176,6 +205,6 @@ public class OrganizerExpandableListsAdapter extends BaseExpandableListAdapter {
      */
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
-        return false;
+        return true;
     }
 }
