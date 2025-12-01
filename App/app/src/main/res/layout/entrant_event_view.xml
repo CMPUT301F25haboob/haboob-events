@@ -129,6 +129,7 @@
                 android:layout_height="48dp"
                 android:layout_marginTop="4dp"
                 android:text="Accept Event Invitation"
+                android:textColor="@android:color/black"
                 android:textAllCaps="false"
                 android:textStyle="bold"
                 app:backgroundTint="@color/white"
@@ -148,6 +149,7 @@
                 android:text="Decline Invitation"
                 android:textAllCaps="false"
                 android:textStyle="bold"
+
                 app:backgroundTint="@color/leaving_red"
                 app:cornerRadius="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -165,7 +167,6 @@
                 android:text="Join Waitlist"
                 android:textAllCaps="false"
                 android:textStyle="bold"
-                app:backgroundTint="@color/white"
                 app:cornerRadius="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
