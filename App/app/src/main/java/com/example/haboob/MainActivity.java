@@ -26,7 +26,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
  * This activity serves as the container for navigation between different fragments
  * and handles deep link navigation from QR code scans.
  *
- * @author Haboob Team
+ * @author David
  * @version 1.0
  */
 public class MainActivity extends AppCompatActivity {
