@@ -50,6 +50,7 @@ import com.google.firebase.firestore.GeoPoint;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -81,8 +82,8 @@ public class EventViewerFragment extends Fragment {
     private FirebaseFirestore db;
     private String deviceId;
     MaterialButton acceptWaitListInvitationButton, leaveWaitlistButton, leaveEventButton, joinEventButton,
-    declineInvitationButton;
-    TextView userWaitListStatus;
+    declineInvitationButton, shareButton;
+    TextView userWaitListStatus, waitListCapBtn, waitListSizeBtn, waitlistSizeText, waitListCapText;
     private NotificationManager notificationManager;
     EventsList eventsList;
     Event eventToDisplay;
@@ -154,6 +155,13 @@ public class EventViewerFragment extends Fragment {
         leaveEventButton = view.findViewById(R.id.btnLeaveEvent);
         joinEventButton = view.findViewById(R.id.btnAcceptEventInvite);
         declineInvitationButton = view.findViewById(R.id.btnDeclineEventInvite);
+        shareButton = view.findViewById(R.id.btnViewQRCode);
+
+        waitlistSizeText = view.findViewById(R.id.labelAmount);
+        waitListCapText = view.findViewById(R.id.labelNewInfo);
+        waitListCapBtn = view.findViewById(R.id.valueAmount);
+        waitListSizeBtn = view.findViewById(R.id.textNewInfo);
+
 
         db = FirebaseFirestore.getInstance();
         notificationManager = new NotificationManager();
@@ -255,6 +263,7 @@ public class EventViewerFragment extends Fragment {
                     acceptWaitListInvitationButton.setVisibility(View.VISIBLE);
                     acceptWaitListInvitationButton.setText("Joined!");
                     styleButtonColored(acceptWaitListInvitationButton, R.color.accept_green);
+                    leaveWaitlistButton.setVisibility(View.VISIBLE);
                 }
                 break;
 
@@ -267,6 +276,18 @@ public class EventViewerFragment extends Fragment {
                 joinEventButton.setVisibility(View.VISIBLE);
                 declineInvitationButton.setVisibility(View.VISIBLE);
                 userWaitListStatus.setText(R.string.active_invite_status);
+                break;
+
+            case "registration_closed":
+                joinEventButton.setVisibility(View.GONE);
+                declineInvitationButton.setVisibility(View.GONE);
+                userWaitListStatus.setText("The registration date for this event has passed. You can no longer sign up for this event.");
+                acceptWaitListInvitationButton.setVisibility(View.GONE);
+                shareButton.setVisibility(View.GONE);
+                waitListCapBtn.setVisibility(View.INVISIBLE);
+                waitListSizeBtn.setVisibility(View.INVISIBLE);
+                waitlistSizeText.setVisibility(View.INVISIBLE);
+                waitListCapText.setVisibility(View.INVISIBLE);
                 break;
 
             case "not_in_waitlist_or_event":
@@ -287,11 +308,12 @@ public class EventViewerFragment extends Fragment {
      * @return String: The user's status in the event
      *
      */
-    // TODO: I think we can get rid of the notification type attribute,
-    //  here is where I check what the user status is, and I setButtons based on this status, not the notif attribute
     public String findUserStatus(String deviceId, Event eventToDisplay){
         eventToDisplay = eventsList.getEventByID(eventToDisplay.getEventID()); // update eventToDisplay, it may not have been updated by this point?
         assert (eventToDisplay != null);
+
+        Date regEnd = eventToDisplay.getRegistrationEndDate();
+        long now = System.currentTimeMillis();
 
         if (eventToDisplay.getWaitingEntrants().contains(deviceId)) {
             return "in_waitlist";
@@ -303,7 +325,10 @@ public class EventViewerFragment extends Fragment {
         else if (eventToDisplay.getInvitedEntrants().contains(deviceId)){
             return "won_lottery";
         }
-        // TODO: if past the registration date for joining an event, display no details, then the last if statement should be join waitlist
+//        // TODO: if past the registration date for joining an event, display no details, then the last if statement should be join waitlist
+        else if (regEnd.getTime() < now){ // registration is closed
+            return "registration_closed";
+        }
         else {
             return "not_in_waitlist_or_event";
         }
