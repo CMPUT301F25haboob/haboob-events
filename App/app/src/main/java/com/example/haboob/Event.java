@@ -437,7 +437,7 @@ public class Event implements Serializable {
         }
 
         // Automatically fill vacancy from waiting list
-        LotterySampler sampler = new LotterySampler();
+        LotterySampler sampler = new LotterySampler(new NotificationManager());
         sampler.fillVacancyFromWaitlist(this);
 
         // Safety check — can't query without eventID
@@ -489,7 +489,7 @@ public class Event implements Serializable {
         }
 
         // Automatically fill vacancy from waiting list
-        LotterySampler sampler = new LotterySampler();
+        LotterySampler sampler = new LotterySampler(new NotificationManager());
         sampler.fillVacancyFromWaitlist(this);
 
         // Safety check — can't query without eventID

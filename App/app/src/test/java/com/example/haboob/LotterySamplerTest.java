@@ -2,6 +2,8 @@ package com.example.haboob;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +20,9 @@ import static org.junit.Assert.*;
  * that overrides those methods to mutate in-memory lists only.</p>
  */
 public class LotterySamplerTest {
+
+    @Mock
+    private NotificationManager nm;
 
     private LotterySampler sampler;
     private FakeEvent event; // in-memory test double
@@ -66,7 +71,9 @@ public class LotterySamplerTest {
 
     @Before
     public void setUp() {
-        sampler = new LotterySampler();
+        MockitoAnnotations.openMocks(this);
+
+        sampler = new LotterySampler(nm);
         event = new FakeEvent();
 
         // Seed the waiting entrants list
