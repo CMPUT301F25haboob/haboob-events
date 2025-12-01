@@ -57,7 +57,7 @@ public class LotterySampler {
                 event.getEventID(),
                 event.getOrganizer(),
                 String.format("You've been invited to join the event: %s\n\n" +
-                        "Navigate to the event to accept/decline your invitation.", event.getEventTitle())
+                        "Tap this notification to navigate to the event to accept/decline your invitation.", event.getEventTitle())
         );
 
         // Create loser winner notification object
