@@ -134,7 +134,15 @@
             android:text="BACK"
             android:textSize="14sp"
             android:textStyle="bold"
-            app:cornerRadius="8dp" />
+            app:cornerRadius="8dp"
+
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:strokeColor="@color/purple_500"
+            app:strokeWidth="2dp"
+            app:backgroundTint="@color/purple_500"
+            android:textColor="@android:color/white"
+            />
+
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

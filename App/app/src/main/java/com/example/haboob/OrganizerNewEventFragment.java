@@ -7,6 +7,7 @@ import com.bumptech.glide.Glide;
 import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
+import com.google.android.material.materialswitch.MaterialSwitch;
 
 import java.util.Map;
 import android.content.Intent;
@@ -152,7 +153,7 @@ public class OrganizerNewEventFragment extends Fragment {
         Button btnTags = view.findViewById(R.id.tags_button);
         CalendarView signupStartView = view.findViewById(R.id.start_date);
         CalendarView signupEndView = view.findViewById(R.id.end_date);
-        Switch geoSwitch = view.findViewById(R.id.geo_data_required);
+        MaterialSwitch geoDataRequiredSwitch = view.findViewById(R.id.geo_data_required);
         Button backButton = view.findViewById(R.id.back_button);
         Button uploadPosterButton = view.findViewById(R.id.upload_picture_button);
 
@@ -238,7 +239,7 @@ public class OrganizerNewEventFragment extends Fragment {
             int limit;
             Date signupStart = startDate[0];
             Date signupEnd = endDate[0];
-            boolean geoData = geoSwitch.isChecked();
+            boolean geoData = geoDataRequiredSwitch.isChecked();
 
             // Check that fields are filled
             if (eventTitle.isEmpty() || eventDetails.isEmpty() || eventCapacity.isEmpty() || signupStart == null || signupEnd == null) {
