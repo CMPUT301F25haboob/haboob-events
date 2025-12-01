@@ -215,7 +215,7 @@ public class OrganizerOptionsFragment extends Fragment {
                 Toast.makeText(getContext(), "Cannot draw yet, registration has not closed", Toast.LENGTH_LONG).show();
                 return;
             }
-            LotterySampler sampler  = new LotterySampler();
+            LotterySampler sampler  = new LotterySampler(new NotificationManager());
             try {
                 sampler.performLottery(clickedEvent);
                 Toast.makeText(parent, "Lottery Drawn!", Toast.LENGTH_SHORT).show();

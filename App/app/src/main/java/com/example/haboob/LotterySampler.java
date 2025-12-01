@@ -10,6 +10,11 @@ import java.util.List;
 */
 public class LotterySampler {
 
+    private NotificationManager nManager;
+
+    public LotterySampler(NotificationManager nManager) {
+        this.nManager = nManager;
+    }
     /**
      * Performs lottery sampling on an event's entrants list.
      * Randomly selects entrants up to the event's lottery sample size and moves them to invitedEntrants.
@@ -64,13 +69,12 @@ public class LotterySampler {
         );
 
         // Create new NotificationManager object
-        NotificationManager nm = new NotificationManager();
 
         // Use NotificationManager to send winnerNotification to all users in the invited entrants list
-        nm.sendToList(event.getInvitedEntrants(), event.getOrganizer(), winnerNotification);
+        nManager.sendToList(event.getInvitedEntrants(), event.getOrganizer(), winnerNotification);
 
         // Use NotificationManager to send loserNotification to all users in the invited entrants list
-        nm.sendToList(event.getWaitingEntrants(), event.getOrganizer(), loserNotification);
+        nManager.sendToList(event.getWaitingEntrants(), event.getOrganizer(), loserNotification);
     }
 
     /**
@@ -136,11 +140,8 @@ public class LotterySampler {
                             "Navigate to the event to accept/decline your invitation.", event.getEventTitle())
             );
 
-            // Create new NotificationManager object
-            NotificationManager nm = new NotificationManager();
-
             // Use NotificationManager to send winnerNotification to all users in the invited entrants list
-            nm.sendToUser(winnerNotification);
+            nManager.sendToUser(winnerNotification);
 
             return selectedEntrantId;
         }
