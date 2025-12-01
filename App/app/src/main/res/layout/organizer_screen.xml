@@ -12,7 +12,7 @@
         android:id="@+id/create_event"
         android:layout_width="0dp"
         android:layout_height="56dp"
-        android:text="New Event"
+        android:text="NEW EVENT"
         android:textSize="16sp"
         android:textStyle="bold"
         android:textColor="@android:color/white"
@@ -21,7 +21,8 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="16dp"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
 
     <!-- Current Events Label -->
     <TextView
@@ -29,7 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Current Events"
-        android:textSize="14sp"
+        android:textSize="16sp"
         android:textColor="@android:color/darker_gray"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
@@ -49,7 +50,9 @@
         app:layout_constraintHeight_default="percent"
         app:layout_constraintHeight_percent="0.35"
         android:divider="@null"
-        android:dividerHeight="0dp" />
+        android:dividerHeight="0dp"
+        android:listSelector="@android:color/transparent"
+        />
 
     <!-- Upcoming Events Label -->
     <TextView
@@ -57,7 +60,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Upcoming Events"
-        android:textSize="14sp"
+        android:textSize="16sp"
         android:textColor="@android:color/darker_gray"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="8dp"
@@ -75,36 +78,46 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:divider="@null"
-        android:dividerHeight="0dp" />
+        android:dividerHeight="0dp"
+        android:listSelector="@android:color/transparent" />
 
     <!-- Edit Poster Button -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/edit_poster_button"
         android:layout_width="0dp"
         android:layout_height="56dp"
-        android:text="Edit Poster"
+        android:text="EDIT POSTER"
         android:textStyle="bold"
-        android:textSize="16sp"
-        android:textColor="@android:color/white"
-        app:backgroundTint="@color/purple_500"
-        app:cornerRadius="8dp"
+        android:textSize="14sp"
+
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        app:strokeColor="@color/purple_500"
+        app:strokeWidth="2dp"
+        android:textColor="@color/purple_500"
+        app:backgroundTint="@android:color/white"
+
         android:layout_marginEnd="8dp"
         android:layout_marginTop="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/view_lists_button"
         app:layout_constraintBottom_toBottomOf="parent" />
 
+
     <!-- View Lists Button -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/view_lists_button"
         android:layout_width="0dp"
         android:layout_height="56dp"
-        android:text="View Lists"
+        android:text="EVENT DATA"
         android:textStyle="bold"
-        android:textSize="16sp"
-        android:textColor="@android:color/white"
-        app:backgroundTint="@color/purple_500"
-        app:cornerRadius="8dp"
+        android:textSize="14sp"
+
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        app:strokeColor="@color/purple_500"
+        app:strokeWidth="2dp"
+        android:textColor="@color/purple_500"
+        app:backgroundTint="@android:color/white"
+
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="16dp"
@@ -112,13 +125,14 @@
         app:layout_constraintEnd_toStartOf="@id/draw_lottery_button"
         app:layout_constraintBottom_toBottomOf="parent" />
 
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/draw_lottery_button"
         android:layout_width="0dp"
         android:layout_height="56dp"
-        android:text="Draw Lottery"
+        android:text="DRAW LOTTERY"
         android:textStyle="bold"
-        android:textSize="16sp"
+        android:textSize="14sp"
         android:textColor="@android:color/white"
         app:backgroundTint="@color/purple_500"
         app:cornerRadius="8dp"
@@ -126,6 +140,7 @@
         android:layout_marginTop="16dp"
         app:layout_constraintStart_toEndOf="@id/view_lists_button"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

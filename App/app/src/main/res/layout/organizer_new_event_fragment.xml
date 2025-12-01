@@ -129,7 +129,7 @@
         <CalendarView
             android:id="@+id/start_date"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
+            android:layout_height="350dp"
             android:layout_marginBottom="24dp" />
 
         <!-- End Date Calendar -->
@@ -145,32 +145,56 @@
         <CalendarView
             android:id="@+id/end_date"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
+            android:layout_height="350dp"
             android:layout_marginBottom="24dp" />
 
-        <!-- Geo Data Switch -->
+        <!-- Geo Data Switch Row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="24dp"
-            android:gravity="center_vertical">
+            android:paddingVertical="12dp"
+            android:paddingHorizontal="4dp"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="24dp">
 
-            <TextView
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Require Geo Data"
-                android:textSize="16sp"
-                android:textColor="@android:color/black" />
+                android:orientation="vertical">
 
-            <Switch
+                <TextView
+                    android:id="@+id/geo_data_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Require Geo Data"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black" />
+
+                <TextView
+                    android:id="@+id/geo_data_subtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Only allow sign-ups when location is available."
+                    android:textSize="13sp"
+                    android:textColor="@android:color/darker_gray"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
+
+            <com.google.android.material.materialswitch.MaterialSwitch
                 android:id="@+id/geo_data_required"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+
                 app:thumbTint="@color/purple_500"
-                app:trackTint="@color/purple_500" />
+                app:trackTint="@color/switch_track_tint"
+                app:haloColor="@color/purple_500"
+
+                app:useMaterialThemeColors="false" />
         </LinearLayout>
+
 
         <!-- Upload and Tags Buttons -->
         <LinearLayout
@@ -187,7 +211,7 @@
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
                 android:text="Upload Poster"
-                android:textSize="16sp"
+                android:textSize="15sp"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 app:strokeColor="@color/purple_500"
                 app:strokeWidth="2dp"
@@ -200,7 +224,7 @@
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
                 android:text="Select Tags"
-                android:textSize="16sp"
+                android:textSize="15sp"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 app:strokeColor="@color/purple_500"
                 app:strokeWidth="2dp"
@@ -221,7 +245,7 @@
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
                 android:text="Back"
-                android:textSize="16sp"
+                android:textSize="15sp"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 app:strokeColor="@color/purple_500"
                 app:strokeWidth="2dp" />
@@ -232,10 +256,13 @@
                 android:layout_height="56dp"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                android:text="Create Event"
-                android:textSize="16sp"
+                android:text="CREATE EVENT"
+                android:textSize="15sp"
                 android:textStyle="bold"
-                app:cornerRadius="8dp" />
+                app:cornerRadius="8dp"
+                app:backgroundTint="@color/purple_500"
+                android:textColor="@android:color/white"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
         </LinearLayout>
 
     </LinearLayout>

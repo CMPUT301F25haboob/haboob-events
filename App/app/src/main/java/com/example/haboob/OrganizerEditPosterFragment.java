@@ -22,6 +22,23 @@ import com.cloudinary.android.callback.UploadCallback;
 
 import java.util.Map;
 
+/**
+ * Fragment that lets an organizer preview and update the poster image for a given {@link Event}.
+ * <p>
+ * This screen:
+ * </p>
+ * <ul>
+ *     <li>Retrieves the {@link Event} from the fragment arguments.</li>
+ *     <li>Displays the current poster (if any) in an {@link ImageView}.</li>
+ *     <li>Allows the organizer to pick a new image from local storage.</li>
+ *     <li>Uploads the selected image to Cloudinary and updates the event's {@link Poster}.</li>
+ * </ul>
+ * <p>
+ * Image loading is handled via Glide, while image upload is delegated to Cloudinary's
+ * {@link MediaManager}. Persisting the updated poster to Firestore is expected to be handled
+ * elsewhere (e.g., through {@code EventsList} logic).
+ * </p>
+ */
 public class OrganizerEditPosterFragment extends Fragment {
 
     private Event event;                    // Event being edited
@@ -31,12 +48,27 @@ public class OrganizerEditPosterFragment extends Fragment {
     private ActivityResultLauncher<String> imagePickerLauncher;
     private Uri selectedImageUri = null;
 
-    // Callback for uploaded URL
+    /**
+     * Simple callback interface used to report the secure URL of an image
+     * after a successful Cloudinary upload.
+     */
     private interface OnImageUploadedListener {
         void onUploaded(String url);
     }
 
-    // Cloudinary upload helper
+    /**
+     * Uploads the given local image {@link Uri} to Cloudinary using an unsigned preset and
+     * reports the resulting secure URL through the provided callback.
+     * <p>
+     * This method shows basic user feedback via {@link Toast} messages and logs the
+     * upload lifecycle events (start, success, error, reschedule). On success, the
+     * {@code secure_url} returned by Cloudinary is passed to the supplied
+     * {@link OnImageUploadedListener}.
+     * </p>
+     *
+     * @param uri      the local {@link Uri} of the image to upload
+     * @param listener callback invoked with the secure Cloudinary URL once the upload succeeds
+     */
     private void uploadImageToCloudinary(Uri uri, OnImageUploadedListener listener) {
         MediaManager.get().upload(uri)
                 .unsigned("haboob_unsigned") // your unsigned preset
@@ -75,6 +107,21 @@ public class OrganizerEditPosterFragment extends Fragment {
                 .dispatch();
     }
 
+    /**
+     * Initializes the fragment by retrieving the {@link Event} from the arguments
+     * and registering an {@link ActivityResultLauncher} for image selection.
+     * <p>
+     * When the user picks an image, this method:
+     * </p>
+     * <ul>
+     *     <li>Stores the selected {@link Uri}.</li>
+     *     <li>Triggers a Cloudinary upload via {@link #uploadImageToCloudinary(Uri, OnImageUploadedListener)}.</li>
+     *     <li>Updates the event's {@link Poster} with the returned URL.</li>
+     *     <li>Refreshes the poster preview using Glide, if the {@link ImageView} is available.</li>
+     * </ul>
+     *
+     * @param savedInstanceState saved state bundle, or {@code null} for a fresh creation
+     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,6 +158,21 @@ public class OrganizerEditPosterFragment extends Fragment {
         );
     }
 
+    /**
+     * Inflates the organizer poster-editing layout, binds UI elements, and wires up button
+     * behavior for navigating back and changing the poster.
+     * <p>
+     * If the current {@link Event} already has a {@link Poster} with a non-empty URL, the
+     * image is loaded into the poster preview using Glide. The "Change Poster" button opens
+     * the image picker (configured in {@link #onCreate(Bundle)}), while the back button
+     * simply pops the fragment back stack.
+     * </p>
+     *
+     * @param inflater  the {@link LayoutInflater} used to inflate the fragment layout
+     * @param container the parent {@link ViewGroup} for the fragment's UI, or {@code null}
+     * @param savedInstanceState saved state bundle, or {@code null} if none
+     * @return the inflated root {@link View} for this fragment
+     */
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

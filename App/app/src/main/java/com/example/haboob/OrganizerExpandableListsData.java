@@ -27,7 +27,6 @@ public class OrganizerExpandableListsData {
      * @param currentEvent the {@link Event} whose entrant lists are to be displayed
      * @return a mapping from list title to corresponding entrant IDs or names
      */
-    // Create getter function for expandable lists
     public static HashMap<String, ArrayList<String>> getListsToDisplay(Event currentEvent) {
         HashMap<String, ArrayList<String>> expandableLists = new HashMap<>();
 

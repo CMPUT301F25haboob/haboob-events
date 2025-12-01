@@ -49,8 +49,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Manage entrants and view their locations"
-            android:textSize="14sp"
-            android:textColor="@android:color/darker_gray"
+            android:textSize="15sp"
             android:layout_marginBottom="20dp" />
 
         <!-- ENTRANT LISTS -->
@@ -60,7 +59,7 @@
             android:text="Entrant Lists"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="@android:color/black"
+            android:textColor="@android:color/darker_gray"
             android:layout_marginBottom="8dp" />
 
         <com.example.haboob.NonScrollExpandableListView
@@ -80,7 +79,7 @@
             android:text="Entrant Locations"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="@android:color/black"
+            android:textColor="@android:color/darker_gray"
             android:layout_marginBottom="8dp" />
 
         <!-- FIXED HEIGHT MAP CONTAINER -->
@@ -91,7 +90,8 @@
             android:background="@android:color/white"
             android:elevation="4dp"
             android:nestedScrollingEnabled="false"
-            android:layout_marginBottom="20dp" />
+            android:layout_marginBottom="20dp"
+            android:outlineSpotShadowColor="@color/zxing_transparent"/>
 
         <!-- ACTION BUTTONS -->
         <LinearLayout
@@ -109,7 +109,7 @@
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
                 android:text="Export CSV"
-                android:textSize="15sp"
+                android:textSize="13sp"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 app:strokeColor="@color/purple_500"
                 app:strokeWidth="2dp" />
@@ -121,7 +121,7 @@
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
                 android:text="Message Entrants"
-                android:textSize="15sp"
+                android:textSize="13sp"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 app:strokeColor="@color/purple_500"
                 app:strokeWidth="2dp" />
@@ -131,10 +131,18 @@
             android:id="@+id/back_button"
             android:layout_width="match_parent"
             android:layout_height="52dp"
-            android:text="Back"
-            android:textSize="16sp"
+            android:text="BACK"
+            android:textSize="14sp"
             android:textStyle="bold"
-            app:cornerRadius="8dp" />
+            app:cornerRadius="8dp"
+
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:strokeColor="@color/purple_500"
+            app:strokeWidth="2dp"
+            app:backgroundTint="@color/purple_500"
+            android:textColor="@android:color/white"
+            />
+
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

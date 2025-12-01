@@ -691,7 +691,6 @@ public class Event implements Serializable {
      * Minimal constructor used by tests that expect a specific signature.
      * (Fields are not initialized; provided only to satisfy test scaffolding.)
      */
-    // For EventsListTest
     public Event(String organizerId, Date date, Date date1, String s, String s1, boolean b, int i, Object o, Object o1, List<String> tags) {
     }
 
@@ -807,10 +806,6 @@ public class Event implements Serializable {
      */
     public Poster getPoster() {
         return this.poster;
-    }
-
-    public String getEventImage() {
-        return eventImage;
     }
 
     /**
@@ -940,10 +935,6 @@ public class Event implements Serializable {
                 .addOnFailureListener(e -> {
                     Log.e("Firestore", "Error querying events", e);
                 });
-    }
-
-    public void setEventImage(String eventImage) {
-        this.eventImage = eventImage;
     }
 
     /** @param tags tag list */

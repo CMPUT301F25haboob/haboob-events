@@ -12,21 +12,35 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
+/**
+ * Handles creating, sending, logging, and retrieving {@link Notification} objects
+ * for users and organizers using Firestore.
+ */
 public class NotificationManager {
 
     private final FirebaseFirestore db;
 
+    /**
+     * Initializes the NotificationManager with a Firestore instance.
+     */
     public NotificationManager() {
         db = FirebaseFirestore.getInstance();
     }
 
+    /**
+     * Callback for returning user notifications or handling errors.
+     */
     public interface NotificationsCallback {
         void onSuccess(ArrayList<Notification> notifications);
         void onError(Exception e);
     }
 
-    // Send notification to a single user by adding it to that user's notifications sub collection
-    // NOTIFICATION OBJECT PASSED TO THIS METHOD MUST HAVE A SET RECIPIENT ID
+    /**
+     * Sends a notification to a single user by writing it to
+     * users/{recipientId}/notifications/{notificationId}.
+     *
+     * @param notification the notification to send (must have recipientId set)
+     */
     public void sendToUser(Notification notification) {
         if (notification == null) {
             Log.w("NotificationManager", "Cannot send notification: notification is null.");
@@ -56,7 +70,14 @@ public class NotificationManager {
                 });
     }
 
-    // Send notifications to all users in a given list by adding it to the users notifications sub collection
+    /**
+     * Sends the given notification to every user ID in the list.
+     * Each user receives their own copy under their notifications subcollection.
+     *
+     * @param recipientIds list of user IDs to receive the notification
+     * @param organizerId  ID of the sender
+     * @param notification base notification to duplicate for each user
+     */
     public void sendToList(ArrayList<String> recipientIds, String organizerId, Notification notification) {
         for (String id : recipientIds) {
             Notification userNotification = new Notification(
@@ -71,7 +92,13 @@ public class NotificationManager {
         }
     }
 
-    // Log a sent notification in an organizer's notification subcollection
+    /**
+     * Logs a copy of a notification under the organizer's sentNotifications
+     * subcollection for record-keeping.
+     *
+     * @param organizerId ID of the organizer sending the notification
+     * @param notification the notification to log
+     */
     public void logOrganizerNotification(String organizerId, Notification notification) {
         if (notification == null) {
             Log.w("NotificationManager", "Cannot log: notification is null.");
@@ -97,7 +124,12 @@ public class NotificationManager {
                         Log.e("NotificationManager", "Failed to log organizer notification.", e));
     }
 
-    // fetch a user's notifications, newest first to display
+    /**
+     * Fetches all notifications for a user, ordered newest first.
+     *
+     * @param userId   the user's ID
+     * @param callback callback returning the list or an error
+     */
     public void getUserNotifications(@NonNull String userId, @NonNull NotificationsCallback callback) {
         if (userId.trim().isEmpty()) {
             callback.onError(new IllegalArgumentException("userId is empty"));
@@ -119,18 +151,4 @@ public class NotificationManager {
                 })
                 .addOnFailureListener(callback::onError);
     }
-
-    // Mark a users notification as read
-    public void markAsRead(String recipientId, String notificationId) {
-        // TODO
-    }
-
-
-
-
-
-
-
-
-
 }

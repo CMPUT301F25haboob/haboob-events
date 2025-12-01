@@ -71,6 +71,7 @@ public class OrganizerOptionsFragment extends Fragment {
     private Date date;
     // NOTE: Can check LogCat to help debug processes
 
+
     /**
      * Inflates the organizer options UI, initializes components, and sets up event button logic.
      *
@@ -127,9 +128,17 @@ public class OrganizerOptionsFragment extends Fragment {
         viewListsButton.setVisibility(INVISIBLE);
         drawLotteryButton.setVisibility(INVISIBLE);
 
-        // --- Event Selection Logic ---
         organizerUpcomingEventsView.setOnItemClickListener((parent1, view1, position, id) -> {
             clickedEvent = organizerUpcomingEvents.get(position);
+
+            // Highlight in upcoming list
+            organizerUpcomingEventsAdapter.setSelectedIndex(position);
+            organizerUpcomingEventsAdapter.notifyDataSetChanged();
+
+            // Clear highlight in current events list
+            organizerCurrentEventsAdapter.setSelectedIndex(-1);
+            organizerCurrentEventsAdapter.notifyDataSetChanged();
+
             editPosterButton.setVisibility(View.VISIBLE);
             viewListsButton.setVisibility(View.VISIBLE);
             drawLotteryButton.setVisibility(View.VISIBLE);
@@ -137,10 +146,20 @@ public class OrganizerOptionsFragment extends Fragment {
 
         organizerCurrentEventsView.setOnItemClickListener((parent1, view1, position, id) -> {
             clickedEvent = organizerCurrentEvents.get(position);
+
+            // Highlight in current list
+            organizerCurrentEventsAdapter.setSelectedIndex(position);
+            organizerCurrentEventsAdapter.notifyDataSetChanged();
+
+            // Clear highlight in upcoming events list
+            organizerUpcomingEventsAdapter.setSelectedIndex(-1);
+            organizerUpcomingEventsAdapter.notifyDataSetChanged();
+
             editPosterButton.setVisibility(View.VISIBLE);
             viewListsButton.setVisibility(View.VISIBLE);
             drawLotteryButton.setVisibility(View.VISIBLE);
         });
+
 
         // --- Button Logic ---
 
