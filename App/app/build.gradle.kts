@@ -80,7 +80,7 @@ dependencies {
 
 
     // JavaDocs
-    implementation(files("/home/astro/Android/Sdk/platforms/android-36/android.jar"))
+    // implementation(files("/home/user/Android/Sdk/platforms/android-36/android.jar"))
 
 
     // mockito testing dependencies - david
