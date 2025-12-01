@@ -1,3 +1,21 @@
+/**
+ Fragment to displays all Users for an admin
+ Copyright (C) 2025  jeff
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.example.haboob;
 
 import android.os.Bundle;
@@ -27,20 +45,49 @@ import java.util.List;
  * Fragment for displaying all user profiles from the database in the admin view.
  * Allows administrators to view all users and delete user accounts.
  *
- * @author Haboob Team
+ * <p>This fragment provides comprehensive user management functionality for administrators:</p>
+ * <ul>
+ *   <li>Loads and displays all users from Firestore</li>
+ *   <li>Shows user information in a scrollable list</li>
+ *   <li>Provides user deletion with confirmation dialogs</li>
+ *   <li>Handles both main user collection and account-specific collections</li>
+ *   <li>Shows appropriate loading and empty states</li>
+ * </ul>
+ *
+ * <p>The fragment creates appropriate User subclass instances (Entrant or Organizer)
+ * based on the account type stored in the database.</p>
+ *
+ * @author Jeff
  * @version 1.0
+ * @see AdminUserAdapter
+ * @see User
+ * @see Entrant
+ * @see Organizer
  */
 public class AdminUserFragment extends Fragment implements AdminUserAdapter.OnUserActionListener {
 
+    /** Tag for logging */
     private static final String TAG = "AdminUserFragment";
 
+    /** RecyclerView for displaying the list of users */
     private RecyclerView recyclerView;
+
+    /** Progress bar shown during data loading */
     private ProgressBar progressBar;
+
+    /** Layout shown when no users exist in the system */
     private View emptyStateLayout;
+
+    /** Toolbar with navigation controls */
     private MaterialToolbar toolbar;
 
+    /** Adapter for the RecyclerView */
     private AdminUserAdapter adapter;
+
+    /** List of all users loaded from Firestore */
     private List<User> userList;
+
+    /** Firestore database instance */
     private FirebaseFirestore db;
 
     /**
@@ -52,6 +99,10 @@ public class AdminUserFragment extends Fragment implements AdminUserAdapter.OnUs
 
     /**
      * Inflates the fragment's layout and initializes all UI components.
+     *
+     * <p>Sets up the RecyclerView with a linear layout manager, initializes
+     * Firestore connection, configures toolbar navigation, and loads all users
+     * from the database.</p>
      *
      * @param inflater The LayoutInflater object to inflate views
      * @param container The parent view that the fragment's UI should be attached to
@@ -98,7 +149,19 @@ public class AdminUserFragment extends Fragment implements AdminUserAdapter.OnUs
 
     /**
      * Loads all users from the Firestore "users" collection.
-     * Shows progress bar during loading and handles empty state.
+     *
+     * <p>Queries all documents in the users collection and creates appropriate
+     * User objects (Entrant or Organizer) based on the account type. Shows
+     * progress bar during loading and handles empty state when no users exist.</p>
+     *
+     * <p>User fields loaded include:</p>
+     * <ul>
+     *   <li>Device ID (used as unique identifier)</li>
+     *   <li>First name and last name</li>
+     *   <li>Email address</li>
+     *   <li>Phone number</li>
+     *   <li>Account type (Entrant, Organizer, etc.)</li>
+     * </ul>
      */
     private void loadUsersFromFirestore() {
         progressBar.setVisibility(View.VISIBLE);
@@ -162,7 +225,7 @@ public class AdminUserFragment extends Fragment implements AdminUserAdapter.OnUs
 
     /**
      * Called when the delete button is clicked for a user.
-     * Shows a confirmation dialog before deleting.
+     * Shows a confirmation dialog before proceeding with deletion.
      *
      * @param user The user to delete
      * @param position The position of the user in the list
@@ -174,6 +237,9 @@ public class AdminUserFragment extends Fragment implements AdminUserAdapter.OnUs
 
     /**
      * Shows an AlertDialog to confirm user deletion.
+     *
+     * <p>Displays the user's full name and warns that the action cannot be undone.
+     * If the user confirms, proceeds with deletion via deleteUser().</p>
      *
      * @param user The user to delete
      * @param position The position of the user in the list
@@ -192,6 +258,17 @@ public class AdminUserFragment extends Fragment implements AdminUserAdapter.OnUs
 
     /**
      * Deletes a user from Firestore and updates the UI.
+     *
+     * <p>Performs deletion in two steps:</p>
+     * <ol>
+     *   <li>Deletes the user document from the main "users" collection</li>
+     *   <li>Deletes the corresponding document from the account-specific collection
+     *       (e.g., "organizer" or "entrant") if applicable</li>
+     * </ol>
+     *
+     * <p>After successful deletion, removes the user from the local list, updates
+     * the adapter, and shows the empty state if no users remain. Displays
+     * appropriate success or error messages to the administrator.</p>
      *
      * @param user The user to delete
      * @param position The position of the user in the list
@@ -250,7 +327,10 @@ public class AdminUserFragment extends Fragment implements AdminUserAdapter.OnUs
 
     /**
      * Called when a user card is clicked.
-     * Can be used to navigate to user details in the future.
+     *
+     * <p>Currently displays a toast with the user's name. This can be extended
+     * in the future to navigate to a detailed user profile view for editing
+     * or viewing additional information.</p>
      *
      * @param user The user that was clicked
      */
