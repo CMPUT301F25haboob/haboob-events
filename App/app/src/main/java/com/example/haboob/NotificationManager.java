@@ -20,11 +20,19 @@ public class NotificationManager {
 
     private final FirebaseFirestore db;
 
+
+    /**
+     * Constructor for testing
+     */
+    public NotificationManager(FirebaseFirestore db) {
+        this.db = db;
+    }
+
     /**
      * Initializes the NotificationManager with a Firestore instance.
      */
     public NotificationManager() {
-        db = FirebaseFirestore.getInstance();
+        this(FirebaseFirestore.getInstance());
     }
 
     /**
@@ -109,8 +117,6 @@ public class NotificationManager {
         if (notification.getOrganizerId() == null || notification.getOrganizerId().isEmpty()) {
             notification.setOrganizerId(organizerId);
         }
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         DocumentReference logRef = db.collection("users")
                 .document(organizerId)

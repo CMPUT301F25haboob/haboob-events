@@ -83,8 +83,12 @@ public class AdminViewTest {
         onView(withId(R.id.admin_view_posters_button))
                 .check(matches(isDisplayed()));
 
-        // Verify that the View Events button is displayed
-        onView(withId(R.id.admin_view_events_button))
+        // Verify that the View Users button is displayed
+        onView(withId(R.id.admin_view_users_button))
+                .check(matches(isDisplayed()));
+
+        // Verify that the View Notifications button is displayed
+        onView(withId(R.id.admin_view_notifications_button))
                 .check(matches(isDisplayed()));
 
         // Verify that the back button is displayed
@@ -288,7 +292,7 @@ public class AdminViewTest {
         });
 
         // Click the "View Events" button
-        onView(withId(R.id.admin_view_events_button))
+        onView(withId(R.id.admin_view_posters_button))
                 .perform(click());
 
         // Verify navigation occurred (currently goes to same destination as posters)

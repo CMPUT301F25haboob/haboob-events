@@ -225,94 +225,59 @@ public class EventViewerFragment extends Fragment {
      *
 //     * @param args the fragment arguments bundle (must include {@link #ARG_EVENT_ID})
      */
-    public void setButtons(String ARG_EVENT_ID){
-        //TODO: set the buttons based on the current waitlist status
-//        assert args != null;
-//        String eventId = args.getString(ARG_EVENT_ID);
+    private void setButtons(Event event) {
+        eventToDisplay = event; // update the fragment field
 
-        assert ARG_EVENT_ID != null;
-        EventsList eventsList = new EventsList();
-        //eventToDisplay = eventsList.getEventByID(ARG_EVENT_ID);
+        // Determine user status
+        String userStatus = findUserStatus(deviceId, eventToDisplay);
 
-        List<Event> list = eventsList.getEventsList();
-        // list should be populated by the time setButtons() has been called
+        // Default: hide most buttons
+        acceptWaitListInvitationButton.setVisibility(View.GONE);
+        leaveWaitlistButton.setVisibility(View.GONE);
+        joinEventButton.setVisibility(View.GONE);
+        declineInvitationButton.setVisibility(View.GONE);
+        leaveEventButton.setVisibility(View.GONE);
+        userWaitListStatus.setVisibility(View.VISIBLE);
 
-        for (Event event : list) {
-            Log.d("EventViewerFragment", "Event " + event.getEventTitle() + " " + event.getEventID());
-        }
-
-        assert eventToDisplay != null;
-
-
-//        boolean currentlyInWaitlist = args.getBoolean("in_waitlist", false);
-//        boolean currentlyEnrolled = args.getBoolean("from_enrolledEvents", false);
-//        boolean wonLottery = args.getBoolean("won_lottery", false);
-//        String type = args.getString("waitlist_notif");
-//        if (type == null)
-//            type = "no_type";
-
-        String userStatus = findUserStatus(deviceId, eventToDisplay); // returns "in_waitlist", "enrolled_in_event", "not_in_waitlist_or_event", or "won_lottery"
-
-        // set the buttons based on the status of the user, as given to us by entrantMainFragment's bundle
-        if (Objects.equals(userStatus, "in_waitlist")) {
-            Log.d("TAG", "user is in the WAITLIST for: " + eventToDisplay.getEventTitle());
-            leaveWaitlistButton.setVisibility(View.VISIBLE); // set leavewaitlist to visible
-            // If user is also invited, hide the "Joined!" button and show the accept invitation button
-            boolean isInvited = eventToDisplay.getInvitedEntrants() != null &&
-                               eventToDisplay.getInvitedEntrants().contains(deviceId);
-
-            if (isInvited) {
-                acceptWaitListInvitationButton.setVisibility(View.GONE);
-                joinEventButton.setVisibility(View.VISIBLE); // Show accept invitation button
-                declineInvitationButton.setVisibility(View.VISIBLE); // Show decline invitation button
-                leaveWaitlistButton.setVisibility(View.GONE); // hide leave waitlist button
-                userWaitListStatus.setText(R.string.active_invite_status);
-            } else {
-                acceptWaitListInvitationButton.setText("Joined!"); // set accept to joined
-                styleButtonColored(acceptWaitListInvitationButton, R.color.accept_green);
-                joinEventButton.setVisibility(View.GONE);
-                declineInvitationButton.setVisibility(View.GONE);
+        switch (userStatus) {
+            case "in_waitlist":
                 userWaitListStatus.setText(R.string.waitlist_status_registered);
-            }
 
-            leaveEventButton.setVisibility(View.GONE);
-        }
-        else if (Objects.equals(userStatus, "enrolled_in_event")){
-            Log.d("TAG", "user is enrolled in the EVENT for: " + eventToDisplay.getEventTitle());
-            acceptWaitListInvitationButton.setVisibility(View.GONE);
-            leaveWaitlistButton.setVisibility(View.INVISIBLE);
-            userWaitListStatus.setText(R.string.enrolledInEvent);
-            joinEventButton.setVisibility(View.GONE);
-        }
-        else if (Objects.equals(userStatus, "won_lottery")){
-            Log.d("TAG", "user is invited by the LOTTERY to join the event for:  " + eventToDisplay.getEventTitle());
-            acceptWaitListInvitationButton.setVisibility(View.GONE);
-            leaveWaitlistButton.setVisibility(View.GONE);
-            leaveEventButton.setVisibility(View.GONE);
+                // If invited, show accept/decline buttons
+                boolean isInvited = eventToDisplay.getInvitedEntrants() != null &&
+                        eventToDisplay.getInvitedEntrants().contains(deviceId);
 
-        }
-//        else if (type.equals("waitlist_left")){
-//            // if the click came from the notifications fragment that deals with leaving the event waitlist
-//            joinEventButton.setVisibility(View.GONE);
-//            leaveEventButton.setVisibility(View.GONE);
-//            leaveWaitlistButton.setVisibility(View.GONE);
-//        }
-//        else if (type.equals("waitlist_joined")){
-//            // if the click came from the notifications fragment that deals with leaving the event waitlist
-//            joinEventButton.setVisibility(View.GONE);
-//            leaveEventButton.setVisibility(View.GONE);
-////            acceptWaitListInvitationButton.se
-////
-//        }
-        else{
-            leaveWaitlistButton.setVisibility(View.INVISIBLE);
-            userWaitListStatus.setVisibility(View.INVISIBLE);
-            leaveEventButton.setVisibility(View.GONE);
-            joinEventButton.setVisibility(View.GONE);
+                if (isInvited) {
+                    joinEventButton.setVisibility(View.VISIBLE);      // Accept invitation
+                    declineInvitationButton.setVisibility(View.VISIBLE); // Decline invitation
+                    userWaitListStatus.setText(R.string.active_invite_status);
+                } else {
+                    acceptWaitListInvitationButton.setVisibility(View.VISIBLE);
+                    acceptWaitListInvitationButton.setText("Joined!");
+                    styleButtonColored(acceptWaitListInvitationButton, R.color.accept_green);
+                }
+                break;
 
-            styleButtonWhite(acceptWaitListInvitationButton);
+            case "enrolled_in_event":
+                userWaitListStatus.setText(R.string.enrolledInEvent);
+                leaveEventButton.setVisibility(View.VISIBLE);
+                break;
+
+            case "won_lottery":
+                joinEventButton.setVisibility(View.VISIBLE);
+                declineInvitationButton.setVisibility(View.VISIBLE);
+                userWaitListStatus.setText(R.string.active_invite_status);
+                break;
+
+            case "not_in_waitlist_or_event":
+            default:
+                acceptWaitListInvitationButton.setVisibility(View.VISIBLE);
+                styleButtonWhite(acceptWaitListInvitationButton);
+                userWaitListStatus.setVisibility(View.INVISIBLE);
+                break;
         }
     }
+
 
     /**
      * (Author: <b>David Tyrrell</b> — Nov 20, 2025)
@@ -385,7 +350,7 @@ public class EventViewerFragment extends Fragment {
      */
     private void displayEvent(Event event, View view, String eventId) {
 
-        setButtons(eventId); // set the buttons based on the current status of the user
+        setButtons(event); // set the buttons based on the current status of the user
 
         // set title:
         toolbar.setTitle(event.getEventTitle());
